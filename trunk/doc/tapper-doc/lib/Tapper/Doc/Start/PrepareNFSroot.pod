@@ -1,0 +1,104 @@
+=head1 NAME
+
+Tapper::Doc::Start::PrepareNFSroot - Step-by-step instructions how to set up a Tapper::Installer image bootable from NFS
+
+=head1 Intro
+
+The L<Tapper::Installer|Tapper::Installer> needs an NFS root
+image. This document describes how to change a Debian Lenny image
+supplied with Tapper to become Installer root.
+
+=head1 Remove network setup from init
+
+The network is set up by the kernel at startup. Usually, there will be
+a network setup script started by init. An additional networking would
+deactivate the already running interface and make the NFS root
+unavailable and therefore the boot process stop.
+
+
+=head1 Enable console login
+
+Install a getty tool (e.g. getty), put the following line into
+/etc/inittab to enable login from serial console:
+s0:12345:respawn:/sbin/getty 115200 ttyS0 vt100
+Grant permission for console login by adding ttyS0 to /etc/securetty.
+
+=head1 Set NFS read-only
+
+We suggest to use a readonly NFS for installation. When anything goes
+wrong this reduces the risk that the installer will damage your
+installation system. This benefit is usually worth the extra effort
+that comes with a readonly NFS root for the Installer. 
+
+To use a readonly NFS two changes are needed. To make the kernel mount
+the root NFS file system read only the grub config needs to contain
+"root=/dev/nfs ro" in the kernel command line. This is not enough
+because during init the root filesystem is remounted rw unless
+requested otherwise. In the debian image provided with the Tapper
+starter package this is done by setting "rootmode=ro" in
+/etc/init.d/checkroot.sh. Alternatively, you can tell your NFS server
+to export the file system read_only.
+
+Even on a readonly root NFS some directories need to be writeable. This
+includes especially /tmp but also some parts of /var like /var/log.
+
+proc                 /proc                proc       defaults              0 0
+sysfs                /sys                 sysfs      defaults              0 0
+tmpfs                /tmp                 tmpfs      defaults              0 0
+
+ramfs                /var/log             ramfs      defaults              0 0
+ramfs                /var/lock            ramfs      defaults              0 0
+ramfs                /var/run             ramfs      defaults              0 0
+ramfs                /var/spool           ramfs      defaults              0 0
+
+=head1 Set up Perl
+
+Use a compiled own perl to get some advantages. You can set your own
+options like threads/no threads and your perl won't interfere with
+possible distro tools using perl. The following paragraph describes
+how to use a separate Tapper perl on the attached debian image.
+
+=head2 Install perl using perlbrew
+
+  cpan App::perlbrew
+  PERLBREW_ROOT=/opt/tapper/perl perlbrew init
+  add "source /opt/tapper/perl/etc/bashrc" to your bashrc (as
+  instructed by perlbrew
+  install perl-5.12.3 (or any version >= 5.10.1)
+   use -D, -U and -A to pass switches to configure
+  switch to your new perl
+  configure your cpan
+
+=head2 Install Tapper::Installer
+
+ cpan Tapper::Installer
+
+Create an init.d file to start tapper-installer-client.pl. The start
+file is found at /opt/tapper/perl/perls/current/bin/tapper-installer-client.pl
+
+** an example script for Debian can be found at the end of this document
+
+Activate the startup script:
+
+ update-rc.d tapper defaults        # Debian
+ chmod +x /etc/init.d/tapper
+
+If you are on a Redhat or Suse system you can use the following instead:
+
+ insserv /etc/init.d/tapper         # Suse
+ chkconfig --add /etc/init.d/tapper # RedHat
+
+
+Create the required files and directories
+
+ mkdir /mnt/target/
+ mkdir /mnt/guests
+ mkdir /data/tapper
+
+Install a log4perl config see doc/oss/etc/log4perl.cfg for an example
+
+Since /etc/tapper is not writable on a readonly NFS we need to
+symlink it into tmpfs:
+
+ ln -sf /tmp/tapper /etc/tapper
+

@@ -1,0 +1,581 @@
+=head1 NAME
+
+Tapper::Doc::Start::StepByStep - Step-by-step instructions how to set up a Tapper infrastructure
+
+=head1 About
+
+Tapper is a B<modular test infrastructure, inclusive Operating System
+and Virtualization support>. See
+L<Tapper::Doc::FactSheet|http://search.cpan.org/~amd/Tapper-Doc/lib/Tapper/Doc/FactSheet.pod>
+for a feature overview.
+
+=head1 "The Whole Mix in One Go" starter kit
+
+B<HALT!> Don't neccessarily read the whole tutorial!
+
+There is a starter kit with a frontend Makefile that takes care of
+nearly everything described in this step-by-step guide.
+
+It is targeting a Debian/Squeeze:
+
+=over 4
+
+=item * Download frontend makefile:
+
+ curl -L http://xrl.us/tapperstarterkit -o Makefile
+
+=item * Run installation:
+
+ make it so
+
+=back
+
+This will download subsequent files, install Debian packages, create
+intermediate chroots, pack images, install and setup /etc/init.d
+services, etc., etc.
+
+For understanding what it does you can now read the following chapters
+-- especially for setting up the automation you will need some manual
+DHCP config and console and hardware reset installation. But the rest
+is covered in the starter kit.
+
+=head1 Intro
+
+In this setup guide we will set up a central master host running the
+testrun and reports databases, the web frontend and the automation
+layer based on network boot, tftp and nfs.
+
+The central host is named
+
+=over 4
+
+=item * B<plutonium>
+
+=back
+
+and we use 2 slave machines named
+
+=over 4
+
+=item * B<johnconnor>
+
+=item * B<sarahconnor>
+
+=back
+
+We use symbolic variables for these machines:
+
+ $TAPPER_SERVER = 'plutonium'
+ $TESTMACHINE1  = 'johnconnor'
+ $TESTMACHINE2  = 'sarahconnor'
+
+=head1 Install base OS
+
+Install a Debian on C<$TAPPER_SERVER>.
+
+Other OSes will work, too. We ran it for years on C<SLES 10> but
+prepared this manual based on C<Debian Squeeze>.
+
+=head1 Get example starter packages
+
+We provide some example files for first start.
+Download the package and unpack it in C</tmp>:
+
+  cd /tmp
+  wget http://amd64.org/pub/tapper/tapper-starterkit.tgz
+  tar xzf tapper-starterkit.tgz
+
+This will give you those files:
+
+ /tmp/tapper-example-configs/etc/tapper.cfg
+ /tmp/tapper-example-configs/etc/init.d/tapper_reports_receiver_daemon
+ /tmp/tapper-example-configs/etc/init.d/tapper_reports_api_daemon
+ /tmp/tapper-example-configs/etc/apache2/conf.d/tapper_reports_web.conf
+ /tmp/tapper-example-configs/etc/dhcp.conf
+
+ /tmp/tapper-example-configs/utils/opt-tapper-package.sh
+ /tmp/tapper-example-configs/utils/kernel_boot_example_precondition.yml
+
+ /tmp/tapper-example-images/tftpboot/bzImage
+
+=head1 Prepare basic work environment
+
+=head2 Config
+
+Create a Tapper config in C</etc/tapper.cfg>. Copy an example
+config from C</tmp/tapper-example-configs/etc/tapper.cfg> and change
+it to fit your needs.
+
+=head2 Prepare central workdir
+
+The central workdir that is later exported via NFS.
+
+Create sub directories that appear in the Tapper config.
+
+ mkdir -p /data/tapper/live/metareports/                     # meta-reports
+ mkdir -p /data/tapper/live/output/                          # intermediate output
+ mkdir -p /data/tapper/live/repository/images/               # OS images
+ mkdir -p /data/tapper/live/repository/packages/             # packages
+ mkdir -p /data/tapper/live/repository/packages/tapperutils  # Tapper clientlib
+ mkdir -p /data/tapper/live/testprogram/                     # test programs
+ mkdir -p /data/tapper/live/configs                          # auto-generated configs
+ mkdir -p /data/tapper/live/configs/tftpboot/                # grub configs via TFTP
+ mkdir -p /data/tapper/live/sync/                            # sync'ing interdependent tests
+ mkdir -p /data/tapper/live/nfsroot/                         # network bootable OS image
+
+=head2 Prepare network boot OS
+
+Create an NFS root that is able to boot over network. It will later
+run the Installer on the test machines:
+
+The manual
+L<Tapper::Doc::Start::PrepareNFSroot|Tapper::Doc::Start::PrepareNFSroot>
+tells you how to prepare such an image.
+
+Copy the content of the OS subdirectory into the central workdir:
+
+ rsync -a /tmp/NFSROOT/ /data/tapper/live/nfsroot/
+
+=head2 Install an NFS server
+
+=over 4
+
+=item * Install NFS server
+
+ apt-get install nfs-server
+
+=item * Export /data/tapper
+
+ echo '/data/tapper 192.168.1.0/255.255.255.0(fsid=0,no_root_squash,no_subtree_check,rw)' >> /etc/exports
+
+=back
+
+=head1 Set up Perl
+
+We set up our own perl to not interfere with a system Perl.
+
+=head2 Install perl using perlbrew
+
+=over 4
+
+=item * Install perlbrew
+
+ cpan App::perlbrew
+
+=item * Initialize perlbrew
+
+ PERLBREW_ROOT=/opt/tapper/perl perlbrew init
+
+=item * Add perlbrew to your .bashrc
+
+Add this line
+
+ source /opt/tapper/perl/etc/bashrc
+
+to your C<.bashrc> (as instructed by perlbrew).
+
+=item * Install perl-5.12.1 (or any version >= 5.10.1)
+
+ perlbrew install perl-5.12.1
+
+Use C<-D>, C<-U> and C<-A> to pass switches to C<Configure>.
+
+=item * Switch to your new perl
+
+ perlbrew switch perl-5.12.1
+
+=item * Configure your cpan
+
+For example:
+
+ $ cpan
+ cpan[1]> o conf auto_commit 1
+ cpan[2]> o conf urllist unshift ftp://ftp.fu-berlin.de/unix/languages/perl/
+ # ... as you like it ...
+
+=back
+
+=head2 Create a client-side "/opt/tapper" package
+
+We package a subset of dependencies needed on installed machines in
+C</opt/tapper> without anything else and create an C<opt-tapper.tgz>
+package from it.
+
+That package is later installed on the test machine.
+
+It consists of a precompiled perl and the tools to control test suite
+execution (L<Tapper::PRC|Tapper::PRC>, and for some special
+situations L<Tapper::Installer|Tapper::Installer>).
+
+The different architecture packages are specified in this section of
+C<tapper.cfg>:
+
+ files:
+  tapper_package:
+    linux64: tapperutils/opt-tapper64.tar.gz
+    linux32: tapperutils/opt-tapper32.tar.gz
+    windows: tapperutils/wintest.tar.gz
+
+Now let's create them. First start creating a chroot, e.g. by using
+the debian image you got earlier:
+
+ mkdir /opt/chroot
+ tar -C /opt/chroot/ -xzf /tmp/tapper-example-images/guest/debian_base64.tgz
+ chroot /opt/chroot
+ mount -t proc proc /proc
+
+ 
+Install perl inside this chroot as described in chapter
+L<Install perl using perlbrew|/"Install perl using perlbrew">:
+
+B<You can skip this step if you take the already prepared baseimage as
+base for the opt-tapper package>.
+
+ cpan App::perlbrew
+ PERLBREW_ROOT=/opt/tapper/perl perlbrew init
+ source /opt/tapper/perl/etc/bashrc
+ perlbrew install perl-5.12.1
+ perlbrew switch perl-5.12.1
+ cpan
+   cpan[1]> o conf auto_commit 1
+   cpan[2]> o conf urllist unshift ftp://ftp.fu-berlin.de/unix/languages/perl/
+
+Now, however, install the PRC and Installer packages:
+
+ cpan Tapper::PRC
+ cpan Tapper::Installer
+
+Leave the chroot and pack the package:
+
+ exit
+ cd /opt/chroot
+ tar -czf /data/tapper/live/repository/packages/tapperutils/opt-tapper64.tar.gz opt/ # for linux 64bit
+
+Repeat this step for every architecture you need, e.g. Linux 32bit,
+Linux with different glibc version or whatever. This of course requires
+appropriate chroot images.
+
+=head1 Prepare Central Server
+
+=over 4
+
+=item * apt-get install mysql-server
+
+=item * apt-get install libmysqlclient-dev # needed for DBD::mysql
+
+=item * cpan DBD::mysql
+
+(The particular driver is your decision. We run Tapper with C<mysql>
+and do unit tests with C<SQLite>. We recommend using the same first
+and then feel free to try out others.)
+
+=item * cpan Tapper::Schema
+
+=item * cpan Tapper::CLI
+
+=back
+
+=head2 Prepare Database
+
+=over 4
+
+=item * echo "create user tapper identified by 'tapper';" | mysql -uroot
+
+=item * echo "create database reportsdb;" | mysql -uroot -p
+
+=item * echo "grant all on reportsdb.* to tapper@'%';" | mysql -uroot
+
+=item * echo "create database testrundb;" | mysql -uroot -p
+
+=item * echo "grant all on testrundb.* to tapper@'%';" | mysql -u root
+
+=item * yes | tapper-db-deploy init --db ReportsDB
+
+=item * yes | tapper-db-deploy init --db TestrunDB
+
+=item * make sure a scheduling queue named "AdHoc" exists
+
+=over 4
+
+=item * tapper-testrun listqueue | grep AdHoc
+
+=item * if it does not exists, create it with
+
+=item * tapper-testrun newqueue --name AdHoc --prio 1000 # the prio is not important, the name is
+
+=back
+
+=back
+
+Put your test machines into the database. You can already use the
+command line interface for this task:
+
+ tapper-testrun newhost --name $TESTMACHINE1
+ tapper-testrun newhost --name $TESTMACHINE2
+
+You need to insert host feature information into your database. This
+information is used to generate hardware reports which later allow you
+to group reports based on machine groups. Furthermore, this
+information is used for scheduling based on requested_features.
+
+Currently, there is no public tool to generate the required database
+entries automatically.
+
+For this tutorial we provide the following example SQL statements for
+host features:
+
+ $ mysql testrundb -utapper -ptapper
+
+ -- machine1
+ mysql> insert into host_feature(host_id, entry, value)  values ((select id from host where name = '$TESTMACHINE1'),     'mem',  4096);
+ mysql> insert into host_feature(host_id, entry, value)  values ((select id from host where name = '$TESTMACHINE1'),   'cores',     4);
+ mysql> insert into host_feature(host_id, entry, value)  values ((select id from host where name = '$TESTMACHINE1'),  'vendor', 'AMD');
+ mysql> insert into host_feature(host_id, entry, value)  values ((select id from host where name = '$TESTMACHINE1'), 'has_ecc',     1);
+
+ -- machine2
+ mysql> insert into host_feature(host_id, entry, value)  values ((select id from host where name = '$TESTMACHINE2'),     'mem',    2048);
+ mysql> insert into host_feature(host_id, entry, value)  values ((select id from host where name = '$TESTMACHINE2'),   'cores',       2);
+ mysql> insert into host_feature(host_id, entry, value)  values ((select id from host where name = '$TESTMACHINE2'),  'vendor', 'Intel');
+ mysql> insert into host_feature(host_id, entry, value)  values ((select id from host where name = '$TESTMACHINE2'), 'has_ecc',       0);
+
+You now have an empty database ready for use.
+
+=head1 Setup Reports Framework
+
+The B<reports framework> collects and evaluates test reports of test
+results. Even though other ways to get these results are possible
+using the reports framework is simple and highly integrated into the
+whole Tapper framework.
+
+=over 4
+
+=item * apt-get install libexpat-dev # needed for XML::Parser
+
+=item * cpan Tapper::Reports::Web
+
+=item * cpan Tapper::Reports::Receiver
+
+=item * cpan Tapper::Reports::API
+
+=item * install the start scripts
+
+=over 4
+
+=item ** cp doc/oss/etc/init.d/tapper_reports_receiver_daemon /etc/init.d/
+
+=item ** cp doc/oss/etc/init.d/tapper_reports_api_daemon /etc/init.d/
+
+=item ** update-rc.d tapper_reports_receiver_daemon defaults
+
+=item ** update-rc.d tapper_reports_api_daemon defaults
+
+=back
+
+=item * start reports receiver and API daemon with
+
+=over 4
+
+=item ** /etc/init.d/tapper_reports_receiver_daemon start
+
+=item ** /etc/init.d/tapper_reports_api_daemon start
+
+=back
+
+=item * send a first test report to $TAPPER_SERVER 7357
+
+ # ----- example report command ---------
+ echo '
+ 1..2
+ # Tapper-Suite-Name: example-hello-world
+ # Tapper-Suite-Version: 1.01
+ # Tapper-Machine-Name: hello-host
+ ok - Hello test world
+ ok - Just another description
+ ' | netcat -q7 -w1 $TAPPER_SERVER 7357
+ # ----- end example report command ------
+
+Depending on your C<netcat> flavour the options C<-q> and C<-w> need
+to be droppped or used differently.
+
+=back
+
+=head2 Setup Web Server
+
+The L<Tapper::Reports::Web|Tapper::Reports::Web> server is the best
+way to view the test results. Therefore, we recommend to install it
+even though tests are possible without it.
+
+=over 4
+
+=item * install apache
+
+ apt-get install apache2
+
+=item * enable fastcgi
+
+ apt-get install libapache2-mod-fcgid
+
+ a2enmod fcgid
+
+=item * cpan Tapper::Reports::Web
+
+=item * start tapper_reports_web_server
+
+ cp doc/oss/etc/apache2/conf.d/tapper_reports_web.conf /etc/apache2/conf.d/
+ /etc/init.d/apache2 restart
+
+=item * connect to $TAPPER_SERVER in your web browser
+
+ http://plutonium/tapper
+
+=back
+
+=head1 Set up test machines
+
+As long as you don't plan interdependent (client-server) testruns,
+just one test machine would be enough. To demonstrate a few Tapper
+features, we still describe a setup of two test machines. Substitute
+$TESTMACHINE1 and $TESTMACHINE2 with the names of your test maschines.
+
+=head2 Automatic reset
+
+Usually Tapper assumes that test machines are to be reinstalled for
+every test (though there are exceptions).
+
+We also assume that doing a reboot via logging into the testmachine
+and calling C<reboot> is not always possible, e.g. on a kernel Oops.
+
+Tapper will always try to login first and then call some hardware
+reset facility, as specified in the config file. One example used here
+as example is a power outlet with network support. (In reality we have
+our own reset solution.)
+
+=head3 Configure Reset mechanism
+
+The example config file has it already configured under the options
+C<reset_plugin> and C<reset_plugin_options>.
+
+Configure it accordingly, usually the IP addresses of the power outlet
+and the numbers where each machine is connected accordingly:
+
+ reset_plugin: PM211MIP
+ reset_plugin_options:
+   ip: 192.168.1.39
+   user: admin
+   passwd: secret
+   outletnr:
+     johnconnor: 2
+     sarahconnor: 1
+
+=head3 Connect machines to the power outlet
+
+Do it now.
+
+=head2 Install TFTP daemon
+
+When a system is installed it starts a minimalistic system over
+network. The kernel is loaded via TFTP, the root is served via NFS.
+
+Here we install a TFTP server, put the kernel image there, and create
+some symlinks to ease later relative and absolute filenames. First
+believe us and try it first before you ask. :-)
+
+=over 4
+
+=item Install TFTP server
+
+ apt-get install atftpd
+
+=item Copy a linux kernel image
+
+ cp /tmp/tapper-example-images/netboot/bzImage /tftpboot/
+
+=item Symlink to Tapper workdir
+
+ ln -s /data/tapper/live/configs/tftpboot /tftpboot/tftpboot
+
+=back
+
+=head2 Prepare the Installer nfsroot
+
+When a system is installed it starts a minimalistic system over
+network. The kernel is loaded via TFTP, the root is served via NFS.
+
+Here we setup the NFS root to use:
+
+ cd /data/tapper/live/nfsroot/
+ tar xzf /tmp/tapper-example-images/nfsroot/debian_nfs_root.tgz
+
+This image is basically the Debian base image with changes to use it
+readonly over NFS. Furthermore, it already contains the
+Tapper::Installer which needs to be updated on changes. Use the chroot
+approach described in L<Create opt-tapper package.|/"Create a client-side "/opt/tapper" package">.
+For a detailed description on how this image was prepared look into
+C<prepare-nfs-root.pod>.
+
+=head2 Configure your grub to boot the testmachine
+
+As configured by default Tapper writes host specific grub configs
+dynamically into
+C</data/tapper/live/configs/tftpboot/$hostname.lst>. It will
+dynamically contain whether to boot the Tapper installer or the ready
+installed test system.
+
+Configure your DHCP accordingly to use the same files.
+
+Find an example DHCP config in
+C</tmp/tapper-example-configs/etc/dhcp.conf>.
+
+Basically it says to use a PXE grub and points machines to their
+respective grub config which is dynamically provided by Tapper.
+
+It looks similar to this:
+
+ # example dhcp config with invalid ethernet addresses
+ subnet 192.168.1.0 netmask 255.255.255.0 {
+ group
+ {
+        filename '/tftpboot/pxegrub';
+
+        # offer the host the here given name as host name
+        option host-name = host-decl-name;
+        option dhcp-parameter-request-list = concat(option dhcp-parameter-request-list,96);
+        host sarahconnor
+        {
+                hardware ethernet 00:09:11:11:11:11;
+                fixed-address 192.168.1.2;
+                option configfile "/data/tapper/live/configs/tftpboot/sarahconnor.lst";
+        }
+	host johnconnor
+        {
+                hardware ethernet 00:09:22:22:22:22;
+                fixed-address 192.168.1.3;
+                option configfile "/data/tapper/live/configs/tftpboot/johnconnor.lst";
+        }
+ }
+
+but you will definitely need to work out your own DHCP solution. The
+only requirement is to get machines booting using those
+C</data/tapper/live/configs/tftpboot/$hostname.lst> grub configs.
+
+=head1 Set up Master Control Program
+
+The master controller is the part that schedules and controls
+testruns. In Tapper notation it is usually called the I<MCP> (short
+for I<Master Control Program>).
+
+I<MCP> is the core of the Tapper automation part.
+
+Install the MCP packet on the $TAPPER_SERVER
+
+ cpan Tapper::MCP
+
+Start the Tapper master controller:
+
+ tapper-mcp-runloop
+
+You can now start your first fully automatic Tapper test. 
+
+ tapper-testrun new --macroprecond /tmp/tapper-example-configs/utils/kernel_boot_example_precondition.yml --requested_host johnconnor
+
+Congratulation, you are now an Tapper user.
