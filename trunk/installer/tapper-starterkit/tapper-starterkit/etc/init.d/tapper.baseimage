@@ -13,7 +13,7 @@
 ### END INIT INFO
 
 # Note: Special treatment of stop for LSB conformance
-PERLBIN=/opt/tapper/perl/perls/current/bin
+PERLBIN=/opt/tapper/perl/perls/perl-5.12.3/bin
 PERL=${PERLBIN}/perl
 TAPPER_PRC_BIN=${PERLBIN}/tapper-automatic-test.pl
 test -f $TAPPER_PRC_BIN || { echo "$TAPPER_PRC_BIN not installed";

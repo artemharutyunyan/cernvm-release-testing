@@ -13,5 +13,5 @@
 ### END INIT INFO
 
 if ( test "$1" = 'start' ); then
-    /opt/tapper/perl/perls/current/bin/tapper-installer-client.pl $*
+    /opt/tapper/perl/perls/perl-5.12.3/bin/tapper-installer-client.pl $*
 fi

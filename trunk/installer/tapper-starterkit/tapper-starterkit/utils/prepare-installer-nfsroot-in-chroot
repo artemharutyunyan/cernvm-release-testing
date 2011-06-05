@@ -69,7 +69,7 @@ cp /tmp/tapper-starterkit/misc/CPAN-Config.pm /opt/tapper/perl/perls/perl-${PERL
 export TWMC_TEST_PORT=9876
 export PERL_AUTOINSTALL="--defaultdeps"
 export TEST_JOBS=${CPUCOUNT}
-export CPAN=/opt/tapper/perl/perls/current/bin/cpan
+export CPAN=/opt/tapper/perl/perls/perl-${PERLVERSION}/bin/cpan
 echo "reload index" | $CPAN
 $CPAN LWP
 $CPAN Expect

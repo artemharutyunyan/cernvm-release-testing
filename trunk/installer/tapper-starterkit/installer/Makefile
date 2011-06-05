@@ -96,7 +96,7 @@ TESTMACHINE3=bullock
 PERLVERSION=5.12.3
 DISTROPREFS=http://cpansearch.perl.org/src/ANDK/CPAN-1.9600/distroprefs/
 DISTROPREFSDIR=/root/.cpan/prefs
-PERLBIN=/opt/tapper/perl/perls/current/bin
+PERLBIN=/opt/tapper/perl/perls/perl-$(PERLVERSION)/bin
 CPAN=$(PERLBIN)/cpan
 PERL=$(PERLBIN)/perl
 
@@ -487,6 +487,7 @@ WORKDIRS := $(METAREPORTSDIR) \
              $(TAPPERUTILSDIR) \
              $(TESTPROGRAMDIR) \
              $(CONFIGSDIR) \
+			 $(USECASEDIR) \
              $(TFTPBOOTDIR) \
              $(SYNCDIR) \
              $(NFSROOTDIR)
@@ -574,7 +575,7 @@ perlpkgs:
 	-# work around bug in Tapper::Config 3.0.4
 	PERL_AUTOINSTALL="--defaultdeps" TEST_JOBS=$(CPUCOUNT) TAPPER_CONFIG_FILE=lib/auto/Tapper/Config/tapper.yml $(CPAN) Tapper::Config
 	-# missing dependency in T::R::Web 3.0.5
-	PERL_AUTOINSTALL="--defaultdeps" TEST_JOBS=$(CPUCOUNT) $(CPAN) Tapper::Testplan
+	PERL_AUTOINSTALL="--defaultdeps" TEST_JOBS=$(CPUCOUNT) $(CPAN) -f Tapper::Testplan
 	-# missing dependency in T::R::Web
 	PERL_AUTOINSTALL="--defaultdeps" TEST_JOBS=$(CPUCOUNT) $(CPAN) TAP::Parser
 	-# non problematic rest
@@ -677,6 +678,7 @@ mcp: workingdirs dependencies tapperconfig libdeps optperl examplemachines initi
 # start scripts for MCP
 #
 	@echo "########## start scripts for MCP"
+	PERL_AUTOINSTALL="--defaultdeps" TEST_JOBS=$(CPUCOUNT) $(CPAN) App::Daemon
 	PERL_AUTOINSTALL="--defaultdeps" TEST_JOBS=$(CPUCOUNT) $(CPAN) Tapper::MCP
 	cp $(STARTERKITDIR)/etc/init.d/tapper_mcp_daemon /etc/init.d/
 	insserv tapper_mcp_daemon
