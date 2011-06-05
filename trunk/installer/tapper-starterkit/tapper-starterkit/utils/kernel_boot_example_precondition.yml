@@ -1,0 +1,20 @@
+arch: linux64
+image: debian_base64.tgz
+mount: /
+partition: sda2
+precondition_type: image
+---
+precondition_type: copyfile
+name: /data/tapper/live/repository/packages/tapperutils/kernel/gen_initrd.sh
+dest: /bin/
+protocol: local
+---
+precondition_type: package
+filename: /data/tapper/live/repository/packages/kernel/linux-2.6.36_rc7.2010-10-07.x86_64.tgz
+---
+precondition_type: exec
+filename: /bin/gen_initrd.sh
+---
+precondition_type: testprogram
+program: /bin/true
+timeout: 100
