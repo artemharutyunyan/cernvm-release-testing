@@ -14,8 +14,8 @@
 ### END INIT INFO
 
 # Note: Special treatment of stop for LSB conformance
-PERL=/opt/tapper/perl/perls/perl-5.12.3/bin/perl
-TAPPER_REPORTS_RECEIVER_BIN=/opt/tapper/perl/perls/perl-5.12.3/bin/tapper-reports-receiver-daemon
+PERL=/opt/tapper/perl/perls/current/bin/perl
+TAPPER_REPORTS_RECEIVER_BIN=/opt/tapper/perl/perls/current/bin/tapper-reports-receiver-daemon
 test -f $TAPPER_REPORTS_RECEIVER_BIN || { echo "$TAPPER_REPORTS_RECEIVER_BIN not installed"; 
 	if [ "$1" = "stop" ]; then exit 0;
 	else exit 5; fi; }

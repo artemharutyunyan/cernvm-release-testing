@@ -96,7 +96,7 @@ TESTMACHINE3=bullock
 PERLVERSION=5.12.3
 DISTROPREFS=http://cpansearch.perl.org/src/ANDK/CPAN-1.9600/distroprefs/
 DISTROPREFSDIR=/root/.cpan/prefs
-PERLBIN=/opt/tapper/perl/perls/perl-$(PERLVERSION)/bin
+PERLBIN=/opt/tapper/perl/perls/current/bin
 CPAN=$(PERLBIN)/cpan
 PERL=$(PERLBIN)/perl
 
