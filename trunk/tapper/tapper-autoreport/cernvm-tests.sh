@@ -61,4 +61,28 @@ NOUPLOAD=0
 uname -a | grep -q Linux  # example of an ok exit code
 ok $? "The system is running Linux"
 
+#
+# Create/configure, start, and control virtual machines tests
+#
+
+# Verify that default network is active and set to autostart
+virsh net-autostart default
+virsh net-list --all | egrep -q "^default[[:space:]]*active[[:space:]]*yes"
+ok $? "Verify that virtual machine NAT network is active and set to autostart"
+
+# Verify that virtual machine domain has been created from an xml file
+virsh define $VM_XML_DEFINITION
+virsh list --all | grep -q $VMNAME
+ok $? "Verify that virtual machine domain $VMNAME has been created from an xml file"
+
+# Verify that virtual machine can be started and stopped
+virsh start $VMNAME # Start it and wait 2 minutes for it to boot
+sleep 120
+virsh list --all | egrep -q "^[[:space:]]*[[:digit:]]*[[:space:]]*$VMNAME[[:space:]]*running"
+ok $? "Verify that virtual machine $VMNAME has been started"
+virsh shutdown $VMNAME
+sleep 120	# Wait 2 minutes for virtual machine to turn off
+virsh list --all | egrep -q "^[[:space:]]*-[[:space:]]*$VMNAME[[:space:]]*shut[[:space:]]off"
+ok $? "Verify that virtual machine $VMNAME has been stopped"
+
 . ./tapper-autoreport $BOOT_ERRORS
