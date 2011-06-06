@@ -100,10 +100,70 @@ PERLBIN=/opt/tapper/perl/perls/perl-$(PERLVERSION)/bin
 CPAN=$(PERLBIN)/cpan
 PERL=$(PERLBIN)/perl
 
-# Debian automatic install
+# Debian automatic install/uninstall
 APTGETOPTIONS=-o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --yes
+APTGETREMOVE=remove --purge
+APTGETCLEANUP=autoremove
 APTGET=DEBIAN_FRONTEND=noninteractive; export DEBIAN_FRONTEND ; apt-get $(APTGETOPTIONS)
+# Debian packages to remove on cleanup
+APTREMOVEPKG := expect-dev \
+				expect \
+				libssl-dev \
+				mysql-server \
+				libmysqlclient-dev \
+				libsqlite3-0 \
+				sqlite3 \
+				libxml2-dev \
+				libxml2 \
+				libexpat1-dev \
+				libexpat1 \
+				libapache2-mod-fcgid \
+				apache2 \
+				atftpd
 
+# Redhat automatic install/uninstall
+YUMOPTIONS=--assumeyes --quiet --errorlevel=0
+YUMREMOVE=remove
+YUMCLEANUP=clean all
+YUM=yum $(YUMOPTIONS)
+# Redhat packages to remove on cleanup
+YUMREMOVEPKG := expect-devel \
+				expect \
+				openssl-devel \
+				mysql-server \
+				mysql-devel \
+				libsqlite3x \
+				sqlite \
+				libxml2-devel \
+				libxml2 \
+				expat-devel \
+				expat \
+				mod_fcgid \
+				httpd \
+				tftp-server
+
+# Determine whether the system is Redhat or Debian based and set the
+# appropriate PKGMRG interface and the corresponding packages to install
+OS := $(shell uname -o)
+ifeq ($(OS),GNU/Linux)
+	# Check if distribution is Redhat based 
+	ifeq ($(findstring redhat-release,$(wildcard /etc/*)),redhat-release)
+		PKGMGR=$(YUM)
+		REMOVE=$(YUMREMOVE)
+		CLEANUP=$(YUMCLEANUP)
+		REMOVEPKG=$(YUMREMOVEPKG)
+	# Check if distribution is Debian based 
+	else ifeq ($(findstring debian_version,$(wildcard /etc/*)),debian_version)
+		PKGMGR=$(APTGET)
+		REMOVE=$(APTGETREMOVE)
+		CLEANUP=$(APTGETCLEANUP)
+		REMOVEPKG=$(APTREMOVEPKG)
+	else
+		#TODO (not priority) Implement support for other distros
+	endif
+else
+	#TODO (not a priority) support other operating systems 
+endif
 ### starter kit
 STARTERKITBASENAME=tapper-starterkit
 STARTERKIT=$(STARTERKITBASENAME).tgz
@@ -172,23 +232,13 @@ cleannfsroot:
 	-umount $(CLIENTPKG64CHROOT)/dev/pts
 	-rm -fr $(NFSROOTCLEANFILES)
 
-cleanlocal:
+$(REMOVEPKG):
 	@echo "########## Remove local machine setup"
-	-$(APTGET) remove --purge expect-dev
-	-$(APTGET) remove --purge expect
-	-$(APTGET) remove --purge libssl-dev
-	-$(APTGET) remove --purge mysql-server
-	-$(APTGET) remove --purge libmysqlclient-dev
-	-$(APTGET) remove --purge libsqlite3-0
-	-$(APTGET) remove --purge sqlite3
-	-$(APTGET) remove --purge libxml2-dev
-	-$(APTGET) remove --purge libxml2
-	-$(APTGET) remove --purge libexpat1-dev
-	-$(APTGET) remove --purge libexpat1
-	-$(APTGET) remove --purge libapache2-mod-fcgid
-	-$(APTGET) remove --purge apache2
-	-$(APTGET) remove --purge atftpd
-	-$(APTGET) autoremove
+	@echo $(PKGMGR) $(REMOVE) $@
+	#-$(PKGMGR) $(REMOVE) $@
+
+cleanlocal: $(REMOVEPKG)
+	-$(PKGMGR) $(CLEANUP)
 	-rm -fr $(LOCALCLEANFILES)
 
 cleanbaseimage64chroot:
@@ -216,6 +266,10 @@ mrproper: clean localclean localcleandb nfsrootclean
 # *
 # *
 # ==============================================================
+# Simple Debug, call make debug to use
+debug: $(REMOVEPKG)
+	@echo "### configuring the package manager ###"
+	@echo $(PKGMGR) $(REMOVE)
 
 distroprefs: $(DISTROPREFSDIR)/00.README
 
