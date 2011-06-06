@@ -1,0 +1,45 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:          TAPPER_REPORTS_API
+# Required-Start:    $syslog $remote_fs
+# Should-Start: $time ypbind smtp
+# Required-Stop:     $syslog $remote_fs
+# Should-Stop: $time ypbind smtp
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: TAPPER_REPORTS_API daemon providing Tapper remote API
+# Description:       Start TAPPER_REPORTS_API to allow Tapper reports
+#	be accessed via the API on port 7358.
+### END INIT INFO
+
+# Note: Special treatment of stop for LSB conformance
+PERL=/opt/tapper/perl/perls/perl-5.12.3/bin/perl
+TAPPER_REPORTS_API_BIN=/opt/tapper/perl/perls/perl-5.12.3/bin/tapper-reports-api-daemon
+test -f $TAPPER_REPORTS_API_BIN || { echo "$TAPPER_REPORTS_API_BIN not installed"; 
+	if [ "$1" = "stop" ]; then exit 0;
+	else exit 5; fi; }
+
+case "$1" in
+    start)
+	echo -n "Starting TAPPER_REPORTS_API "
+	export MX_DAEMON_STDOUT=/var/log/tapper_reports_api_daemon_stdout.log
+	export MX_DAEMON_STDERR=/var/log/tapper_reports_api_daemon_stderr.log
+	#export TAPPER_DEVELOPMENT=1
+	$PERL $TAPPER_REPORTS_API_BIN start
+	;;
+    stop)
+	echo -n "Shutting down TAPPER_REPORTS_API "
+	$PERL $TAPPER_REPORTS_API_BIN stop
+	;;
+    restart)
+	echo -n "Restart TAPPER_REPORTS_API "
+	$0 stop
+	$0 start
+	;;
+    *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+	;;
+esac
+
