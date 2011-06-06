@@ -85,4 +85,45 @@ sleep 120	# Wait 2 minutes for virtual machine to turn off
 virsh list --all | egrep -q "^[[:space:]]*-[[:space:]]*$VMNAME[[:space:]]*shut[[:space:]]off"
 ok $? "Verify that virtual machine $VMNAME has been stopped"
 
+#
+# Three CernVM TestCases
+#
+
+# Verify that virtual machine booted and has console support
+# Start the virtual machine and wait 2 minutes for it to boot
+virsh start $VMNAME
+sleep 120
+virsh list --all | egrep -q "^[[:space:]]*[[:digit:]]*[[:space:]]*$VMNAME[[:space:]]*running"
+ok $? "Verify that virtual machine $VMNAME has been started"
+virsh ttyconsole $VMNAME
+ok $? "Verify that virtual machine $VMNAME has booted and has console support"
+
+# CernVM TestCase 1: Check login via ssh
+ssh -q -o "BatchMode=yes" root@$GUESTIP "echo 2>&1"
+ok $? "CernVM TestCase 1: Check login via ssh"
+
+# CernVM TestCase 2: No error messages at boot
+RESULT=0
+BOOT_ERRORS="boot_error.log"
+BOOT_TESTS=("ssh root@$GUESTIP dmesg | egrep \"error|warning|fail\" >> $BOOT_ERRORS" 
+"ssh root@$GUESTIP cat /var/log/boot.log | egrep \"error|warning|fail\" >> $BOOT_ERRORS" 
+"ssh root@$GUESTIP cat /var/log/messages | egrep \"error|warning|fail\" >> $BOOT_ERRORS" 
+"ssh root@$GUESTIP cat /var/log/cernvm-update.log | egrep \"error|warning|fail\" >> $BOOT_ERRORS")
+
+for test in "${BOOT_TESTS[@]}"
+do
+	$test
+        # If one of the tests finds boot error, set result as failure and break
+        if [ "$?" -eq 0 ]
+        then
+                RESULT=1
+                break
+        fi
+done
+ok $RESULT "CernVM TestCase 2: No error messages at boot"
+
+# CernVM TestCase 3: Check for correct time / running ntpd
+ssh root@$GUESTIP ps -eaf | grep -q ntpd
+ok $? "CernVM TestCase 3: Check for correct time / running ntpd"
+
 . ./tapper-autoreport $BOOT_ERRORS
