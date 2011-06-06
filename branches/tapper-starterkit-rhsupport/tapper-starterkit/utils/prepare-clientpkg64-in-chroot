@@ -16,13 +16,14 @@ echo ". /opt/tapper/perl/etc/bashrc" >> $HOME/.bashrc
 . /opt/tapper/perl/etc/bashrc
 perlbrew install -j ${CPUCOUNT} perl-${PERLVERSION}
 perlbrew switch perl-${PERLVERSION}
+cd /opt/tapper/perl/perls ; ln -sf perl-${PERLVERSION} current
 
 # CPAN config
 cp /tmp/tapper-starterkit/misc/CPAN-Config.pm /opt/tapper/perl/perls/perl-${PERLVERSION}/lib/${PERLVERSION}/CPAN/Config.pm
 export TWMC_TEST_PORT=9876
 export PERL_AUTOINSTALL="--defaultdeps"
 export TEST_JOBS=${CPUCOUNT}
-export CPAN=/opt/tapper/perl/perls/perl-${PERLVERSION}/bin/cpan
+export CPAN=/opt/tapper/perl/perls/current/bin/cpan
 echo "reload index" | $CPAN
 $CPAN LWP
 $CPAN Expect

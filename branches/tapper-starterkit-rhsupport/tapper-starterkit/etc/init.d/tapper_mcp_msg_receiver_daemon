@@ -13,8 +13,8 @@
 ### END INIT INFO
 
 # Note: Special treatment of stop for LSB conformance
-PERL=/opt/tapper/perl/perls/perl-5.12.3/bin/perl
-TAPPER_MSGRECEIVER_BIN=/opt/tapper/perl/perls/perl-5.12.3/bin/tapper-mcp-messagereceiver
+PERL=/opt/tapper/perl/perls/current/bin/perl
+TAPPER_MSGRECEIVER_BIN=/opt/tapper/perl/perls/current/bin/tapper-mcp-messagereceiver
 test -f $TAPPER_MSGRECEIVER_BIN || { echo "$TAPPER_MSGRECEIVER_BIN not installed"; 
 	if [ "$1" = "stop" ]; then exit 0;
 	else exit 5; fi; }

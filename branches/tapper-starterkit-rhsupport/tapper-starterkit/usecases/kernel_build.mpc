@@ -41,7 +41,7 @@ changeset: HEAD
 [% END %]
 ---
 precondition_type: testprogram
-program: /opt/tapper/perl/perls/perl-5.12.3/bin/tapper-testsuite-autotest
+program: /opt/tapper/perl/perls/current/bin/tapper-testsuite-autotest
 parameters:
 [% IF (Tests.qemu_iotests) or (Tests == 'qemu_iotests') %]
   - -t
