@@ -1,4 +1,11 @@
 #!/bin/sh
+#
+# TAPPER_REPORTS_API      TAPPER_REPORTS_API daemon providing Tapper remote API
+#
+# chkconfig: 2345 98 98
+# description: Start TAPPER_REPORTS_API to allow Tapper reports \
+#              be accessed via the API on port 7358.
+# processname: tapper_reports_api_daemon
 
 ### BEGIN INIT INFO
 # Provides:          TAPPER_REPORTS_API

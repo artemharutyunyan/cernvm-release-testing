@@ -1,4 +1,10 @@
 #!/bin/sh
+#
+# TAPPER_INSTALLER      TAPPER_INSTALLER Tapper installer reports receiving
+#
+# chkconfig: 2345 94 94
+# description: Start TAPPER_INSTALLER to setup machine
+# processname: tapper
 
 ### BEGIN INIT INFO
 # Provides:          TAPPER_INSTALLER
