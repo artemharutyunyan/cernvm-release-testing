@@ -105,6 +105,7 @@ APTGETOPTIONS=-o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-c
 APTGETREMOVE=remove --purge
 APTGETCLEANUP=autoremove
 APTGET=DEBIAN_FRONTEND=noninteractive; export DEBIAN_FRONTEND ; apt-get $(APTGETOPTIONS)
+
 # Debian packages to remove on cleanup
 APTREMOVEPKG := expect-dev \
 				expect \
@@ -120,6 +121,36 @@ APTREMOVEPKG := expect-dev \
 				libapache2-mod-fcgid \
 				apache2 \
 				atftpd
+
+# Debian build dependencies to install
+DEBBUILDDEP := debootstrap \
+			   patch \
+	 		   curl \
+	 		   wget \
+	 		   rsync \
+	 		   gcc \
+	 		   perl-modules
+
+# Debian library dependencies to install
+DEBLIBDEP := expect \
+	 		 expect-dev \
+			 libssl-dev \
+	 		 mysql-server \
+	 		 libmysqlclient-dev \
+	 		 libsqlite3-0 \
+	 		 sqlite3 \
+	 		 libxml2 \
+	 		 libxml2-dev \
+	 		 libexpat1 \
+	 		 libexpat1-dev \
+	 		 apache2 \
+	 		 libapache2-mod-fcgid
+
+# Debian NFS packages
+DEBNFSPKG=nfs-kernel-server
+
+# Debian TFTP server packages
+DEBTFTPPKG=atftpd
 
 # Redhat automatic install/uninstall
 YUMOPTIONS=--assumeyes --quiet --errorlevel=0
@@ -142,6 +173,38 @@ YUMREMOVEPKG := expect-devel \
 				httpd \
 				tftp-server
 
+# Redhat build depencies to install
+REDBUILDDEP := debootstrap \
+			   patch \
+			   curl \
+			   wget \
+			   rsync \
+			   gcc \
+			   perl-Module-CoreList \
+			   perl-CPAN
+
+# Redhat library dependencies to install
+REDLIBDEP := expect \
+			 expect-devel \
+			 openssl-devel \
+			 mysql-server \
+			 mysql-devel \
+			 libsqlite3x \
+			 sqlite \
+			 libxml2 \
+			 libxml2-devel \
+			 expat \
+			 expat-devel \
+			 httpd \
+			 mod_fcgid
+
+# Redhat NFS packages
+REDNFSPKG := nfs-utils \
+			 system-config-nfs
+
+# Debian TFTP server packages
+REDTFTPPKG=tftp-server
+
 # Determine whether the system is Redhat or Debian based and set the
 # appropriate PKGMRG interface and the corresponding packages to install
 OS := $(shell uname -o)
@@ -152,23 +215,37 @@ ifeq ($(OS),GNU/Linux)
 		REMOVE=$(YUMREMOVE)
 		CLEANUP=$(YUMCLEANUP)
 		REMOVEPKG=$(YUMREMOVEPKG)
+		# Generate a list of commands to install redhat dependencies
+		INSTALLDEPS=$(PKGMGR) install $(REDBUILDDEP)
+		LIBDEPS=$(REDLIBDEP)
+		NFSPKG=$(REDNFSPKG)
+		TFTPPKG=$(REDTFTPPKG)
 	# Check if distribution is Debian based 
 	else ifeq ($(findstring debian_version,$(wildcard /etc/*)),debian_version)
 		PKGMGR=$(APTGET)
 		REMOVE=$(APTGETREMOVE)
 		CLEANUP=$(APTGETCLEANUP)
 		REMOVEPKG=$(APTREMOVEPKG)
+		# Generate a list of commands to install debian dependencies
+		INSTALLDEPS=$(PKGMGR) update ; $(PKGMGR) install $(DEBBUILDDEP)
+		LIBDEPS=$(DEBLIBDEP)
+		NFSPKG=$(DEBNFSPKG)
+		TFTPPKG=$(DEBTFTPPKG)
 	else
 		#TODO (not priority) Implement support for other distros
 	endif
 else
 	#TODO (not a priority) support other operating systems 
 endif
+
 ### starter kit
 STARTERKITBASENAME=tapper-starterkit
 STARTERKIT=$(STARTERKITBASENAME).tgz
 STARTERKITURL=http://amd64.org/pub/tapper/$(STARTERKIT)
 STARTERKITDIR=$(TMP)/$(STARTERKITBASENAME)
+
+# Additional URL
+MAKEPATCHURL=http://search.cpan.org/CPAN/authors/id/J/JV/JV/makepatch-2.04.tar.gz
 
 ### intermediate build files, not the final results
 CLEANFILES = $(TMP)/$(STARTERKIT) \
@@ -233,9 +310,8 @@ cleannfsroot:
 	-rm -fr $(NFSROOTCLEANFILES)
 
 $(REMOVEPKG):
-	@echo "########## Remove local machine setup"
 	@echo $(PKGMGR) $(REMOVE) $@
-	#-$(PKGMGR) $(REMOVE) $@
+#-$(PKGMGR) $(REMOVE) $@
 
 cleanlocal: $(REMOVEPKG)
 	-$(PKGMGR) $(CLEANUP)
@@ -267,9 +343,18 @@ mrproper: clean localclean localcleandb nfsrootclean
 # *
 # ==============================================================
 # Simple Debug, call make debug to use
-debug: $(REMOVEPKG)
+debug:
 	@echo "### configuring the package manager ###"
-	@echo $(PKGMGR) $(REMOVE)
+	@echo "########## Remove local machine setup"
+	@echo "### TEST REDHAT/DEBIAN VARIABLES ###"
+	@echo $(PKGMGR)
+	@echo $(REMOVE)
+	@echo $(CLEANUP)
+	@echo $(REMOVEPKG)
+	$(INSTALLDEPS)
+	@echo $(LIBDEPS)
+	@echo $(NFSPKG)
+	@echo $(TFTPPKG)
 
 distroprefs: $(DISTROPREFSDIR)/00.README
 
@@ -283,15 +368,13 @@ dependencies: distroprefs $(STARTERKITDIR)/etc/log4perl.cfg
 
 $(STARTERKITDIR)/etc/log4perl.cfg:
 	@echo "########## install some build dependencies"
-	$(APTGET) update
-	$(APTGET) install debootstrap
-	$(APTGET) install patch
-	$(APTGET) install makepatch
-	$(APTGET) install curl
-	$(APTGET) install wget
-	$(APTGET) install rsync
-	$(APTGET) install gcc
-	$(APTGET) install perl-modules
+	$(INSTALLDEPS)
+# Install makepatch from CPAN
+	wget --directory-prefix=$(TMP)/ $(MAKEPATCHURL)
+	tar -xzf $(TMP)/makepatch*.tar.gz -C $(TMP)/ ; cd $(TMP)/makepatch*
+	perl Makefile.PL
+	make && make install
+# Fetch the latest starterkit
 	curl -k -z$(TMP)/$(STARTERKIT) -L $(STARTERKITURL) -o $(TMP)/$(STARTERKIT)
 	cd $(TMP) ; tar xzf $(STARTERKIT)
 
@@ -579,7 +662,7 @@ $(PERLBIN)/perl:
 # Install Perl
 #
 	@echo "########## Install Perl"
-#	chmod +x $(STARTERKITDIR)/utils/prepare-optperl
+	chmod +x $(STARTERKITDIR)/utils/prepare-optperl
 	$(STARTERKITDIR)/utils/prepare-optperl
 
 nfsserver:
@@ -587,7 +670,7 @@ nfsserver:
 # Install an NFS server and export $(DATATAPPER)
 #
 	@echo "########## Install an NFS server and export $(DATATAPPER)"
-	$(APTGET) install nfs-kernel-server
+	$(PKGMGR) install $(NFSPKG)
 	-# find out IP in a clever way, hopefully not too clever...
 	for IP in $$(ip addr | awk '/inet / {print $$2}'); do echo "$(DATATAPPER) $$IP(fsid=0,no_root_squash,no_subtree_check,rw,insecure) 192.168.1.0/255.255.255.0(fsid=0,no_root_squash,no_subtree_check,rw)" >> /etc/exports ; done
 	-# later append: 192.168.1.0/255.255.255.0(fsid=0,no_root_squash,no_subtree_check,rw)
@@ -598,19 +681,7 @@ libdeps:
 # Prepare packages
 #
 	@echo "########## Prepare packages"
-	$(APTGET) install expect
-	$(APTGET) install expect-dev
-	$(APTGET) install libssl-dev
-	$(APTGET) install mysql-server
-	$(APTGET) install libmysqlclient-dev
-	$(APTGET) install libsqlite3-0
-	$(APTGET) install sqlite3
-	$(APTGET) install libxml2
-	$(APTGET) install libxml2-dev
-	$(APTGET) install libexpat1
-	$(APTGET) install libexpat1-dev
-	$(APTGET) install apache2
-	$(APTGET) install libapache2-mod-fcgid
+	$(PKGMGR) install $(LIBDEPS)
 
 perlpkgs:
 #
@@ -636,6 +707,7 @@ perlpkgs:
 	PERL_AUTOINSTALL="--defaultdeps" TEST_JOBS=$(CPUCOUNT) $(CPAN) DBI
 	PERL_AUTOINSTALL="--defaultdeps" TEST_JOBS=$(CPUCOUNT) $(CPAN) DBD::mysql
 	PERL_AUTOINSTALL="--defaultdeps" TEST_JOBS=$(CPUCOUNT) $(CPAN) DBD::SQLite
+	PERL_AUTOINSTALL="--defaultdeps" TEST_JOBS=$(CPUCOUNT) $(CPAN) App::Daemon
 	PERL_AUTOINSTALL="--defaultdeps" TEST_JOBS=$(CPUCOUNT) $(CPAN) Tapper::Schema
 	PERL_AUTOINSTALL="--defaultdeps" TEST_JOBS=$(CPUCOUNT) $(CPAN) Tapper::CLI
 
@@ -715,7 +787,7 @@ receiver: workingdirs dependencies tapperconfig libdeps optperl /etc/init.d/tapp
 	cp $(STARTERKITDIR)/etc/init.d/tapper_reports_receiver_daemon /etc/init.d/
 	insserv tapper_reports_receiver_daemon
 	/etc/init.d/tapper_reports_receiver_daemon restart
-	sleep 2
+	sleep 5		# Give it time to restart
 
 api: workingdirs dependencies tapperconfig libdeps optperl
 #
@@ -726,17 +798,18 @@ api: workingdirs dependencies tapperconfig libdeps optperl
 	cp $(STARTERKITDIR)/etc/init.d/tapper_reports_api_daemon /etc/init.d/
 	insserv tapper_reports_api_daemon
 	/etc/init.d/tapper_reports_api_daemon restart
+	sleep 5		# Give it time to restart
 
 mcp: workingdirs dependencies tapperconfig libdeps optperl examplemachines initialdata
 #
 # start scripts for MCP
 #
 	@echo "########## start scripts for MCP"
-	PERL_AUTOINSTALL="--defaultdeps" TEST_JOBS=$(CPUCOUNT) $(CPAN) App::Daemon
 	PERL_AUTOINSTALL="--defaultdeps" TEST_JOBS=$(CPUCOUNT) $(CPAN) Tapper::MCP
 	cp $(STARTERKITDIR)/etc/init.d/tapper_mcp_daemon /etc/init.d/
 	insserv tapper_mcp_daemon
 	/etc/init.d/tapper_mcp_daemon restart
+	sleep 5		# Give it time to restart
 
 mcpmsgreceiver: workingdirs dependencies tapperconfig libdeps optperl
 #
@@ -747,6 +820,7 @@ mcpmsgreceiver: workingdirs dependencies tapperconfig libdeps optperl
 	cp $(STARTERKITDIR)/etc/init.d/tapper_mcp_msg_receiver_daemon /etc/init.d/
 	insserv tapper_mcp_msg_receiver_daemon
 	/etc/init.d/tapper_mcp_msg_receiver_daemon restart
+	sleep 5		# Give it time to restart
 
 web: workingdirs dependencies tapperconfig libdeps optperl initialdata
 #
@@ -759,14 +833,14 @@ web: workingdirs dependencies tapperconfig libdeps optperl initialdata
 	cp $(STARTERKITDIR)/etc/apache2/conf.d/tapper_reports_web.conf /etc/apache2/conf.d/
 	/etc/init.d/apache2 restart
 	@echo "We wait some seconds for the daemons to come up..."
-	sleep 5
+	sleep 5		# Give it time to restart
 
 tftpserver:
 #
 # Install an TFTP server and export $(DATATAPPER)
 #
 	@echo "########## Install an NFS server and export $(DATATAPPER)"
-	$(APTGET) install atftpd
+	$(PKGMGR) install $(TFTPPKG)
 	-# symlink Debian specific dir to keep all files in our central data dir
 	-rm -rf /srv/tftp
 	-ln -sf $(TFTPBOOTDIR) /srv/tftp
