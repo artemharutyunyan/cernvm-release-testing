@@ -18,3 +18,34 @@ While this document is not intended to be a replacement for the reference manual
 including an introduction to the core component, \amdtapper\cite{tapper}. Figure~\ref{fig:architecture} consists of a diagram outlining the basic architecture
 of Tapper\indexed{\tapper\ Architecture} which consists of a server that controls and gathers results from test clients, and then organizes and 
 displays the results through a web interface.\newline
+
+\begin{figure}[!hbp]
+	\begin{center}
+		\includegraphics[scale=0.25]{img/tapper_architecture_overview.png}
+	\end{center}
+	\caption{Overview of the \tapper architecture}
+	\label{fig:architecture}
+\end{figure}
+
+The components of the \releasetesting~framework are listed in Table~\ref{tbl:components}. 
+
+\begin{table}
+  \begin{center}
+
+    \begin{tabularx}{\linewidth}{l|X}
+      {\bf\centering \releasetesting component name} & {\bf\centering Description} \\\hline
+%        \texttt{Agent} & Communicates with service insances and requests a job to execute. Upon receiving the job downloads the input 
+%                         files, executes the job, uploads job output files and reports that the job execution is finished. \\
+%        \texttt{Generic Job and Storage Manager} & Distributes jobs from the internal queue to Agents for execution, provides space for storing 
+%                                                   the job output   \\
+%        \texttt{AliEn Job Manager} & Retrieves jobs from the central task queue of \indexed{AliEn} Grid \cite{alien} and sends them to 
+%                                     Agents for execution \\
+%        \texttt{AliEn Storage Manager} & Uploads the output of AliEn jobs executed by Agents and finalizes the job status in AliEn Grid.  \\
+%        \texttt{PanDA Storage Manager} & Uploads the output of \indexed{PanDA} \cite{panda} jobs executed by Agents and finalizes the job status in PanDA Grid  \\
+    \end{tabularx}  
+  \end{center}
+
+  \caption{List of \releasetesting and \amdtapper components}
+
+  \label{tbl:components}
+\end{table}
