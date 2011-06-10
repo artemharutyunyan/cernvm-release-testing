@@ -101,18 +101,82 @@ will have, \emph{so feel free to deviate from the instructions}.
 \subsection{Configuring the system}
 \label{sec:rhconfig}
 \begin{enumerate}
-\item 
+\item 	After the system has booted remove the follow unnecessary startup applications by selecting from the menu  
+		\verb|System -> Preferences -> Startup Applications|
+\begin{itemize}
+\item	bluetooth
+\item	evolution alarm
+\item	Gnome Login Sound
+\item	PackageKit Update Applet
+\item	print queue
+\item	screensaver
+\item	visual assistance/aid
+\item	volume control
+\item	any others you think are unnecessary based on your own discretion
+\end{itemize}
+
+\item	Next enable and configure the remote desktop from the menu \verb|System -> Preferences -> Remote Desktop| and ensure
+		that the following options are configured	
+\begin{itemize}
+\item	Enable the option ``Allow others to view your desktop''
+\item	Enable the option ``Allow other users to control your desktop''
+\item	Disable the option ``You must confirm access to this machine''
+\end{itemize}
+
+\item	Next enable SSH access to the machine, in order for SSH and VNC access to work the firewall will have to be disabled
+\begin{itemize}
+\item[a.]	First disable the firewall from the menu \verb|System -> Adminisration -> Firewall| and click the ``Disable'' 
+			button and then click ``Apply'' to apply the changes! {\bf This is a quick solution for now because it's too 
+			much work to configure the firewall for VNC, SSH, Apache, MySQL, PHPMyAdmin, MCP, and all the other network 
+			daemons and should not be a problem if this is just being accessed internally}.
+
+\item[b.]	Now that the firewall is disabled, configure sshd, the ssh daemon, to run on startup
+\begin{lstlisting}
+$ su -c "chkconfig --level 345 sshd on"
+\end{lstlisting}
+\end{itemize}
+
+\item	Next, configure the system to login automatically at boot
+\begin{itemize}
+\item[a.]	Edit the login screen configuration file for gdm using the following command
+\begin{lstlisting}
+$ su -c "gedit /etc/gdm/custom.conf"
+\end{lstlisting}
+
+\item[b.]	Then in the custom.conf file, put the following under the heading [daemon], which will automatically
+			log the system in as the user you created, \emph{make sure you replace the user cernvm with the user
+			that you created}.
+\lstset{caption=Configure Automatic Login}
+\begin{lstlisting}
+AutomaticLoginEnable=true
+AutomaticLogin=cernvm
+TimedLoginEnable=true
+TimedLogin=cernvm
+TimedLoginDelay=0
+\end{lstlisting}		
+\end{itemize}
+
+\item	Next, configure the screen saver from the menu \verb|System -> Preferences -> Screensaver| and ensure that
+		the following options are configured
+\begin{itemize}
+\item	Disable the option ``Lock screen when screensaver active''
+\end{itemize}
+
+\item	Now, reboot the machine, and ensure that the following work
+\begin{itemize}
+\item	It automatically boots up into the full desktop environment without having to login
+\item	You have access to the machine using SSH and can login on the root account
+\item	You have VNC access to the machine and can control the system using VNC	
+\end{itemize}
+
+\item	Finally, update the system from the menu \verb|System -> Administration -> Software Update| and after it has 
+		completed the updates reboot the system
 \end{enumerate}
+
 \subsection{Installing and configuring the hypervisors}
 \subsection{Configuring the CernVM Image}
 \subsection{Setting up the Tapper Test Suite}
 
-\section{OS X Test Client Setup}
-\subsection{Installing the system}
-\subsection{Configuring the system}
-\subsection{Installing and configuring the hypervisors}
-\subsection{Configuring the CernVM Image}
-\subsection{Setting up the Tapper Test Suite}
 
 \section{Debian Based Test Client Setup}
 \subsection{Installing the system}
@@ -171,17 +235,17 @@ the CD so that the system does not load the CD again when it starts.
 \subsection{Configuring the system}
 \label{sec:debianconfig}
 \begin{enumerate}
-\item After the system has booted remove the follow unnecessary startup applications by selecting from the menu  
-\verb|System -> Preferences -> Startup Applications|
+\item	After the system has booted remove the follow unnecessary startup applications by selecting from the menu  
+		\verb|System -> Preferences -> Startup Applications|
 \begin{itemize}
 \item	bluetooth
 \item	evolution alarm
 \item	Gnome Login Sound
-\item	visual assistance/aid
+\item	print queue
 \item	screensaver
 \item	update notifier
+\item	visual assistance/aid
 \item	volume control
-\item	print queue
 \item	any others you think are unnecessary based on your own discretion
 \end{itemize}
 
@@ -253,7 +317,6 @@ Identifier "VNC Monitor"
 HorizSync 30-70
 VertRefresh 50-75
 EndSection
-
 \end{lstlisting}
 	
 \item[b.] Then edit grub and set the option ``nomodeset'', and proceed to update grub and reboot
@@ -266,6 +329,16 @@ GRUB_CMDLINE_LINUX="nomodeset"
 $ su -c "update-grub"
 \end{lstlisting}
 \end{itemize}
+
+\item	Now, reboot the machine, and ensure that the following work
+\begin{itemize}
+\item	It automatically boots up into the full desktop environment without having to login
+\item	You have access to the machine using SSH and can login on the root account
+\item	You have VNC access to the machine and can control the system using VNC	
+\end{itemize}
+
+\item	Finally, update the system from the menu \verb|System -> Administration -> Update Manager| and after it has 
+		completed the updates reboot the system
 \end{enumerate}
 
 \subsection{Installing and configuring the hypervisors}
@@ -459,3 +532,10 @@ does not require virtual machine creation and configuration.
 \subsection{Setting up the Tapper Test Suite}
 \item {\bf Before proceeding any further ensure that you have all other test clients set up this far, and then proceed
 to follow the instructions for setting up and configuring the \tapper server in the section ``Server Platform Setup''}.
+
+\section{OS X Test Client Setup}
+\subsection{Installing the system}
+\subsection{Configuring the system}
+\subsection{Installing and configuring the hypervisors}
+\subsection{Configuring the CernVM Image}
+\subsection{Setting up the Tapper Test Suite}
