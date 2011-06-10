@@ -16,5 +16,51 @@ various operating systems.
 \section{Debian Based Server Setup}
 \subsection{Installing the system}
 \subsection{Configuring the system}
+\flushleft
+\begin{enumerate}
+\item For installing Debian, follow the instructions outlined in the sections ``Installing the system'' and ``Configuring the system'' 
+for installation and configuration instructions with the only exception being that the hostname should be something unique such as 
+\emph{cernvm-debian60 server}, to indicate that it is running the tapper server, {\bf again keep the hostname convention consistent}.
+\end{enumerate}
+
 \subsection{Installing the Tapper Server}
+\begin{enumerate}
+\item Next, execute the following commands to install necessary dependencies, \emph{from now on all commands require root privileges}.
+\lstset{caption= Install Dependencies}
+\begin{lstlisting}
+$ apt-get update
+$ apt-get install make
+$ apt-get install subversion
+\end{lstlisting}
+
+\item Now, download the latest copy of the Tapper-Starerkit, which is an installer for Tapper from the \cernvmreleasetesting 
+Google Code Project page
+\lstset{caption= Download Tapper-Starterkit}
+\begin{lstlisting}
+$ svn checkout http://cernvm-release-testing.googlecode.com/svn/trunk/ cernvm-release-testing-read-only
+\end{lstlisting}
+
+\item Now edit the Makefile in the Tapper-Starterkit installer folder and configure variable TAPPER\_SERVER which 
+is the hostname of the machine that is currently installing the starter-kit. For now disregard the TESTMACHINE 
+variables, also \emph{make sure the variable TAPPER\_SERVER? is changed to TAPPER\_SERVER} you should have something
+similar to this in the Makefile.
+\lstset{caption= Makefile Configuration}
+\begin{lstlisting}
+# initial machine names
+TAPPER_SERVER=cernvm-server
+TESTMACHINE1=johnconnor
+TESTMACHINE2=sarahconnor
+TESTMACHINE3=bullock
+\end{lstlisting}
+
+\item After you have configured the Makefile in the installer folder, install the Tapper-Starterkit by executing the
+following command, for any prompts during the installation leave them as default and press enter. {\bf During
+the installation, you will be prompted for the mysql password, DO NOT ENTER a password here UNLESS you already have an
+existing MySQL installation/database with a password set for the "root" account}
+\lstset{caption= Install Tapper-Starterkit}
+\begin{lstlisting}
+$ make localsetup
+\end{lstlisting}
+\end{enumerate}
+
 \subsection{Setting up Tapper Web Interface and Database}
