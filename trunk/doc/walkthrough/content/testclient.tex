@@ -296,4 +296,86 @@ $ virsh stop cernvm
 \end{enumerate}
 
 \subsection{Configuring the CernVM Image}
+\begin{enumerate}
+\item The next steps involve configuring the CernVM image to integrate with virsh as well as the test suite, first
+start the virtual machine, execute the command to get the IP address of the CernVM image. Then follow this guide
+provided on the CernVM website on how to configure the CernVM image and create a new user using the web interface \url{http://cernvm.cern.ch/portal/cvmconfiguration} and reboot the system, \emph{all virsh commands require root privileges}.
+\begin{lstlisting}
+$ virsh start cernvm
+# Wait about 2 minutes for the system to boot 
+# Then get IP Address using the following command
+$ arp -an
+\end{lstlisting}
+
+\item Now that the system has booted, login in to the system using ssh for the user you created using the CernVM web interface
+\begin{lstlisting}
+$ ssh <user you created>@cernvm-image-ipaddress
+\end{lstlisting}
+
+\item Now that you are logged into the system through SSH, execute the following instructions to enable virsh console access
+\lstset{caption= Enable Virsh Console Access}
+\begin{lstlisting}
+# Type the following command, and enter a root password you won't forget
+$ passwd
+
+# Change to the root account and enable console for root so that you can 
+# login using virsh console
+$ su
+
+# Enable root login on tty
+$ echo “ttyS0″ >> /etc/securetty
+
+# Then add console=ttyS0 to the kernel parameter line in /etc/grub.conf
+$ vi /etc/grub.conf
+
+# Add getty to /etc/inittab file after all the other "tty" lines, 
+# add the following line to /etc/inittab
+s0:2345:respawn:/sbin/agetty -L 38400 ttyS0 vt100
+
+# Reboot the system and the console should now work
+$ virsh console cernvm
+\end{lstlisting}
+
+\item Login to the system using virsh console and then simply type "root" and enter the password to login as the 
+root account, \emph{there will most likely not be any console display from the virtual machine until you press 
+enter after entering the password}, then enable root login through SSH using the following commands.
+\lstset{caption= Enable SSH Root Login}
+\begin{lstlisting}
+# Login as root using password you set with the passwd command
+$ virsh console cernvm
+
+# edit the file /etc/ssh/sshd_config and uncomment the line 
+# PermitRootLogin yes	in order to enable root login
+$ vi /etc/ssh/sshd_config
+\end{lstlisting}
+
+\item Next from the host machine \emph{ie. the machine you're currently using} enable automatic login as root 
+through ssh on the KVM guest, first ensure that the guest machine has been started.
+\lstset{caption= Enable Automatic SSH Root Login}
+\begin{lstlisting}
+$ virsh start cernvm
+
+# Generate a public key, when prompted press enter for everything
+$ ssh-keygen -t rsa
+
+# Get the ip address of the running cernvm guest, as done previously
+$ arp -an
+
+# Next, run the following command to setup automatic login for ssh
+# without having to type the password. When prompted for the password
+# enter the password you just set previously
+$ ssh-copy-id root@cernvm-image-ipaddress
+		
+# Now, try and login to the machine using ssh and ensure that you can
+# login as root without having to type the password
+$ ssh root@cernvm-image-ipaddress
+\end{lstlisting}
+
+\item If everying has worked so far, the test client and CernVM image have been configured properly, if you are
+having issues solve them before proceeding further, or go the the section on ``Server Platform Setup'' as that
+done not require virtual machine creation and configuration.
+\end{enumerate}
+
 \subsection{Setting up the Tapper Test Suite}
+\item {\bf Before proceeding any further ensure that you have all other test clients set up this far, and then proceed
+to follow the instructions for setting up and configuring the \tapper server in the section ``Server Platform Setup''}.
