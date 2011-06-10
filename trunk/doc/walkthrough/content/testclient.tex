@@ -40,6 +40,57 @@ will have, \emph{so feel free to deviate from the instructions}.
 
 \section{Debian Based Test Client Setup}
 \subsection{Installing the system}
+\flushleft
+\begin{enumerate}
+\item First, begin by loading the Debian Squeeze CD and select the `default install' at the initial boot menu.
+
+\item For the first few installation options, such as default language and keyboard layout simply leave the default values and select
+`next' unless you have different requirements than the default options.
+
+\item When prompted to enter the hostname for the computer, enter a relevant hostname for the machine based on the hardware or operating
+system it is running; the hostname should be relevant and unique as \tapper will use this hostname to idenify the system. A good naming
+convention should refer to the hardware or operating system and call it a host to differentiate from the virtual machine that will be
+running as a guest\footnote{This will make more sense later when you have to create and configure CernVM images}, for example a hostname such
+as \emph{cernvm-debian6-host} could be used, {\bf whatever conventions you use make sure it is consistent}.
+
+\item Next, when prompted to enter the password for the root password, set the root password to something you will not forget and is fairly
+difficult with numbers and letters.
+
+\item Next, when prompted to enter a username for the new user to be created on the system, set the username as something simple and relevant
+such as \emph{cernvm} and the password to something you will not forget and is fairly complex with numbers and letters. But, most importantly 
+{\bf keep this username and password consistent across all systems created as part of the infrastructure} as it makes administration and everything
+else much easier.
+
+\item When prompted for the timezone simply configure the timezone according to your local time zone, such as CEST
+
+\item Now, when prompted by the installer to configure the partitioning layout, if there are other operating systems installed on the system 
+select the `Automatic Partitioning' option, and if available select the option `Use Remaining Free Space'. Otherwise, if there are no other 
+operating system installed on the hard drive select the `Manual' option, \emph{beware that doing so will erase everything on the hard drive}.
+Using the manual option, create two primary partitions, with the first taking up the size of the hard drive minus twice the size of the amount
+of RAM installed, and the second primary partition as a SWAP file using the remaining free space. The following is an example of what the partiton
+layout would look like for a 40.0 GB hard drive with 2GB of ram.
+
+\flushleft
+\lstset{caption=Manual Partition Layout Example}
+\begin{lstlisting}
+#1	PRIMARY	36.0 GB		Bf	EXT4	/
+#2	PRIMARY	4.0  GB		 f	SWAP	SWAP
+\end{lstlisting}
+
+\item When prompted, select yes to use a network mirror and select a mirror near your location and in a country with a reputable 
+connection/internet infrastructure such as (USA, Netherlands, Germany, France).
+
+\item When prompted to choose software to install, select the following
+\begin{itemize}
+\item 	Graphical desktop environment
+\item 	SSH Server
+\item	Standard system utilities
+\end{itemize}
+\end{enumerate}
+
+\item After that the system should soon complete the installation, after the installation has finished ensure that you reboot the system and remove
+the CD so that the system does not load the CD again when it starts.
+
 \subsection{Configuring the system}
 \subsection{Installing and configuring the hypervisors}
 \subsection{Configuring the CernVM Image}
