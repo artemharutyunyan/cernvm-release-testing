@@ -1,5 +1,5 @@
 \chapter{\cernvmreleasetesting Test Client Platform Setup}
-\label{sct:testclientsetup}
+\label{sec:testclientsetup}
 
 \section{Introduction}
 The intent of this document is to provided a step-by-step guide on setting up an entire \cernvmreleasetesting\ infrastructure, including instructions
@@ -40,6 +40,7 @@ will have, \emph{so feel free to deviate from the instructions}.
 
 \section{Debian Based Test Client Setup}
 \subsection{Installing the system}
+\label{sec:debianinstall}
 \flushleft
 \begin{enumerate}
 \item First, begin by loading the Debian Squeeze CD and select the `default install' at the initial boot menu.
@@ -92,6 +93,7 @@ connection/internet infrastructure such as (USA, Netherlands, Germany, France).
 the CD so that the system does not load the CD again when it starts.
 
 \subsection{Configuring the system}
+\label{sec:debianconfig}
 \begin{enumerate}
 \item After the system has booted remove the follow unnecessary startup applications by selecting from the menu  
 \verb|System -> Preferences -> Startup Applications|
@@ -119,9 +121,9 @@ the CD so that the system does not load the CD again when it starts.
 \item Next enable and configure remoted desktop from the menu \verb|System -> Preferences -> Remote Desktop| and ensure
 that the following options are configured
 \begin{itemize}
-\item	Enable the option "Allow others to view your desktop"
-\item	Enable the option "Allow other users to control your desktop"
-\item	Disable the option "You must confirm access to this machine"
+\item	Enable the option ``Allow others to view your desktop''
+\item	Enable the option ``Allow other users to control your desktop''
+\item	Disable the option ``You must confirm access to this machine''
 \end{itemize}
 
 \item Next configure the system to login automatically at boot from the menu select \verb|System -> Administration -> Login Screen|
@@ -129,7 +131,7 @@ and then set it to login to the user account you created previously (such as cer
 
 \item Next, remove cd-rom support from sources.list, which is used by Debian for updates \footnote{And is a nuisance for any new user
 as it forces you to find the CD and put it in the computer for the update to continue}, execute the following command with root priviledges
-and comment out any lines that start with "deb cdrom" by using a \#
+and comment out any lines that start with ``deb cdrom'' by using a \#
 \lstset{caption=Removing CD-ROM Requirement for Updates}
 \begin{lstlisting}
 $ su -c "gedit /etc/apt/sources.list"
@@ -192,7 +194,7 @@ $ su -c "update-grub"
 
 \subsection{Installing and configuring the hypervisors}
 \begin{enumerate}
-\item The fiest step is to install the hypervisor, start by installing kvm and virsh using the following command with root priviledges
+\item The first step is to install the hypervisor, start by installing kvm and virsh using the following command with root priviledges
 \lstset{caption=Installing KVM and Virsh Support}
 \begin{lstlisting}
 su 	-c "apt-get install qemu-kvm libvirt-bin"
@@ -336,7 +338,7 @@ s0:2345:respawn:/sbin/agetty -L 38400 ttyS0 vt100
 $ virsh console cernvm
 \end{lstlisting}
 
-\item Login to the system using virsh console and then simply type "root" and enter the password to login as the 
+\item Login to the system using virsh console and then simply type ``root'' and enter the password to login as the 
 root account, \emph{there will most likely not be any console display from the virtual machine until you press 
 enter after entering the password}, then enable root login through SSH using the following commands.
 \lstset{caption= Enable SSH Root Login}
@@ -373,7 +375,7 @@ $ ssh root@cernvm-image-ipaddress
 
 \item If everying has worked so far, the test client and CernVM image have been configured properly, if you are
 having issues solve them before proceeding further, or go the the section on ``Server Platform Setup'' as that
-done not require virtual machine creation and configuration.
+does not require virtual machine creation and configuration.
 \end{enumerate}
 
 \subsection{Setting up the Tapper Test Suite}

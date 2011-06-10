@@ -1,5 +1,5 @@
 \chapter{\cernvmreleasetesting Server Platform Setup}
-\label{sct:serversetup}
+\label{sec:serversetup}
 
 \section{Introduction}
 This section provides complete step by step instructions on how to setup and configure the \tapper server which are part of a basic working
@@ -18,9 +18,10 @@ various operating systems.
 \subsection{Configuring the system}
 \flushleft
 \begin{enumerate}
-\item For installing Debian, follow the instructions outlined in the sections ``Installing the system'' and ``Configuring the system'' 
-for installation and configuration instructions with the only exception being that the hostname should be something unique such as 
-\emph{cernvm-debian60 server}, to indicate that it is running the tapper server, {\bf again keep the hostname convention consistent}.
+\item For installing Debian, follow the instructions outlined in the sections ``Installing the system''~\ref{sec:debianinstall} and
+``Configuring the system''~\ref{sec:debianconfig} for installation and configuration instructions with the only exception being that
+the hostname should be something unique such as \emph{cernvm-debian6-server}, to indicate that it is running the \tapper server, 
+{\bf again keep the hostname convention consistent}.
 \end{enumerate}
 
 \subsection{Installing the Tapper Server}
@@ -37,7 +38,8 @@ $ apt-get install subversion
 Google Code Project page
 \lstset{caption= Download Tapper-Starterkit}
 \begin{lstlisting}
-$ svn checkout http://cernvm-release-testing.googlecode.com/svn/trunk/ cernvm-release-testing-read-only
+$ svn checkout http://cernvm-release-testing.googlecode.com/svn/trunk/ \
+cernvm-release-testing-read-only
 \end{lstlisting}
 
 \item Now edit the Makefile in the Tapper-Starterkit installer folder and configure variable TAPPER\_SERVER which 
@@ -56,7 +58,7 @@ TESTMACHINE3=bullock
 \item After you have configured the Makefile in the installer folder, install the Tapper-Starterkit by executing the
 following command, for any prompts during the installation leave them as default and press enter. {\bf During
 the installation, you will be prompted for the mysql password, DO NOT ENTER a password here UNLESS you already have an
-existing MySQL installation/database with a password set for the "root" account}
+existing MySQL installation/database with a password set for the ``root'' account}
 \lstset{caption= Install Tapper-Starterkit}
 \begin{lstlisting}
 $ make localsetup
@@ -65,7 +67,7 @@ $ make localsetup
 
 \subsection{Setting up Tapper Web Interface and Database}
 \begin{enumerate}
-\item Next you need to set a password for the root account of the mysql database\footnote{this will be implemented in the makefile}
+\item Next you need to set a password for the root account of the mysql database\footnote{This will eventually be implemented in the makefile}
 \lstset{caption= Set MySQL Root Password}
 \begin{lstlisting}
 # Example: mysqladmin -u root password abc123
@@ -73,7 +75,7 @@ mysqladmin -u root password <newpassword>
 \end{lstlisting}
 
 \item Now that the installion has completed and security issue has been dealt with, ensure that you can access the tapper web
-interface is working by viewin\subsection{Configuring the system}g it in your browser using the url,  
+interface is working by viewing it in your browser using the url,  
 \url{http://localhost/tapper}\footnote{This can be accessed locally and remotely from other systems using the server hostname or IP address}
 
 \item Next install phpmyadmin so that it's easy to administrate and configure the Tapper databases, \emph{if you are prompted to 
@@ -108,7 +110,7 @@ $ insert into host_feature(host_id, entry, value)  values \
 
 \item Next, send a sample test report to the tapper server, to ensure that the web interface, MCP, database, and reports
 framework are all working by viewing the tapper reports in your browser at the following url, 
-\url{http://localhost/tapper/reports} You should now see a report from the "Machines"
+\url{http://localhost/tapper/reports} You should now see a report from the ``Machines''
 cernvm-server, or whatever the hostname of the server is.
 \lstset{caption= Send a Report to Server from Server}
 \begin{lstlisting}
@@ -129,7 +131,7 @@ $ cat demo_report.tap | netcat -q7 -w1 cernvm-server 7357
 \item Finally, ssh login to one of the test machine that was set up earlier, \emph{in our examples, cernvm-host} and send another 
 sample test report to the tapper server, to ensure that the web interface, MCP, database, and reports framework are all working by
 viewing the tapper reports in your browser at the following url: \url{http://localhost/tapper/reports} 
-You should now see a report from the "Machines" cernvm-server and cernvm-host or whatever their respective hostnames are.
+You should now see a report from the ``Machines'' cernvm-server and cernvm-host or whatever their respective hostnames are.
 \lstset{caption= Send a Report to Server from a Test Client}
 \begin{lstlisting}
 # Save the following in a file named demo_report.tap
