@@ -26,7 +26,83 @@ will have, \emph{so feel free to deviate from the instructions}.
 
 \section{Red Hat Based Test Client Setup}
 \subsection{Installing the system}
+\label{sec:fedorainstall}
+\flushleft
+\begin{enumerate}
+\item First, begin by booting the fedora CD and when it boots into the desktop environment click the icon on the desktop which says
+	  ``Install to hard drive''.
+	  
+\item	For the first steps of installer, when it asks for the language settings just leave it as the default (english)
+
+\item 	At the next menu option, for the type of device the installation will involve, leave the default option ``Basic Storge Devices''
+
+\item 	At the next menu, where you have to select the drive to install the operating system on, select your hard drive from the list
+	  	\emph{you can usually determine which drive to use based on the model and capacity columns}\footnote{ The device naming convention
+	  	for Linux usually labels a hard drive starting with the first two characters as `sd' or `hd', and a third character from a to z 
+	  	( sd[a-z] or hd[a-z] )} then click ``next''.
+	  
+\item 	When prompted to enter the hostname for the computer, enter a relevant hostname for the machine based on the hardware or operating
+		system it is running; the hostname should be relevant and unique as \tapper will use this hostname to idenify the system. A good naming
+		convention should refer to the hardware or operating system and call it a host to differentiate from the virtual machine that will be
+		running as a guest\footnote{This will make more sense later when you have to create and configure CernVM images}, for example a hostname such
+		as \emph{cernvm-redhat5-host} could be used, {\bf whatever convention you use make sure it is consistent}.
+		
+\item	Next, select the appropriate city/timezone from the list and ensure that the option ``system clock uses UTC'' is selected
+
+\item	When prompted to enter the password for the root password, set the root password to something you will not forget and is fairly
+		difficult with numbers and letters. {\bf Again, whatever password you use,  make sure it's consistent as you will frequently
+		use this account}.
+		
+\item	Next, for the installation type, select ``Use All Space'' to have the installer format the drive and automatically partition/configure
+		the drive for you, {\bf do not use this option if you have data on the hard drive as everything will be deleted}. Furthermore, if you
+		want to manually configure the partitions, or don't want to use LVM\footnote{Logical Volume Manager, it is very beneficial for complex
+		disk configurations and arrays, but for our needs is nothing more than a headache} (I don't) then select ``Create Cusom Layout''
+		and follow the instructions below.
+		
+\begin{itemize}
+\label{sec:rhmanualdrive}
+\item[a.]	From the list select your hard drive (it should be sda) and click create to create a new partition. Select a ``Standard Partition''
+			and click create.
+
+\item[b.]	For the ``Mount Point'' option select from the drop down list, `/' and for the ``File System Type'' select ext4. Then for the 
+			``Size (MB)'' option set the size (in megabytes) as the size of the free space on the hard drive minus double the amount of RAM 
+			installed on the system\footnote{This is a general rule of thumb to create a swap partition twice the size of your RAM}. For 
+			example, if you	have 2GB of RAM installed on the system, then you would subtract 4096 from the size of the hard drive. 
+			Finally, select the option ``Force to be primary partition'' and click OK.
+
+\item[c.]	From the list select the remaining free space and click create, then select a ``Standard Partition'' and click create
+
+\item[d.]	For the "File system type" select swap and then select the options ``Fill to maximum allowable size'' and ``Force to be primary
+			partition'' and click OK.
+			
+\item[e.]	Now, back at the menu select ``next'' and the partitions will now be created
+\end{itemize}
+
+\item	At the next stage in the installer, ensure that the option ``Install boot loader on /dev/\ldots'' is selected as this will install
+		the boot loader to the MBR\footnote{Master Boot Record, normally it is the first 512 bytes located at the first sector of a hard 
+		drive}, and click ``next''.
+		
+\item	After the installation has completed, reboot the machine and make sure to remove the installation CD before the computer boots.
+
+\item	Now, when the computer boots with the installation CD removed, you will begin the final stages of the installation procedure.
+		
+\item	When prompted to enter a username for the new user to be created on the system, set the username as something simple and relevant
+		such as \emph{cernvm} and the password to something you will not forget and is fairly complex with numbers and letters. But, most 
+		importantly {\bf keep this username and password consistent across all systems created as part of the infrastructure} as it makes 
+		administration and everything else much easier.
+		
+\item	At the next stage, for setting the date and time, enable the option ``sychronize date and time over the network'' to use an NTP
+		server\footnote{Network Time Protocol, this is very important and required for keeping all the test clients, CernVM images,
+		and test results synchronized}, and select one of the NTP servers listed, or add one of the \cern dedicated NTP servers.
+		
+\item	Click finish, and if you are prompted to send a profile, and wish to assist the developers select ``send profile''.
+\end{enumerate}
+
 \subsection{Configuring the system}
+\label{sec:rhconfig}
+\begin{enumerate}
+\item 
+\end{enumerate}
 \subsection{Installing and configuring the hypervisors}
 \subsection{Configuring the CernVM Image}
 \subsection{Setting up the Tapper Test Suite}
@@ -52,10 +128,11 @@ will have, \emph{so feel free to deviate from the instructions}.
 system it is running; the hostname should be relevant and unique as \tapper will use this hostname to idenify the system. A good naming
 convention should refer to the hardware or operating system and call it a host to differentiate from the virtual machine that will be
 running as a guest\footnote{This will make more sense later when you have to create and configure CernVM images}, for example a hostname such
-as \emph{cernvm-debian6-host} could be used, {\bf whatever conventions you use make sure it is consistent}.
+as \emph{cernvm-debian6-host} could be used, {\bf whatever convention you use make sure it is consistent}.
 
-\item Next, when prompted to enter the password for the root password, set the root password to something you will not forget and is fairly
-difficult with numbers and letters.
+\item	Next, when prompted to enter the password for the root password, set the root password to something you will not forget and is fairly
+		difficult with numbers and letters. {\bf Again, whatever password you use,  make sure it's consistent as you will frequently
+		use this account}.
 
 \item Next, when prompted to enter a username for the new user to be created on the system, set the username as something simple and relevant
 such as \emph{cernvm} and the password to something you will not forget and is fairly complex with numbers and letters. But, most importantly 
@@ -71,7 +148,6 @@ Using the manual option, create two primary partitions, with the first taking up
 of RAM installed, and the second primary partition as a SWAP file using the remaining free space. The following is an example of what the partiton
 layout would look like for a 40.0 GB hard drive with 2GB of ram.
 
-\flushleft
 \lstset{caption=Manual Partition Layout Example}
 \begin{lstlisting}
 #1	PRIMARY	36.0 GB		Bf	EXT4	/
@@ -87,10 +163,10 @@ connection/internet infrastructure such as (USA, Netherlands, Germany, France).
 \item 	SSH Server
 \item	Standard system utilities
 \end{itemize}
-\end{enumerate}
 
 \item After that the system should soon complete the installation, after the installation has finished ensure that you reboot the system and remove
 the CD so that the system does not load the CD again when it starts.
+\end{enumerate}
 
 \subsection{Configuring the system}
 \label{sec:debianconfig}
@@ -193,6 +269,7 @@ $ su -c "update-grub"
 \end{enumerate}
 
 \subsection{Installing and configuring the hypervisors}
+\label{sec:debianhypervisor}
 \begin{enumerate}
 \item The first step is to install the hypervisor, start by installing kvm and virsh using the following command with root priviledges
 \lstset{caption=Installing KVM and Virsh Support}
@@ -298,6 +375,7 @@ $ virsh stop cernvm
 \end{enumerate}
 
 \subsection{Configuring the CernVM Image}
+\label{sec:cernvmconfig}
 \begin{enumerate}
 \item The next steps involve configuring the CernVM image to integrate with virsh as well as the test suite, first
 start the virtual machine, execute the command to get the IP address of the CernVM image. Then follow this guide
@@ -319,7 +397,7 @@ $ ssh <user you created>@cernvm-image-ipaddress
 \begin{lstlisting}
 # Type the following command, and enter a root password you won't forget
 $ passwd
-
+debianinstall
 # Change to the root account and enable console for root so that you can 
 # login using virsh console
 $ su
