@@ -191,5 +191,109 @@ $ su -c "update-grub"
 \end{enumerate}
 
 \subsection{Installing and configuring the hypervisors}
+\begin{enumerate}
+\item The fiest step is to install the hypervisor, start by installing kvm and virsh using the following command with root priviledges
+\lstset{caption=Installing KVM and Virsh Support}
+\begin{lstlisting}
+su 	-c "apt-get install qemu-kvm libvirt-bin"
+\end{lstlisting}
+
+\item Now, proceed to download and extract the desired kvm virtual machine image onto the system from the CernVM download portal\footnote{The images can be obtained here: \url{http://cernvm.cern.ch/portal/downloads} it is recommended that you download the KVM Basic image for your architecture}, for this guide the
+basic image will be downloaded as it is the most practical image for the majority of users.
+
+\lstset{caption=Download and Extract CernVM KVM Basic Image}
+\begin{lstlisting}
+$ wget http://rbuilder.cern.ch/downloadImage?fileId=1719
+$ gunzip cernvm*.gz
+\end{lstlisting}
+
+\item Now, to ensure that KVM is properly configured and installed, follow this guide provided on the CernVM website
+\url{http://cernvm.cern.ch/portal/kvm} {\bf except create the following virtual machine definition file using gedit}
+\emph{You will need to change the following XML tags in the configuration file accordingly}
+\begin{itemize}
+\item \verb|<uuid>| by generating a uuid using the uuid command
+\item \verb|<source file>| according to wherever you extract the cernvm kvm image
+\item \verb|<mac address>| not a necessity, but change it to something slightly different
+\end{itemize}
+
+\lstset{caption=Create CernVM KVM Definition File}
+\begin{lstlisting}
+# Install uuid tool and generate uuid
+$ su -c "apt-get install uuid"
+$ uuid
+
+# Create the cernvm.xml definition file and set the XML tags accordingly
+$ gedit cernvm.xml
+
+<domain type='kvm'>
+  <name>cernvm</name>
+  <uuid>b32147e7-9b89-dda9-b15d-53ba5f54f590</uuid>
+  <memory>524288</memory>
+  <currentMemory>524288</currentMemory>
+  <vcpu>1</vcpu>
+  <os>
+    <type arch='x86_64' machine='pc-0.12'>hvm</type>
+    <boot dev='hd'/>
+  </os>
+  <features>
+    <acpi/>
+    <apic/>
+    <pae/>
+  </features>
+  <clock offset='utc'/>
+  <on_reboot>restart</on_reboot>
+  <on_crash>restart</on_crash>
+  <devices>
+    <emulator>/usr/bin/kvm</emulator>
+    <disk type='file' device='disk'>
+      <driver name='qemu' type='raw'/>
+      <source file='/home/cernvm/image/cernvm-2.3.0-x86_64.hdd'/>
+      <target dev='hda' bus='ide'/>
+      <address type='drive' controller='0' bus='0' unit='0'/>
+    </disk>
+    <controller type='ide' index='0'>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x01' 
+      function='0x1'/>
+    </controller>
+    <interface type='network'>
+      <mac address='52:54:00:ca:d5:d3'/>
+      <source network='default'/>
+      <target dev='vnet0'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x03' 
+      function='0x0'/>
+    </interface>
+    <serial type='pty'>
+      <target port='0'/>
+    </serial>
+    <console type='pty'>
+      <target type='serial' port='0'/>
+    </console>
+    <input type='mouse' bus='ps2'/>
+    <graphics type='vnc' port='-1' autoport='yes'/>
+    <video>
+      <model type='cirrus' vram='9216' heads='1'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x02'
+      function='0x0'/>
+    </video>
+    <memballoon model='virtio'>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x04'
+      function='0x0'/>
+    </memballoon>
+  </devices>
+</domain>
+\end{lstlisting}
+
+\item Finally, configure the the virtual machine network to automatically start when the system boots, then create the virual machine
+and ensure that it can be started and stopped using virsh, \emph{all virsh commands require root privileges}.
+\lstset{caption= Configure the Virtual Machine and Verify it Works}
+\begin{lstlisting}
+$ virsh net-autostart default
+$ virsh define /home/cernvm/image/cernvm.xml
+$ virsh start cernvm
+# Wait about 2 minutes for the system to boot
+$ virsh stop cernvm
+\end{lstlisting}
+\end{enumerate}
+
 \subsection{Configuring the CernVM Image}
 \subsection{Setting up the Tapper Test Suite}
