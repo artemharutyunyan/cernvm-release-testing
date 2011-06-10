@@ -92,6 +92,104 @@ connection/internet infrastructure such as (USA, Netherlands, Germany, France).
 the CD so that the system does not load the CD again when it starts.
 
 \subsection{Configuring the system}
+\begin{enumerate}
+\item After the system has booted remove the follow unnecessary startup applications by selecting from the menu  
+\verb|System -> Preferences -> Startup Applications|
+\begin{itemize}
+\item	bluetooth
+\item	evolution alarm
+\item	Gnome Login Sound
+\item	visual assistance/aid
+\item	screensaver
+\item	update notifier
+\item	volume control
+\item	print queue
+\item	any others you think are unnecessary based on your own discretion
+\end{itemize}
+
+\item Remove the follow unnecessary services by selecting from the menu \verb|System -> Administration -> Services|
+\begin{itemize}
+\item	alsa utils
+\item	bluetooth
+\item	CUPS
+\item	exim4
+\item	any others you think are unnecessary based on your own discretion
+\end{itemize}
+
+\item Next enable and configure remoted desktop from the menu \verb|System -> Preferences -> Remote Desktop| and ensure
+that the following options are configured
+\begin{itemize}
+\item	Enable the option "Allow others to view your desktop"
+\item	Enable the option "Allow other users to control your desktop"
+\item	Disable the option "You must confirm access to this machine"
+\end{itemize}
+
+\item Next configure the system to login automatically at boot from the menu select \verb|System -> Administration -> Login Screen|
+and then set it to login to the user account you created previously (such as cernvm) automatically.
+
+\item Next, remove cd-rom support from sources.list, which is used by Debian for updates \footnote{And is a nuisance for any new user
+as it forces you to find the CD and put it in the computer for the update to continue}, execute the following command with root priviledges
+and comment out any lines that start with "deb cdrom" by using a \#
+\lstset{caption=Removing CD-ROM Requirement for Updates}
+\begin{lstlisting}
+$ su -c "gedit /etc/apt/sources.list"
+\end{lstlisting}
+
+\item Again, continue to edit /etc/apt/sources.list still with root priviledges and ensure that each line ends with ``main contrib non-free'',
+then save the file and do the following command with root priviledges
+\lstset{caption=Updating the System}
+\begin{lstlisting}
+$ su -c "apt-get update"
+\end{lstlisting}
+
+\item Next, configure the screen saver from the menu \verb|System -> Preferences -> Screensaver| and ensure that the following options are 
+configured
+\begin{itemize}
+\item	Disable the option ``Lock screen when screensaver active''
+\end{itemize}
+
+\item The following instructions involve enabling headless support so that you can remote desktop to the machine without having a monitor
+connected to the computer
+\begin{itemize}
+\item[a.] Edit the xorg.conf file and put the following in it
+\lstset{caption=Configuring Xorg for Headless Support}
+\begin{lstlisting}
+$ su -c "gedit /etc/X11/xorg.conf"
+
+Section "Device"
+Identifier "VNC Device"
+Driver "vesa"
+EndSection
+
+Section "Screen"
+Identifier "VNC Screen"
+Device "VNC Device"
+Monitor "VNC Monitor"
+SubSection "Display"
+Modes "1280x1024"
+EndSubSection
+EndSection
+
+Section "Monitor"
+Identifier "VNC Monitor"
+HorizSync 30-70
+VertRefresh 50-75
+EndSection
+
+\end{lstlisting}
+	
+\item[b.] Then edit grub and set the option ``nomodeset'', and proceed to update grub and reboot
+\lstset{caption=Configuring Grub for Headless Support}
+\begin{lstlisting}
+$ su -c "gedit /etc/default/grub"
+
+GRUB_CMDLINE_LINUX="nomodeset"
+
+$ su -c "update-grub"
+\end{lstlisting}
+\end{itemize}
+\end{enumerate}
+
 \subsection{Installing and configuring the hypervisors}
 \subsection{Configuring the CernVM Image}
 \subsection{Setting up the Tapper Test Suite}
