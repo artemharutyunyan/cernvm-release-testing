@@ -10,18 +10,27 @@ various operating systems.
 \section{Red Hat Based Server Setup}
 \subsection{Installing the system}
 \subsection{Configuring the system}
+\flushleft
+\begin{enumerate}
+\item 	For installing a Red Hat based server, follow the instructions outlined in the sections ``Installing the 
+		system''~\ref{sec:rhinstall} and ``Configuring the system''~\ref{sec:rhconfig} for installation and configuration 
+		instructions with the only exception being that the hostname should be something unique such as \emph{cernvm-debian6-server}, to 
+		indicate that it is running the \tapper server, {\bf again keep the hostname convention consistent}.
+\end{enumerate}
+
 \subsection{Installing the Tapper Server}
 \subsection{Setting up Tapper Web Interface and Database}
+
 
 \section{Debian Based Server Setup}
 \subsection{Installing the system}
 \subsection{Configuring the system}
 \flushleft
 \begin{enumerate}
-\item For installing Debian, follow the instructions outlined in the sections ``Installing the system''~\ref{sec:debianinstall} and
-``Configuring the system''~\ref{sec:debianconfig} for installation and configuration instructions with the only exception being that
-the hostname should be something unique such as \emph{cernvm-debian6-server}, to indicate that it is running the \tapper server, 
-{\bf again keep the hostname convention consistent}.
+\item 	For installing Debian based server, follow the instructions outlined in the sections ``Installing the 
+		system''~\ref{sec:debianinstall} and ``Configuring the system''~\ref{sec:debianconfig} for installation and configuration 
+		instructions with the only exception being that the hostname should be something unique such as \emph{cernvm-debian6-server}, to 
+		indicate that it is running the \tapper server, {\bf again keep the hostname convention consistent}.
 \end{enumerate}
 
 \subsection{Installing the Tapper Server}
@@ -38,8 +47,8 @@ $ apt-get install subversion
 Google Code Project page
 \lstset{caption= Download Tapper-Starterkit}
 \begin{lstlisting}
-$ svn checkout http://cernvm-release-testing.googlecode.com/svn/trunk/ \
-cernvm-release-testing-read-only
+$ svn checkout http://cernvm-release-testing.googlecode.com/svn/trunk/\
+installer/tapper-starterkit cernvm-release-testing-read-only
 \end{lstlisting}
 
 \item Now edit the Makefile in the Tapper-Starterkit installer folder and configure variable TAPPER\_SERVER which 
@@ -108,11 +117,11 @@ $ insert into host_feature(host_id, entry, value)  values \
 \end{lstlisting}
 
 
-\item Next, send a sample test report to the tapper server, to ensure that the web interface, MCP, database, and reports
-framework are all working by viewing the tapper reports in your browser at the following url, 
-\url{http://localhost/tapper/reports} You should now see a report from the ``Machines''
-cernvm-server, or whatever the hostname of the server is.
-\lstset{caption= Send a Report to Server from Server}
+\item 	Next, send a sample test report to the tapper server, to ensure that the web interface, MCP, database, and reports
+		framework are all working by viewing the tapper reports in your browser at the following url, 
+		\url{http://localhost/tapper/reports} You should now see a report from whatever the ``Tapper-Machine-Name'' in 
+		demo\_report.tap was set as. \emph{For the example demo\_report.tap provided below it would be cernvm-server}.
+\lstset{caption= Send a Report from the \tapper~Server to Itself}
 \begin{lstlisting}
 # Save the following in a file named demo_report.tap
 $ vi demo_report.tap
@@ -131,8 +140,9 @@ $ cat demo_report.tap | netcat -q7 -w1 cernvm-server 7357
 \item Finally, ssh login to one of the test machine that was set up earlier, \emph{in our examples, cernvm-host} and send another 
 sample test report to the tapper server, to ensure that the web interface, MCP, database, and reports framework are all working by
 viewing the tapper reports in your browser at the following url: \url{http://localhost/tapper/reports} 
-You should now see a report from the ``Machines'' cernvm-server and cernvm-host or whatever their respective hostnames are.
-\lstset{caption= Send a Report to Server from a Test Client}
+You should now see a report from whatever the ``Tapper-Machine-Name'' in demo\_report.tap was set as. \emph{For the example 
+demo\_report.tap provided below it would be cernvm-testclient}.
+\lstset{caption= Send a Report to the \tapper~Server from a Test Client}
 \begin{lstlisting}
 # Save the following in a file named demo_report.tap
 $ vi demo_report.tap
@@ -140,7 +150,7 @@ $ vi demo_report.tap
 	1..2
 	# Tapper-Suite-Name: Tapper-Starterkit
 	# Tapper-Suite-Version: 1.001
-	# Tapper-Machine-Name: cernvm-server
+	# Tapper-Machine-Name: cernvm-testclient
 	ok - Hello test world
 	ok - Just another description
 
@@ -148,4 +158,7 @@ $ vi demo_report.tap
 $ cat demo_report.tap | netcat -q7 -w1 cernvm-server 7357
 \end{lstlisting}
 
+\item	Now that it has been verified that the tapper server, including the web interface, MCP, database, and reports framework 
+		are all working; return to the sections titled ``Setting up the Tapper Test Suite''	for each of the test client, as 
+		there are unique instructions for each operating system.
 \end{enumerate}

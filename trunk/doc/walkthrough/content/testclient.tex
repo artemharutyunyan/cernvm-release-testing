@@ -341,7 +341,7 @@ s0:2345:respawn:/sbin/agetty -L 38400 ttyS0 vt100
 \item 	Now, login to the system using virsh console and then simply type ``root'' and enter the password to login as the 
 		root account, \emph{there will most likely not be any console display from the virtual machine until you press 
 		enter after entering the password}, then enable root login through SSH using the following commands. {\bf To 
-		disconnect from the virsh console and return to the host machine console, press CTRL + ]  which is ( \^] )}
+		disconnect from the virsh console and return to the host machine console, press CTRL + ]  which is ( \^~] )}
 				
 \lstset{caption= Enable SSH Root Login}
 \begin{lstlisting}
@@ -392,7 +392,79 @@ $ ssh root@cernvm-image-ipaddress
 
 \subsection{Setting up the Tapper Test Suite}
 \label{sec:rhtestsuite}
+\begin{enumerate}
+\item 	{\bf Before proceeding any further ensure that you have all other test clients set up this far, and then proceed
+		to follow the instructions for setting up and configuring the \tapper~server in the section ``Server Platform Setup''}		
+		~\ref{sec:serversetup}.
+		
+\item 	Now that the \tapper~server has been installed and configured and the \tapper web interface and database have proven
+		to be working, the next step is to verify that the test client can actually send a report to the \tapper~server in
+		the form of a TAP file. After sending the TAP report to the server, ensure that the test client is working by viewing 
+		the tapper reports in your browser at the following url: \url{http://localhost/tapper/reports}. You should now see a 
+		report from the test client, there should be a report from a system named whatever the ``Tapper-Machine-Name'' in 
+		demo\_report.tap was set as. \emph{For the example demo\_report.tap provided below it would be cernvm-rhtestclient}.
+		\footnote{This is why a consistent hostname convention was emphasized earlier, as reports are often sorted and organized 
+		based on hostnames}.
+		
+\lstset{caption= Send a Basic Report to the \tapper~Server}
+\begin{lstlisting}
+# Save the following in a file named demo_report.tap
+$ vi demo_report.tap
 
+	1..2
+	# Tapper-Suite-Name: Tapper-Starterkit
+	# Tapper-Suite-Version: 1.001
+	# Tapper-Machine-Name: cernvm-rhtestclient
+	ok - Hello test world
+	ok - Just another description
+
+# Send the report to the tapper server using netcat
+$ cat demo_report.tap | nc -w10 cernvm-server 7357
+\end{lstlisting}
+
+\item 	Next, download a copy of tapper-autoreport and the CernVM Test Cases from the Google Code svn repository
+		\cite{GCreleasetesting} and install the tapper-autoreport dependencies.
+		
+\lstset{caption= Install \tapper~AutoReport and Dependencies}
+\begin{lstlisting}
+# Install subversion, required to checkout auto-tapper
+$ yum install subversion
+
+# Checkout a copy of auto-tapper and cernvm testcases
+$ svn checkout http://cernvm-release-testing.googlecode.com/svn/\
+trunk/tapper/tapper-autoreport/ cernvm-release-testing-read-only
+
+# Install the missing dependencies
+$ yum install perl-Module-CoreList
+$ yum install perl-CPAN
+$ yum intall netcat
+
+# Install the required perl modules
+$ cpan
+$ install prove
+$ install XML::XPath
+\end{lstlisting}
+
+\item	Now that that tapper-autoreport has been installed, configure the following variables in the script
+		``cernvm-tests.sh'' according to your \tapper infrastructure setup.
+\begin{itemize}
+\item	OSNAME		- The operating system of the test client, such as ``Red Hat 5''
+\item	VMNAME 		- The domain name of the virtual machine used earlier with virsh
+\item	VM\_XML\_DEFINITION	- The location and name of cernvm virtual machine definition XML file used to create virtual machine
+\item	HOSTNAME	- The hostname of the test client
+\item	GUESTIP		- This is the IP address of the CernVM image
+\item	TAPPER\_REPORT\_SERVER	- The hostname of the \tapper~Report~Server
+\end{itemize}	
+
+\item	Finally, now that tapper-autoreport has been installed and configured on the test client and the test client and \tapper~Server
+		have proven to be working, the next step is to verify that tapper-autoreport works correctly and can actually send a report to 	
+		the \tapper~server in the form of a TAP file. After the \cernvm Test Cases script, ``cernvm-tests.sh'' has completed and sent
+		a TAP report to the server, ensure that the test client is working by viewing the tapper reports in your browser at the 
+		following url: \url{http://localhost/tapper/reports}. You should now see new report from the test client, there should be a 
+		report from a system with the same hostname\footnote{This is why a consistent hostname convention was emphasized earlier, as 
+		reports are often sorted and organized based on hostnames}.
+
+\end{enumerate}
 
 \section{Debian Based Test Client Setup}
 \subsection{Installing the system}
@@ -410,7 +482,7 @@ $ ssh root@cernvm-image-ipaddress
 		virtual machine that will be running as a guest\footnote{This will make more sense later when you have to create and configure 
 		CernVM images}, for example a hostname such as \emph{cernvm-debian6-host} could be used, {\bf whatever convention you use make 
 		sure it is consistent}.
-
+the following
 \item	Next, you will be prompted to enter a domain name, delete the preset domain name ``local'' and leave it blank, \emph{unless
 		your network environment has specific domain name requirements}.
 
@@ -452,9 +524,12 @@ $ ssh root@cernvm-image-ipaddress
 \item	Standard system utilities
 \end{itemize}
 
+\item 	When prompted to install the GRUB boot loader to the master boot record, select {\bf Yes}
+
 \item	After that the system should soon complete the installation, after the installation has finished ensure that you reboot the 
 		system and remove the CD so that the system does not load the CD again when it starts.
 \end{enumerate}
+
 
 \subsection{Configuring the system}
 \label{sec:debianconfig}
@@ -514,8 +589,8 @@ configured
 \item	Disable the option ``Lock screen when screensaver active''
 \end{itemize}
 
-\item The following instructions involve enabling headless support so that you can remote desktop to the machine without having a monitor
-connected to the computer
+\item 	The following instructions involve enabling headless support so that you can remote desktop to the machine without having a 
+		monitor connected to the computer
 \begin{itemize}
 \item[a.] Edit the xorg.conf file and put the following in it
 \lstset{caption=Configuring Xorg for Headless Support}
@@ -726,7 +801,7 @@ s0:2345:respawn:/sbin/agetty -L 38400 ttyS0 vt100
 \item	Now, login to the system using virsh console and then simply type ``root'' and enter the password to login as the 
 		root account, \emph{there will most likely not be any console display from the virtual machine until you press 
 		enter after entering the password}, then enable root login through SSH using the following commands. {\bf To 
-		disconnect from the virsh console and return to the host machine console, press CTRL + ]  which is ( \^] )}
+		disconnect from the virsh console and return to the host machine console, press CTRL + ]  which is ( \^~] )}
 		
 \lstset{caption= Enable SSH Root Login}
 \begin{lstlisting}
@@ -775,8 +850,12 @@ $ ssh root@cernvm-image-ipaddress
 
 \subsection{Setting up the Tapper Test Suite}
 \label{sec:debiantestsuite}
-\item {\bf Before proceeding any further ensure that you have all other test clients set up this far, and then proceed
-to follow the instructions for setting up and configuring the \tapper server in the section ``Server Platform Setup''}.
+\begin{enumerate}
+\item 	{\bf Before proceeding any further ensure that you have all other test clients set up this far, and then proceed
+		to follow the instructions for setting up and configuring the \tapper~server in the section ``Server Platform Setup''}		
+		~\ref{sec:serversetup}.
+\end{enumerate}
+
 
 \section{OS X Test Client Setup}
 \subsection{Installing the system}
