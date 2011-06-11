@@ -179,7 +179,7 @@ TimedLoginDelay=0
 \label{sec:rhhypervisor}
 \begin{enumerate}
 \item	The first step is to install the hypervisor, start by installing kvm and virsh using the following commands with root 
-		priviledges
+		privileges
 		
 \lstset{caption=Installing KVM and Virsh Support}
 \begin{lstlisting}
@@ -277,6 +277,7 @@ $ gedit cernvm.xml
 \item	Finally, configure the the virtual machine network to automatically start when the system boots, then create
 		the virual machine and ensure that it can be started and stopped using virsh, \emph{all virsh commands require
 		root privileges, so it easiest to simply run as as root}.
+		
 \lstset{caption= Configure the Virtual Machine and Verify it Works}
 \begin{lstlisting}
 $ su
@@ -295,8 +296,102 @@ $ virsh shutdown cernvm
 
 
 \subsection{Configuring the CernVM Image}
-\subsection{Setting up the Tapper Test Suite}
+\label{sec:rhcernvmconfig}
+\begin{enumerate}
+\item 	The next steps involve configuring the CernVM image to integrate with virsh as well as the test suite, first
+		start the virtual machine, execute the command to get the IP address of the CernVM image. Then follow this guide
+		provided on the CernVM website on how to configure the CernVM image and create a new user using the web interface 
+		\url{http://cernvm.cern.ch/portal/cvmconfiguration} and reboot the system, \emph{all virsh commands require root 
+		privileges}.
+		
+\begin{lstlisting}
+$ virsh start cernvm
+# Wait about 2 minutes for the system to boot 
+# Then get IP Address using the following command
+$ arp -an
+\end{lstlisting}
 
+\item 	Now that the system has booted, login in to the system using SSH for the user you created using the CernVM web interface
+\begin{lstlisting}
+$ ssh <user you created>@cernvm-image-ipaddress
+\end{lstlisting}
+
+\item	Now that you are logged into the system through SSH, execute the following instructions to enable virsh console access.
+		
+\lstset{caption= Enable Virsh Console Access}
+\begin{lstlisting}
+# Type the following command, and enter a root password you won't forget
+$ sudo passwd root
+# Change to the root account and enable console for root so that you can 
+# login using virsh console
+$ su
+
+# Enable root login on tty
+$ echo “ttyS0″ >> /etc/securetty
+
+# Then add console=ttyS0 to the kernel parameter line in /etc/grub.conf
+$ vi /etc/grub.conf
+
+# Add getty to /etc/inittab file after all the other "tty" lines, 
+# add the following line to /etc/inittab
+s0:2345:respawn:/sbin/agetty -L 38400 ttyS0 vt100
+
+\end{lstlisting}
+
+\item 	Now, login to the system using virsh console and then simply type ``root'' and enter the password to login as the 
+		root account, \emph{there will most likely not be any console display from the virtual machine until you press 
+		enter after entering the password}, then enable root login through SSH using the following commands. {\bf To 
+		disconnect from the virsh console and return to the host machine console, press CTRL + ]  which is ( \^] )}
+				
+\lstset{caption= Enable SSH Root Login}
+\begin{lstlisting}
+# Reboot the system and the console should now work
+# Wait for it to completely shut off and turn on
+$ virsh shutdown cernvm
+$ virsh start cernvm
+
+# Login as root using password you set with the passwd command
+$ virsh console cernvm
+
+# edit the file /etc/ssh/sshd_config and uncomment the line 
+# PermitRootLogin yes	in order to enable root login
+$ vi /etc/ssh/sshd_config
+
+\end{lstlisting}
+
+\item 	Next from the host machine \emph{ie. the machine you're currently using} enable automatic login as root 
+		through ssh on the KVM guest, first ensure that the guest machine has been started.
+		
+\lstset{caption= Enable Automatic SSH Root Login}
+\begin{lstlisting}
+# Restart the virtual machine wait for 
+# it to completely shut off and turn on
+$ virsh shutdown cernvm
+$ virsh start cernvm
+
+# Generate a public key, when prompted press enter for everything
+$ ssh-keygen -t rsa
+
+# Get the ip address of the running cernvm guest, as done previously
+$ arp -an
+
+# Next, run the following command to setup automatic login for ssh
+# without having to type the password. When prompted for the password
+# enter the password you just set previously
+$ ssh-copy-id -i ~/.ssh/id_rsa.pub root@cernvm-image-ipaddress
+		
+# Disconnect, and try and login to the machine using ssh and ensure 
+# that you can login as root without having to type the password
+$ ssh root@cernvm-image-ipaddress
+\end{lstlisting}
+
+\item	If everything so far has worked, then the test client and CernVM image have been installed and configured properly,
+		if you have any outstanding issues solve them before proceeding further, or go to the section ``Server Platform 		
+		Setup''~\ref{sec:serversetup} as the \tapper~server does not require virtual machine creation and configuration.
+\end{enumerate}
+
+\subsection{Setting up the Tapper Test Suite}
+\label{sec:rhtestsuite}
 
 
 \section{Debian Based Test Client Setup}
@@ -399,15 +494,15 @@ that the following options are configured
 and then set it to login to the user account you created previously (such as cernvm) automatically.
 
 \item Next, remove cd-rom support from sources.list, which is used by Debian for updates \footnote{And is a nuisance for any new user
-as it forces you to find the CD and put it in the computer for the update to continue}, execute the following command with root priviledges
+as it forces you to find the CD and put it in the computer for the update to continue}, execute the following command with root privileges
 and comment out any lines that start with ``deb cdrom'' by using a \#
 \lstset{caption=Removing CD-ROM Requirement for Updates}
 \begin{lstlisting}
 $ su -c "gedit /etc/apt/sources.list"
 \end{lstlisting}
 
-\item Again, continue to edit /etc/apt/sources.list still with root priviledges and ensure that each line ends with ``main contrib non-free'',
-then save the file and do the following command with root priviledges
+\item	Again, continue to edit /etc/apt/sources.list still with root privileges and ensure that each line ends with ``main 
+		contrib non-free'', then save the file and do the following command with root privileges.
 \lstset{caption=Updating the System}
 \begin{lstlisting}
 $ su -c "apt-get update"
@@ -473,14 +568,16 @@ $ su -c "update-grub"
 \subsection{Installing and configuring the hypervisors}
 \label{sec:debianhypervisor}
 \begin{enumerate}
-\item The first step is to install the hypervisor, start by installing kvm and virsh using the following command with root priviledges
+\item The first step is to install the hypervisor, start by installing kvm and virsh using the following command with root privileges
 \lstset{caption=Installing KVM and Virsh Support}
 \begin{lstlisting}
 $ su 	-c "apt-get install qemu-kvm libvirt-bin"
 \end{lstlisting}
 
-\item Now, proceed to download and extract the desired kvm virtual machine image onto the system from the CernVM download portal\footnote{The images can be obtained here: \url{http://cernvm.cern.ch/portal/downloads} it is recommended that you download the KVM Basic image for your architecture}, for this guide the
-basic image will be downloaded as it is the most practical image for the majority of users.
+\item 	Now, proceed to download and extract the desired kvm virtual machine image onto the system from the CernVM download 		
+		portal\footnote{The images can be obtained here: \url{http://cernvm.cern.ch/portal/downloads} it is recommended that you 
+		download the KVM Basic image for your architecture}, for this guide the basic image will be downloaded as it is the most 
+		practical image for the majority of users.
 
 \lstset{caption=Download and Extract CernVM KVM Basic Image}
 \begin{lstlisting}
@@ -490,7 +587,8 @@ $ gunzip cernvm*.gz
 
 \item 	Now, to ensure that KVM is properly configured and installed, follow this guide provided on the CernVM website
 		\url{http://cernvm.cern.ch/portal/kvm} {\bf except, instead use following virtual machine definition file to 
-		create the virtual machine}. \emph{You will need to change the following XML tags in the configuration file accordingly}
+		create the virtual machine}. \emph{You will need to change the following XML tags in the configuration file accordingly}.
+		
 \begin{itemize}
 \item \verb|<uuid>| by generating a uuid using the uuid command
 \item \verb|<source file>| according to wherever you extracted the cernvm kvm image
@@ -586,9 +684,11 @@ $ virsh shutdown cernvm
 \subsection{Configuring the CernVM Image}
 \label{sec:cernvmconfig}
 \begin{enumerate}
-\item The next steps involve configuring the CernVM image to integrate with virsh as well as the test suite, first
-start the virtual machine, execute the command to get the IP address of the CernVM image. Then follow this guide
-provided on the CernVM website on how to configure the CernVM image and create a new user using the web interface \url{http://cernvm.cern.ch/portal/cvmconfiguration} and reboot the system, \emph{all virsh commands require root privileges}.
+\item 	The next steps involve configuring the CernVM image to integrate with virsh as well as the test suite, first
+		start the virtual machine, execute the command to get the IP address of the CernVM image. Then follow this guide
+		provided on the CernVM website on how to configure the CernVM image and create a new user using the web interface 
+		\url{http://cernvm.cern.ch/portal/cvmconfiguration} and reboot the system, \emph{all virsh commands require root privileges}.
+
 \begin{lstlisting}
 $ virsh start cernvm
 # Wait about 2 minutes for the system to boot 
@@ -596,16 +696,17 @@ $ virsh start cernvm
 $ arp -an
 \end{lstlisting}
 
-\item Now that the system has booted, login in to the system using ssh for the user you created using the CernVM web interface
+\item Now that the system has booted, login in to the system using SSH for the user you created using the CernVM web interface
 \begin{lstlisting}
 $ ssh <user you created>@cernvm-image-ipaddress
 \end{lstlisting}
 
-\item Now that you are logged into the system through SSH, execute the following instructions to enable virsh console access
+\item	Now that you are logged into the system through SSH, execute the following instructions to enable virsh console access.
+		
 \lstset{caption= Enable Virsh Console Access}
 \begin{lstlisting}
 # Type the following command, and enter a root password you won't forget
-$ passwd
+$ sudo passwd root
 # Change to the root account and enable console for root so that you can 
 # login using virsh console
 $ su
@@ -620,15 +721,20 @@ $ vi /etc/grub.conf
 # add the following line to /etc/inittab
 s0:2345:respawn:/sbin/agetty -L 38400 ttyS0 vt100
 
-# Reboot the system and the console should now work
-$ virsh console cernvm
 \end{lstlisting}
 
-\item Login to the system using virsh console and then simply type ``root'' and enter the password to login as the 
-root account, \emph{there will most likely not be any console display from the virtual machine until you press 
-enter after entering the password}, then enable root login through SSH using the following commands.
+\item	Now, login to the system using virsh console and then simply type ``root'' and enter the password to login as the 
+		root account, \emph{there will most likely not be any console display from the virtual machine until you press 
+		enter after entering the password}, then enable root login through SSH using the following commands. {\bf To 
+		disconnect from the virsh console and return to the host machine console, press CTRL + ]  which is ( \^] )}
+		
 \lstset{caption= Enable SSH Root Login}
 \begin{lstlisting}
+# Reboot the system and the console should now work
+# Wait for it to completely shut off and turn on
+$ virsh shutdown cernvm
+$ virsh start cernvm
+
 # Login as root using password you set with the passwd command
 $ virsh console cernvm
 
@@ -641,6 +747,9 @@ $ vi /etc/ssh/sshd_config
 through ssh on the KVM guest, first ensure that the guest machine has been started.
 \lstset{caption= Enable Automatic SSH Root Login}
 \begin{lstlisting}
+# Restart the virtual machine wait for 
+# it to completely shut off and turn on
+$ virsh shutdown cernvm
 $ virsh start cernvm
 
 # Generate a public key, when prompted press enter for everything
@@ -652,19 +761,20 @@ $ arp -an
 # Next, run the following command to setup automatic login for ssh
 # without having to type the password. When prompted for the password
 # enter the password you just set previously
-$ ssh-copy-id root@cernvm-image-ipaddress
+$ ssh-copy-id -i ~/.ssh/id_rsa.pub root@cernvm-image-ipaddress
 		
-# Now, try and login to the machine using ssh and ensure that you can
-# login as root without having to type the password
+# Disconnect, and try and login to the machine using ssh and ensure 
+# that you can login as root without having to type the password
 $ ssh root@cernvm-image-ipaddress
 \end{lstlisting}
 
-\item If everying has worked so far, the test client and CernVM image have been configured properly, if you are
-having issues solve them before proceeding further, or go the the section on ``Server Platform Setup'' as that
-does not require virtual machine creation and configuration.
+\item	If everything so far has worked, then the test client and CernVM image have been installed and configured properly,
+		if you have any outstanding issues solve them before proceeding further, or go to the section ``Server Platform 		
+		Setup''~\ref{sec:serversetup} as the \tapper~server does not require virtual machine creation and configuration.
 \end{enumerate}
 
 \subsection{Setting up the Tapper Test Suite}
+\label{sec:debiantestsuite}
 \item {\bf Before proceeding any further ensure that you have all other test clients set up this far, and then proceed
 to follow the instructions for setting up and configuring the \tapper server in the section ``Server Platform Setup''}.
 
