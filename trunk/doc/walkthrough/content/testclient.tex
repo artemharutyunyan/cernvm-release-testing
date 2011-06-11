@@ -437,7 +437,6 @@ trunk/tapper/tapper-autoreport/ cernvm-release-testing-read-only
 # Install the missing dependencies
 $ yum install perl-Module-CoreList
 $ yum install perl-CPAN
-$ yum intall netcat
 
 # Install the required perl modules
 $ cpan
@@ -463,7 +462,11 @@ $ install XML::XPath
 		following url: \url{http://localhost/tapper/reports}. You should now see new report from the test client, there should be a 
 		report from a system with the same hostname\footnote{This is why a consistent hostname convention was emphasized earlier, as 
 		reports are often sorted and organized based on hostnames}.
-
+\lstset{caption= Run \tapper-AutoReport for CernVM Test Cases}
+\begin{lstlisting}
+# Simply execute the script and wait for it to finish
+./cernvm-tests.sh
+\end{lstlisting}
 \end{enumerate}
 
 \section{Debian Based Test Client Setup}
