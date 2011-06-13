@@ -753,6 +753,7 @@ WORKDIRS := $(METAREPORTSDIR) \
              $(TAPPERUTILSDIR) \
              $(TESTPROGRAMDIR) \
              $(CONFIGSDIR) \
+			 $(USECASEDIR) \
              $(TFTPBOOTDIR) \
              $(SYNCDIR) \
              $(NFSROOTDIR)
@@ -993,6 +994,7 @@ mcp: workingdirs dependencies tapperconfig libdeps optperl
 # start scripts for MCP
 #
 	@echo "########## start scripts for MCP"
+	PERL_AUTOINSTALL="--defaultdeps" TEST_JOBS=$(CPUCOUNT) $(CPAN) App::Daemon
 	$(SCRIPTENVIRONMENT) $(PREPAREPERLMODULE) Tapper::MCP
 	cp $(STARTERKITDIR)/etc/init.d/tapper_mcp_daemon /etc/init.d/
 	insserv tapper_mcp_daemon
@@ -1032,7 +1034,7 @@ tftpserver:
 	-# symlink Debian specific dir to keep all files in our central data dir
 	-rm -rf /srv/tftp
 	-ln -sf $(TFTPBOOTDIR) /srv/tftp
-	-ln -s $(TFTPBOOTDIR) $(TFTPBOOTDIR)/tftpboot
+	-ln -sf $(TFTPBOOTDIR) $(TFTPBOOTDIR)/tftpboot
 	cp $(STARTERKITDIR)/tftpboot/bzImage $(TFTPBOOTDIR)/
 	/etc/init.d/atftpd restart
 
@@ -1054,7 +1056,7 @@ testquery: receiver
 localsetup: workingdirs dependencies \
             tapperconfig \
             libdeps optperl perlpkgs optpython \
-            databases \
+            cli databases \
             receiver web api \
             testreport \
             nfsserver tftpserver \
