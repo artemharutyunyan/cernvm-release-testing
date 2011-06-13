@@ -1,0 +1,41 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:          TAPPER_ACTION
+# Required-Start:    $syslog $remote_fs
+# Should-Start: $time ypbind smtp
+# Required-Stop:     $syslog $remote_fs
+# Should-Stop: $time ypbind smtp
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: TAPPER_ACTION daemon providing Tapper action support
+# Description:       Start TAPPER_ACTION to provide Tapper action support
+### END INIT INFO
+
+# Note: Special treatment of stop for LSB conformance
+PERL=/opt/tapper/perl/perls/current/bin/perl
+TAPPER_ACTION_BIN=/opt/tapper/perl/perls/current/bin/tapper-action-daemon
+test -f $TAPPER_ACTION_BIN || { echo "$TAPPER_ACTION_BIN not installed";
+	if [ "$1" = "stop" ]; then exit 0;
+	else exit 5; fi; }
+
+case "$1" in
+    start)
+	echo -n "Starting TAPPER_ACTION "
+	$PERL $TAPPER_ACTION_BIN start
+	;;
+    stop)
+	echo -n "Shutting down TAPPER_ACTION "
+	$PERL $TAPPER_ACTION_BIN stop
+	;;
+    restart)
+	echo -n "Restart TAPPER_ACTION "
+	$0 stop
+	$0 start
+	;;
+    *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+	;;
+esac
+

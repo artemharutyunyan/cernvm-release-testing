@@ -1,0 +1,52 @@
+#!/bin/bash
+
+### BEGIN INIT INFO
+# Provides:          TAPPER_PRC
+# Required-Start:    $syslog $remote_fs $all
+# Should-Start: $time ypbind smtp
+# Required-Stop:     $syslog $remote_fs
+# Should-Stop: $time ypbind smtp
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: TAPPER_PRC Tapper program run control
+# Description:       Start TAPPER_PRC to setup machine
+### END INIT INFO
+
+# Note: Special treatment of stop for LSB conformance
+PERLBIN=/opt/tapper/perl/perls/current/bin
+PERL=${PERLBIN}/perl
+TAPPER_PRC_BIN=${PERLBIN}/tapper-automatic-test.pl
+test -f $TAPPER_PRC_BIN || { echo "$TAPPER_PRC_BIN not installed";
+	if [ "$1" = "stop" ]; then exit 0;
+	else exit 5; fi; }
+
+case "$1" in
+    start)
+	echo -n "Starting TAPPER_MCP "
+        # show IP addressed of all active network cards for debugging in virtualized guests.
+        /sbin/ifconfig
+        # needed for NFS on some images
+        if [[ -e /etc/init.d/portmap ]]
+        then
+	    /etc/init.d/portmap start
+        fi
+        # work around slow upcoming network on some machines
+        for(( i=0; i<10; i++))
+        do
+            ping -c1 __TAPPER_HOST__ > /dev/null && break
+            echo "wait for network available..."
+            sleep 2
+        done
+        ${PERL} $TAPPER_PRC_BIN
+	;;
+    stop)
+	echo ""
+	;;
+    restart)
+	echo ""
+	;;
+    *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+	;;
+esac
