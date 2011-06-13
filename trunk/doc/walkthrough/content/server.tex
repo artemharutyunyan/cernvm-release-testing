@@ -83,12 +83,13 @@ $ make localsetup
 mysqladmin -u root password <newpassword>
 \end{lstlisting}
 
-\item Now that the installion has completed and security issue has been dealt with, ensure that you can access the tapper web
-interface is working by viewing it in your browser using the url,  
-\url{http://localhost/tapper}\footnote{This can be accessed locally and remotely from other systems using the server hostname or IP address}
+\item 	Now that the installion has completed and security issue has been dealt with, ensure that you can access the tapper web
+		interface is working by viewing it in your browser using the url, \url{http://localhost/tapper}\footnote{This can be accessed
+		locally and remotely from other systems using the server hostname or IP address}
 
-\item Next install phpmyadmin so that it's easy to administrate and configure the Tapper databases, \emph{if you are prompted to 
-configure the database for phpmyadmin with dbconfig-common select {\bf NO} } 
+\item 	Next install PHPMyAdmin so that it's easy to administrate and configure the Tapper databases, when prompted to select the
+		``Web server to reconfigure automatically'' select apache2 by pressing the space bar and press enter. \emph{If you are 
+		prompted to ``configure databases for phpmyadmin with dbconfig-common'' select {\bf NO} } 
 \lstset{caption= Install PHPMyAdmin}
 \begin{lstlisting}
 $ apt-get update
@@ -98,13 +99,22 @@ $ apt-get update
 $ apt-get install phpmyadmin
 \end{lstlisting}
 
-\item Now, manually add the configured test machines from created in the ``Test Client Platform Setup'' section to the
-tapper database and set the test clients as active. This example is just using a single generic test machine, you will
-have to repeat these commands for each test client and change the hostname \emph{cernvm-host} and the values for mem,
-core,vendor, and has\_ecc as needed; the vendor can be AMD or Intel.
+\item	Verify that PHPMyAdmin has been installed and configured correctly and that you can access the tapper web
+		interface by viewing it in your browser using the url, \url{http://localhost/phpmyadmin}. Login to the PHPMyAdmin
+		web interface using the \emph{username root and the MySQL root password you set earlier using mysqladmin).
+
+\item 	Now, add all of the configured test machines created in the ``Test Client Platform Setup'' section to the
+		\tapper database and set the test clients as active, then add the hardware specifications for each test client
+		to the database. This example is just using a single generic test machine, you will have to repeat these commands
+		for each test client and change the hostname \emph{cernvm-host} and the values for mem, core,vendor, and has\_ecc 
+		as needed; the vendor can be AMD or Intel.
+		
 \lstset{caption= Adding Test Clients to Tapper Database}
 \begin{lstlisting}
+# Add the hostname of the test client to database
 $ tapper-testrun newhost --name cernvm-host --active
+
+# Add the hardware specifications for the test client
 $ mysql testrundb -utapper -ptapper
 $ insert into host_feature(host_id, entry, value)  values \
 ((select id from host where name = 'cernvm-host'),     'mem',  4096);
