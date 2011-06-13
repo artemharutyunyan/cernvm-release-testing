@@ -1,0 +1,11 @@
+#! /bin/bash
+
+set -x
+
+export TAPPERFROMGIT
+export GITPREFIXTAPPERLIBS
+export GITPREFIXTESTSUITES
+
+/tmp/tapper-starterkit/utils/prepare-common-development-packages
+/tmp/tapper-starterkit/utils/prepare-perlmodule Tapper::Installer
+/tmp/tapper-starterkit/utils/create-symlinks

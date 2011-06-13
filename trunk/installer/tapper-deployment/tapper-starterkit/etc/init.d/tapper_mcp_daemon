@@ -1,0 +1,42 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:          TAPPER_MCP
+# Required-Start:    $syslog $remote_fs
+# Should-Start: $time ypbind smtp
+# Required-Stop:     $syslog $remote_fs
+# Should-Stop: $time ypbind smtp
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: TAPPER_MCP daemon providing Tapper automation
+# Description:       Start TAPPER_MCP to provide Tapper automation
+### END INIT INFO
+
+# Note: Special treatment of stop for LSB conformance
+PERL=/opt/tapper/perl/perls/current/bin/perl
+TAPPER_MCP_BIN=/opt/tapper/perl/perls/current/bin/tapper-mcp-daemon
+test -f $TAPPER_MCP_BIN || { echo "$TAPPER_MCP_BIN not installed";
+	if [ "$1" = "stop" ]; then exit 0;
+	else exit 5; fi; }
+
+
+case "$1" in
+    start)
+	echo -n "Starting TAPPER_MCP "
+	$PERL $TAPPER_MCP_BIN start
+	;;
+    stop)
+	echo -n "Shutting down TAPPER_MCP "
+	$PERL $TAPPER_MCP_BIN stop
+	;;
+    restart)
+	echo -n "Restart TAPPER_MCP "
+	$0 stop
+	$0 start
+	;;
+    *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+	;;
+esac
+

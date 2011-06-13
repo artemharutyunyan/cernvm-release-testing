@@ -1,0 +1,96 @@
+Tapper-Deployment
+=================
+
+This project is an AMD/OSRC specific fork of Tapper-Starterkit.
+
+The Starterkit is meant to create an initial setup of Tapper to get
+newcomers started, it is not expected to change much.
+
+New development is mostly happening in Tapper-Deployment, containing
+lots of OSRC specific details, like additional 32bit images, client
+packages, Python installation and much refactoring.
+
+It is, however, also useful for other users who want to regularly
+upgrade Tapper or follow development from git.
+
+It should work as drop-in replacement for Tapper-Starterkit.
+
+                                 ***
+
+Just calling "make" provides you with an overview of the most common targets:
+
+Try most common targets:
+------------------------
+
+  make web              -- update WebGUI
+  make mcp              -- update MCP
+  make cli              -- update CLI
+  make api              -- update Reports::API
+  make receiver         -- update Reports::Receiver
+  make nfsrootperl      -- update Tapper::Installer & friends in nfsroot
+  make clientpkgs       -- create client packages (64bit + 32bit)
+  make clientpkgs++     -- update client packages (64bit + 32bit)
+  make baseimages       -- create base images     (64bit + 32bit)
+
+  make allautomation    -- everything for automation
+                           *except* the MCP-MessageReceiver
+                              . cleanups to force rebuild
+                              . nfsrootdir
+                              . baseimages
+                              . clientpkgs
+                              . mcp
+
+Special target:
+---------------
+
+  make mcpmsgreceiver   -- MCP-MessageReceiver
+                           => only do if *REALLY* needed
+                              because it risks MCP persistence!
+
+Other targets:
+--------------
+
+  make nfsrootdir       -- a base OS subdir bootable from NFS for Tapper::Installer
+  make localsetup       -- most stuff to run a central Tapper host
+                           but WITHOUT automation. Contains:
+                              . reports receiver
+                              . reports api
+                              . web frontend
+  make tapperhost       -- everything to run a central Tapper control host
+                           INCLUSIVE automation. Contains:
+                              . make installerchroot
+                              . make baseimage64
+                              . make clientpkg64
+                              . make localsetup
+  make it so            -- same as 'make tapperhost'
+  make clean            -- remove intermediate build files+chroots
+                           (keeps the final /data/tapper/... intact)
+
+
+About Tapper
+============
+
+Tapper is an infrastructure for all aspects of testing 
+inclusive Operating Systems and Virtualization.
+
+Tapper contains
+
+ - Automation
+ - Machine Scheduling
+ - Command line utils
+ - Web Frontend application
+ - Support for writing tests
+ - Powerful result evaluation API
+ - Testplan support with TaskJuggler
+ - Many use-cases from tracking test results to
+   benchmarking to full OS testing including virtualization
+
+More information about Tapper:
+
+ - https://github.com/amd/Tapper-Doc/
+ - http://search.cpan.org/~amd/Tapper-Doc/
+
+Other Tapper subprojects:
+
+ - https://github.com/amd
+ - http://search.cpan.org/~amd

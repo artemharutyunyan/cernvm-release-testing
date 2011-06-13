@@ -1,0 +1,70 @@
+#! /bin/bash
+
+set -x
+
+export TAPPERFROMGIT
+export GITPREFIXTAPPERLIBS
+export GITPREFIXTESTSUITES
+
+# deactivate udev
+insserv -r udev-mtab
+insserv -r udev
+
+# setup locales
+apt-get --yes --allow-unauthenticated install locales
+echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen
+/usr/sbin/locale-gen
+
+# add dependencies
+apt-get --yes --allow-unauthenticated install libyaml-dev
+
+# helpless try for the archives
+# wget ftp://ftp.debian.org/debian/pool/main/n/nfs-utils/nfs-common_1.2.2-5_amd64.deb
+# dpkg -i nfs-common_1.2.2-5_amd64.deb
+
+# some utils
+/tmp/tapper-starterkit/utils/prepare-common-development-packages
+
+# Bug with nfs-common
+/var/lib/dpkg/info/nfs-common.postinst
+
+# set default password
+echo "root:tapper" | chpasswd
+
+# default start script for PRC
+cp /tmp/tapper-starterkit/etc/init.d/tapper.baseimage /etc/init.d/tapper
+export IP=$(ip addr | awk '/inet / {print $2}'|grep -v 127.0.0|cut -d/ -f1)
+perl -i -pne "s/__TAPPER_HOST__/$IP/g" /etc/init.d/tapper     # $IP is the env variable substituted by shell
+chmod +x /etc/init.d/tapper
+insserv tapper
+
+# create the required files and directories
+
+mkdir -p /mnt/target
+mkdir -p /mnt/guests
+mkdir -p /data/tapper
+
+# workaround early ::Installer bug, can be dropped later
+mkdir -p /boot/grub
+
+# copy basic Log4Perl config
+cp /tmp/tapper-starterkit/etc/log4perl.cfg /etc/log4perl.cfg
+
+# don't set a hostname to trigger getting it dynamically on boot
+rm /etc/hostname
+
+# create devices
+cp /tmp/tapper-starterkit/misc/MAKEDEV /dev/MAKEDEV
+chmod +x /dev/MAKEDEV
+cd /dev
+./MAKEDEV generic
+
+# ===========================================================
+
+# we build Perl+Python to have it already available for clientpkg and
+# save compile time
+
+/tmp/tapper-starterkit/utils/prepare-optperl
+/tmp/tapper-starterkit/utils/prepare-optpython
+
+# ===========================================================

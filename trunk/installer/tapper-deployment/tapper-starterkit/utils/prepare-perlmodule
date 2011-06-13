@@ -1,0 +1,45 @@
+#! /bin/bash
+
+export TAPPERFROMGIT
+export GITPREFIXTAPPERLIBS
+export GITPREFIXTESTSUITES
+
+export CPUCOUNT=`cat /proc/cpuinfo | grep vendor_id | wc -l`
+export PERLVERSION=5.12.3
+export PERLBREW_ROOT=/opt/tapper/perl
+export TWMC_TEST_PORT=9876
+export PERL_AUTOINSTALL="--defaultdeps"
+export TEST_JOBS=${CPUCOUNT}
+export CPAN=/opt/tapper/perl/perls/current/bin/cpan
+. /opt/tapper/perl/etc/bashrc
+
+TAPPERMODULES="$*"
+
+# build from CPAN (which solves dependencies)
+# and optionally from git on top
+for module in $TAPPERMODULES ; do
+        echo "" ; echo "" ; echo ""
+        echo "********************** $module **********************************"
+        echo "" ; echo "" ; echo ""
+    $CPAN $module || $CPAN -f $module
+done
+if [ "x1" == "x$TAPPERFROMGIT" ] ; then
+    $CPAN Module::Install::AuthorRequires
+    $CPAN Module::Install
+    for module in $TAPPERMODULES ; do
+        echo "" ; echo "" ; echo ""
+        echo "********************** $module (from git) **********************************"
+        echo "" ; echo "" ; echo ""
+        dist=$(echo $module | sed -e 's/::/-/g')
+        cd /tmp/
+        rm -fr $dist
+        git clone ${GITPREFIXTAPPERLIBS}/$dist
+        cd $dist
+        perl Makefile.PL
+        make
+        make test
+        make install
+    done
+fi
+
+/tmp/tapper-starterkit/utils/create-symlinks

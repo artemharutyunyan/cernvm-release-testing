@@ -1,0 +1,65 @@
+#! /bin/bash
+
+set -x
+
+export TAPPERFROMGIT
+export GITPREFIXTAPPERLIBS
+export GITPREFIXTESTSUITES
+
+# deactivate network interfaces coming up in NFS root
+insserv -r ifupdown
+
+# deactivate udev
+insserv -r udev-mtab
+insserv -r udev
+
+# setup locales
+apt-get --yes --allow-unauthenticated install locales
+echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen
+/usr/sbin/locale-gen
+
+# some utils
+/tmp/tapper-starterkit/utils/prepare-common-development-packages
+apt-get --yes --allow-unauthenticated install pciutils
+
+# set default password
+echo "root:tapper" | chpasswd
+
+/tmp/tapper-starterkit/utils/prepare-optperl
+/tmp/tapper-starterkit/utils/prepare-installer-nfsroot-perlmodules
+
+cp /tmp/tapper-starterkit/etc/init.d/tapper /etc/init.d/tapper
+chmod +x /etc/init.d/tapper
+insserv tapper
+
+# create the required files and directories
+
+mkdir -p /mnt/target/
+mkdir -p /mnt/guests
+mkdir -p /mnt/nfs
+mkdir -p /mnt/images
+mkdir -p /mnt/output
+mkdir -p /data/tapper
+
+# Since /etc/ is not writable on a readonly NFS we need to
+# symlink some files into tmpfs
+ln -sf /tmp/tapper  /etc/tapper
+ln -sf /tmp/adjtime /etc/adjtime
+
+# Link mtab to proc.
+# The content is the same and we can not write to mtab on a readonly NFS.
+ln -sf /proc/mounts /etc/mtab
+
+# copy basic Log4Perl config
+cp /tmp/tapper-starterkit/etc/log4perl.cfg /etc/log4perl.cfg
+
+# don't set a hostname to trigger getting it dynamically on boot
+rm /etc/hostname
+
+# create devices
+cp /tmp/tapper-starterkit/misc/MAKEDEV /dev/MAKEDEV
+chmod +x /dev/MAKEDEV
+cd /dev
+./MAKEDEV generic
+
+

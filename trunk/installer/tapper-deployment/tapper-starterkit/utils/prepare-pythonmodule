@@ -1,0 +1,41 @@
+#! /bin/bash
+
+
+# This is *very* specific to OSRC internal needs
+
+export TAPPERFROMGIT
+export GITPREFIXTAPPERLIBS
+export GITPREFIXTESTSUITES
+
+export CPUCOUNT=`cat /proc/cpuinfo | grep vendor_id | wc -l`
+
+TAPPERMODULES="$*"
+PYTHONPREFIX=/opt/tapper/python
+
+
+if [ "x1" == "x$TAPPERFROMGIT" ] ; then
+
+    # git checkout
+    cd /tmp/
+    if [ ! -d OSRC-Tapper ] ; then
+        git clone git://wotan/OSRC-Tapper
+    fi
+
+    # successfully cloned? Then we are probably in OSRC
+    if [ -d OSRC-Tapper ] ; then
+        cd OSRC-Tapper
+        git pull
+        for module in $TAPPERMODULES ; do
+            echo "" ; echo "" ; echo ""
+            echo "********************** $module (from git) **********************************"
+            echo "" ; echo "" ; echo ""
+            dist=$(echo $module | sed -e 's/::/-/g')
+            cd /tmp/OSRC-Tapper/src/$module
+            rm -f dist/*.egg
+            ${PYTHONPREFIX}/bin/python setup.py bdist_egg
+            ${PYTHONPREFIX}/bin/easy_install dist/*.egg
+        done
+    fi
+fi
+
+/tmp/tapper-starterkit/utils/create-symlinks
