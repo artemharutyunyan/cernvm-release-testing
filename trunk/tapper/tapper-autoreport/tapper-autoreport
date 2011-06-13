@@ -60,6 +60,11 @@ cpu_family_max () {
     [ $(($fam)) -le $(($max)) ]
 }
 
+autoreport_skip_all () {
+    explanation="${1:-'no explanation'}"
+    SKIPALL="1..0 # skip $explanation"
+    NOSEND=1
+}
 # stops testscript if not matching required cpu family from
 # /proc/cpuinfo of a minimum/maximum range
 require_amd_family_range () {
@@ -71,8 +76,7 @@ require_amd_family_range () {
     else
         vendor=$(get_vendor);
         fam=$(get_cpu_family);
-        echo "1..0 # skip Family $vendor/$fam does not match AMD/$min..$max"
-        exit 0 # Yes, exit.
+        autoreport_skip_all "Family $vendor/$fam does not match AMD/$min..$max"
     fi
 }
 
@@ -90,8 +94,7 @@ require_l3cache () {
     if has_l3cache ; then
         return 0
     else
-        echo "1..0 # skip No L3 cache"
-        exit 0 # Yes, exit.
+        autoreport_skip_all "No L3 cache"
     fi
 }
 
@@ -111,8 +114,7 @@ require_cpufeature () {
     if has_cpufeature "$feature" ; then
         return 0
     else
-        echo "1..0 # skip Missing cpufeature $feature"
-        exit 0 # Yes, exit.
+        autoreport_skip_all "Missing cpufeature $feature"
     fi
 }
 
@@ -132,8 +134,7 @@ require_cpbdisable () {
     if has_cpbdisable ; then
         return 0
     else
-        echo "1..0 # skip No CPB disable"
-        exit 0 # Yes, exit.
+        autoreport_skip_all "No CPB disable"
     fi
 }
 
@@ -153,8 +154,7 @@ require_program () {
     if has_program "$program" ; then
         return 0
     else
-        echo "1..0 # skip Missing program $program"
-        exit 0 # Yes, exit.
+        autoreport_skip_all "Missing program $program"
     fi
 }
 
@@ -163,8 +163,7 @@ require_root () {
     if [ "x$ID" == "x0" ] ; then
         return 0
     else
-        echo "1..0 # skip Need to run as root"
-        exit 0 # Yes, exit.
+        autoreport_skip_all "Need to run as root"
     fi
 }
 
@@ -245,8 +244,7 @@ require_kernel_release_min () {
     if kernel_release_min "$release_req"; then
         return 0
     else
-        echo "1..0 # skip Linux Kernel must be newer than 2.6.$LK_MIN"
-        exit 0
+        autoreport_skip_all "Linux Kernel must be newer than 2.6.$LK_MIN"
     fi
 }
 
@@ -463,6 +461,13 @@ upload_files() {
 # ===== main =========================================
 
 autoreport_main() {
+    if [ -n "$SKIPALL" ] ; then
+        echo "$SKIPALL"
+        tapper_suite_meta
+        tapper_section_meta
+        export NOSEND=1
+        return
+    fi
 
     # ==================== prepare plan
 
@@ -536,6 +541,7 @@ autoreport_main() {
 }
 
 # ===== main =========================================
+autoreport_start () {
 
 if [ "$PRINTVERSION" ] ; then
     echo "$VERSION"
@@ -576,3 +582,6 @@ if [ -n "$TAPPER_REPORT_SERVER" ] ; then
         autoreport_main
     fi
 fi
+}
+
+autoreport_start
