@@ -1,0 +1,89 @@
+#! /bin/bash
+
+# ====================================================================
+#
+# virt-interface
+# -----------------
+#
+# This script contains several virtualization functions that
+# interface with libvirsh and return a success or failure, 
+# which can be used to generate a TAP report.
+#
+# These functions are well suited for precondition tests to ensure
+# that virtual machines can be created and controlled before 
+# executing any more tests.
+#
+# ====================================================================
+
+
+# Set the default network as active and verify it is active
+set_default_net()
+{
+	virsh net-autostart default
+	virsh net-list --all | egrep -q "^default[[:space:]]*active[[:space:]]*yes"
+	
+	return $?
+}
+
+# Create a virtual machine from an xml file, verify it has been created 
+# @param $1 - The path to the virtual machine
+# @param $2 - The name of the virtual machine
+create_vm()
+{
+	virsh define $1
+	virsh list --all | grep -q $2
+	
+	return $?
+}
+
+# Destroy a virtual machine, verify it has been removed from virsh
+# NOTE: The files will still exist, the virtual machine is simply
+# 		no longer accesible until it is re-created 
+# @param $1 - The name of the virtual machine
+destroy_vm()
+{
+	virsh undefine $1
+	virsh list --all | grep -q $1
+	
+	if [ $? -eq 0 ]
+		return 1
+	else
+		return 0
+	fi
+}
+
+# Start the virtual machine and verify it started
+# @param $1 - The name of the virtual machine
+start_vm()
+{	
+	virsh start $1
+	sleep 5
+	virsh list --all | egrep -q "^[[:space:]]*[[:digit:]]*[[:space:]]*$1[[:space:]]*running"
+
+	return $?
+}
+
+# Stop the virtual machine and verify it has shutdown
+# @param $1 - The name of the virtual machine
+stop_vm()
+{
+	virsh shutdown $1
+	# Wait 2 minutes for virtual machine to turn off
+	sleep 120
+	virsh list --all | egrep -q "^[[:space:]]*-[[:space:]]*$1[[:space:]]*shut[[:space:]]off"
+
+	return $?
+}
+
+# TODO: ADD SUPPORT TO VERIFY LOGIN THROUGH TTY CONSOLE
+# 		LOOKS RELATIVELY FEASIBLE USING
+#		http://search.cpan.org/~cosimo/Device-Modem-1.54/
+# Verify that the virtual machine has console support
+# requires that the virtual machine has been first started
+# @param $1 - The name of the virtual machine
+has_console_support()
+{
+	virsh ttyconsole $1
+	
+	return $?
+}
