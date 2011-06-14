@@ -16,6 +16,7 @@
 ###################################################################
 
 . ./tapper-autoreport --import-utils
+. ./virt-interface
 
 TAP[0]="ok - autoreport selftest"
 #TAP[1]="ok - some other description"
@@ -62,47 +63,51 @@ uname -a | grep -q Linux  # example of an ok exit code
 ok $? "The system is running Linux"
 
 #
+# CernVM Precondition Tests
 # Create/configure, start, and control virtual machines tests
 #
 
-# Verify that default network is active and set to autostart
-virsh net-autostart default
-virsh net-list --all | egrep -q "^default[[:space:]]*active[[:space:]]*yes"
-ok $? "Verify that virtual machine NAT network is active and set to autostart"
+# Precondition Test 1 - Verify that virtual machine NAT network is active and 
+#						set to autostart
+set_default_net
+ok $? "Precondition Test 1 - Verify that virtual machine NAT network is active \
+and set to autostart"
 
-# Verify that virtual machine domain has been created from an xml file
-virsh define $VM_XML_DEFINITION
-virsh list --all | grep -q $VMNAME
-ok $? "Verify that virtual machine domain $VMNAME has been created from an xml file"
+# Precondition Test 2 - Verify that virtual machine domain has been created 
+#						from an xml file
+create_vm $VM_XML_DEFINITION $VMNAME
+ok $? "Precondition Test 2 - Verify that virtual machine domain $VMNAME has been \
+created from an xml file"
+
+# Precondition Test 3 - Verify that virtual machine can be started
+start_vm $VMNAME
+ok $? "Precondition Test 3 - Verify that virtual machine $VMNAME has been started"
+
 
 # Verify that virtual machine can be started and stopped
-virsh start $VMNAME # Start it and wait 2 minutes for it to boot
+	# Start it and wait 2 minutes for it to boot
+	virsh start 
+	sleep 120
+	
+# Precondition Test 4 - Verify that virtual machine $VMNAME has been stopped
+stop_vm $VMNAME
+ok $? "Precondition Test 4 - Verify that virtual machine $VMNAME has been stopped"
+
+
+# Precondition Test 5 - Verify that virtual machine booted and has console support
+# Start the virtual machine and wait 2 minutes for it to boot before calling the
+# function has_console_support
+start_vm
 sleep 120
-virsh list --all | egrep -q "^[[:space:]]*[[:digit:]]*[[:space:]]*$VMNAME[[:space:]]*running"
+has_console_support $VMNAME
 ok $? "Verify that virtual machine $VMNAME has been started"
-virsh shutdown $VMNAME
-sleep 120	# Wait 2 minutes for virtual machine to turn off
-virsh list --all | egrep -q "^[[:space:]]*-[[:space:]]*$VMNAME[[:space:]]*shut[[:space:]]off"
-ok $? "Verify that virtual machine $VMNAME has been stopped"
 
-#
-# Three CernVM TestCases
-#
 
-# Verify that virtual machine booted and has console support
-# Start the virtual machine and wait 2 minutes for it to boot
-virsh start $VMNAME
-sleep 120
-virsh list --all | egrep -q "^[[:space:]]*[[:digit:]]*[[:space:]]*$VMNAME[[:space:]]*running"
-ok $? "Verify that virtual machine $VMNAME has been started"
-virsh ttyconsole $VMNAME
-ok $? "Verify that virtual machine $VMNAME has booted and has console support"
-
-# CernVM TestCase 1: Check login via ssh
+# CernVM TestCase 1 - Check login via ssh
 ssh -q -o "BatchMode=yes" root@$GUESTIP "echo 2>&1"
-ok $? "CernVM TestCase 1: Check login via ssh"
+ok $? "CernVM TestCase 1 - Check login via ssh"
 
-# CernVM TestCase 2: No error messages at boot
+# CernVM TestCase 2 - No error messages at boot
 RESULT=0
 BOOT_ERRORS="boot_error.log"
 BOOT_TESTS=("ssh root@$GUESTIP dmesg | egrep \"error|warning|fail\" >> $BOOT_ERRORS" 
@@ -120,10 +125,10 @@ do
                 break
         fi
 done
-ok $RESULT "CernVM TestCase 2: No error messages at boot"
+ok $RESULT "CernVM TestCase 2 - No error messages at boot"
 
-# CernVM TestCase 3: Check for correct time / running ntpd
+# CernVM TestCase 3 - Check for correct time / running ntpd
 ssh root@$GUESTIP ps -eaf | grep -q ntpd
-ok $? "CernVM TestCase 3: Check for correct time / running ntpd"
+ok $? "CernVM TestCase 3 - Check for correct time / running ntpd"
 
 . ./tapper-autoreport $BOOT_ERRORS
