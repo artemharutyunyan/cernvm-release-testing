@@ -46,6 +46,7 @@ destroy_vm()
 	virsh list --all | grep -q $1
 	
 	if [ $? -eq 0 ]
+	then
 		return 1
 	else
 		return 0
@@ -57,7 +58,8 @@ destroy_vm()
 start_vm()
 {	
 	virsh start $1
-	sleep 5
+	# Wait two minutes for virtual machine to start
+	sleep 120
 	virsh list --all | egrep -q "^[[:space:]]*[[:digit:]]*[[:space:]]*$1[[:space:]]*running"
 
 	return $?

@@ -47,13 +47,13 @@ main_after_hook ()
 
 SUITENAME="CernVM-Sample-Tests"
 SUITEVERSION="1.00"
-OSNAME="Debian Squeeze"
+OSNAME="Fedora 13"
 VMNAME="cernvm"
 VM_XML_DEFINITION="/home/cernvm/image/cernvm.xml" # Virtual machine XML config file
 CHANGESET="0"
-HOSTNAME="cernvm-host"
-GUESTIP="192.168.122.179"
-TAPPER_REPORT_SERVER="cernvm-server"
+HOSTNAME="cernvm-fedora13-host"
+GUESTIP="192.168.122.252"
+TAPPER_REPORT_SERVER="cernvm-debian6-server"
 REPORTGROUP=selftest-`date +%Y-%m-%d | md5sum | cut -d" " -f1`
 NOSEND=0
 NOUPLOAD=0
@@ -83,29 +83,20 @@ created from an xml file"
 start_vm $VMNAME
 ok $? "Precondition Test 3 - Verify that virtual machine $VMNAME has been started"
 
-
-# Verify that virtual machine can be started and stopped
-	# Start it and wait 2 minutes for it to boot
-	virsh start 
-	sleep 120
-	
 # Precondition Test 4 - Verify that virtual machine $VMNAME has been stopped
 stop_vm $VMNAME
 ok $? "Precondition Test 4 - Verify that virtual machine $VMNAME has been stopped"
 
-
-# Precondition Test 5 - Verify that virtual machine booted and has console support
-# Start the virtual machine and wait 2 minutes for it to boot before calling the
-# function has_console_support
-start_vm
-sleep 120
+# Precondition Test 5 - Verify that the virtual has console support
+# Start the virtual machine and verify that it has console support
+start_vm $VMNAME
 has_console_support $VMNAME
-ok $? "Verify that virtual machine $VMNAME has been started"
+ok $? "Precondition Test 5 - Verify that virtual $VMNAME has console support"
 
 
 # CernVM TestCase 1 - Check login via ssh
 ssh -q -o "BatchMode=yes" root@$GUESTIP "echo 2>&1"
-ok $? "CernVM TestCase 1 - Check login via ssh"
+ok $? "CernVM Test Case 1 - Check login via ssh"
 
 # CernVM TestCase 2 - No error messages at boot
 RESULT=0
@@ -125,10 +116,10 @@ do
                 break
         fi
 done
-ok $RESULT "CernVM TestCase 2 - No error messages at boot"
+ok $RESULT "CernVM Test Case 2 - No error messages at boot"
 
 # CernVM TestCase 3 - Check for correct time / running ntpd
 ssh root@$GUESTIP ps -eaf | grep -q ntpd
-ok $? "CernVM TestCase 3 - Check for correct time / running ntpd"
+ok $? "CernVM Test Case 3 - Check for correct time / running ntpd"
 
 . ./tapper-autoreport $BOOT_ERRORS
