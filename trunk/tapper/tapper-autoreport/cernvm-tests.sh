@@ -1,6 +1,9 @@
 #! /bin/bash
 
-###################################################################
+# =============================================================================
+#
+# cernvm-tests.sh
+# -----------------
 #
 # This script contains several sample tests, to test the features
 # and functionality of tapper, as well as to demo some sample
@@ -8,12 +11,21 @@
 #
 # The following tests are executed
 #
-#  - Create/configure, start, and control virtual machines
-#  - CernVM TestCase 1: No error messages at boot
-#  - CernVM TestCase 5: Check for correct time / running ntpd
-#  - CernVM TestCase 6: Check login via ssh
 #
-###################################################################
+#	Precondition Test 1 - Verify that virtual machine NAT network is active and 
+#						  set to autostart
+#	Precondition Test 2 - Verify that virtual machine domain has been created 
+#						  from an xml file
+#	Precondition Test 3 - Verify that virtual machine can be started
+#	Precondition Test 4 - Verify that virtual machine has been stopped
+#	Precondition Test 5 - Verify that the virtual has console support
+#
+#
+#  	CernVM TestCase 1 - No error messages at boot
+#  	CernVM TestCase 2 - Check for correct time / running ntpd
+#  	CernVM TestCase 3 -Check login via ssh
+#
+# =============================================================================
 
 . ./tapper-autoreport --import-utils
 . ./virt-interface
@@ -48,11 +60,11 @@ main_after_hook ()
 
 SUITENAME="CernVM-Sample-Tests"
 SUITEVERSION="1.00"
-OSNAME="Fedora 13"
+OSNAME="Red Hat 5"
 VMNAME="cernvm"
-VM_XML_DEFINITION="/home/cernvm/image/cernvm.xml" # Virtual machine XML config file
+VM_XML_DEFINITION="/home/CernVM/IMAGES/kvm/cernvm.xml" # Virtual machine XML config file
 CHANGESET="0"
-HOSTNAME="cernvm-fedora13-host"
+HOSTNAME="cernvm-redhat5-host"
 GUESTIP="192.168.122.252"
 TAPPER_REPORT_SERVER="cernvm-debian6-server"
 REPORTGROUP=selftest-`date +%Y-%m-%d | md5sum | cut -d" " -f1`
@@ -103,9 +115,10 @@ ok $? "CernVM Test Case 1 - Check login via ssh as root"
 # CernVM TestCase 2 - No error messages at boot
 check_boot_error $GUESTIP $BOOT_ERRORS
 ok $? "CernVM Test Case 2 - No error messages at boot"
+add_file $BOOT_ERRORS
 
 # CernVM TestCase 3 - Check for correct time / running ntpd
 check_time $GUESTIP
 ok $? "CernVM Test Case 3 - Check for correct time / running ntpd"
 
-. ./tapper-autoreport $BOOT_ERRORS
+. ./tapper-autoreport

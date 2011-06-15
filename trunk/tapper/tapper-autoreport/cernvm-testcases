@@ -1,6 +1,6 @@
 #! /bin/bash
 
-# ====================================================================
+# =============================================================================
 #
 # cernvm-testcases
 # -----------------
@@ -23,7 +23,8 @@
 #		THAN A FAILURE FOR THE NTPD TIME BEING INCORRECT, WHEN IN REALITY
 #		check_time() COULDN'T SSH TO THE MACHINE
 #		*** THIS IS ESSENTIALLY TAPPER'S YAML STRUCTURE ANYWAYS...
-# ====================================================================
+#
+# =============================================================================
 
 # CernVM Test Case - Check login via ssh
 # @param $1 - The username to login with
@@ -42,15 +43,15 @@ check_ssh()
 check_boot_error()
 {
 	RESULT=0
-	BOOT_TESTS=("ssh root@$1 dmesg | egrep \"error|warning|fail\" >> $2" 
+	BOOT_TESTS=("ssh root@$1 dmesg | egrep \"error|warning|fail\" > $2" 
 "ssh root@$1 cat /var/log/boot.log | egrep \"error|warning|fail\" >> $2" 
 "ssh root@$1 cat /var/log/messages | egrep \"error|warning|fail\" >> $2" 
 "ssh root@$1 cat /var/log/cernvm-update.log | egrep \"error|warning|fail\" >> $2")
 
 	for test in "${BOOT_TESTS[@]}"
 	do
-		$test
-		    # If one of the tests finds boot error, set result as failure and break
+		eval $test
+		    # If one of the tests has boot error, set result as failure and break
 		    if [ "$?" -eq 0 ]
 		    then
 		            RESULT=1

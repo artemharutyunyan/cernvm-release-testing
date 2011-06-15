@@ -1,6 +1,6 @@
 #! /bin/bash
 
-# ====================================================================
+# =============================================================================
 #
 # tapper-autoreport
 # -----------------
@@ -19,10 +19,10 @@
 #
 # It is licensed under a 2-clause BSD license. See the LICENSE file.
 #
-# ====================================================================
+# =============================================================================
 
 
-# ==================== Utility functions =============================
+# ========================== Utility functions ================================
 
 # gets vendor "AMD" or "Intel" from /proc/cpuinfo
 get_vendor () {
@@ -166,7 +166,6 @@ require_root () {
         autoreport_skip_all "Need to run as root"
     fi
 }
-
 # ==================== TAP utils ====================
 
 get_tap_counter () {
@@ -186,6 +185,18 @@ append_tapdata () {
     tap_report="${1:-'not ok - unknown TAP line in utility function append_tapdata'}"
     TAPDATA=( "${TAPDATA[@]}" "$1" )
 }
+
+# Add a file to the list of additional files to be uploaded
+add_file()
+{
+	if [ -e $1 ]
+	then
+		ADDITIONALFILES[$ADDITIONALCOUNT]=$1
+		let ADDITIONALCOUNT=ADDITIONALCOUNT+1
+	else
+		echo "The file $1 does not exist!" 1>&2
+	fi
+} 
 
 ok () {
     success="${1:-0}"
@@ -437,6 +448,16 @@ prepare_plan() {
     PLAN=$(($MYPLAN + $COUNT))
 }
 
+# Append the files that were added to the list of files to be uploaded
+append_files()
+{
+    for f in $(seq 0 $(($ADDITIONALCOUNT - 1))) ; do
+        file="${ADDITIONALFILES[f]}"
+		FILES[$FILECOUNT]=$file
+		let FILECOUNT=FILECOUNT+1
+    done
+}
+
 upload_files() {
     MYNETCAT="$NETCAT $TAPPER_REPORT_SERVER $TAPPER_API_PORT"
     # echo "# Uploading:  $MYNETCAT ..." 1>&2
@@ -576,6 +597,8 @@ if [ -n "$TAPPER_REPORT_SERVER" ] ; then
             else
                 echo "/tapper/reports/id/$reportid" 1>&2
             fi
+            # Append additional files to the list then upload all files
+            append_files
             upload_files
         fi
     else
