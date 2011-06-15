@@ -1,0 +1,72 @@
+#! /bin/bash
+
+# ====================================================================
+#
+# cernvm-testcases
+# -----------------
+#
+# This script contains each of the CernVM Release Testing
+# test cases and provides a simple interface to execute each test
+# and returns either a success or failure, (0 or 1) which can be 
+# used to generate a TAP report.
+#
+# More complex test cases can be created by combining other test cases
+# as prerequisites for the test case
+#
+# TODO: MAKE MANY OF THE TEST CASES HAVE OTHER TEST CASES AS
+# 		PREREQUISITES AND THEN IF THEY FAIL REPORT THAT THE TEST CASE
+#		FAILED BECAUSE A PREREQUISITE FAILED, AND WHY THAT PREREQUISITE
+#		FAILED. THIS IS MUCH BETTER THAN HAVING A TEST CASE FAIL DUE
+# 		TO ANOTHER DEPENDENCY AND MAKES THE TEST CASES ORDER-INDEPENDENT
+#		IE. FOR check_time(), CALL check_ssh() AND VERIFY THAT SSH IS
+#		FIRST POSSIBLE, THIS GIVES MORE EXPLANATION TO FAILURES RATHER
+#		THAN A FAILURE FOR THE NTPD TIME BEING INCORRECT, WHEN IN REALITY
+#		check_time() COULDN'T SSH TO THE MACHINE
+#		*** THIS IS ESSENTIALLY TAPPER'S YAML STRUCTURE ANYWAYS...
+# ====================================================================
+
+# CernVM Test Case - Check login via ssh
+# @param $1 - The username to login with
+# @param $2 - The IP address of the machine to login via ssh
+check_ssh()
+{
+	ssh -q -o "BatchMode=yes" $1@$2 "echo 2>&1"
+
+	return $?
+}
+
+
+# CernVM Test Case - Check for error messages at boot
+# @param $1 - The IP address of the machine to login via ssh
+# @param $2 - The name of the boot errors log file
+check_boot_error()
+{
+	RESULT=0
+	BOOT_TESTS=("ssh root@$1 dmesg | egrep \"error|warning|fail\" >> $2" 
+"ssh root@$1 cat /var/log/boot.log | egrep \"error|warning|fail\" >> $2" 
+"ssh root@$1 cat /var/log/messages | egrep \"error|warning|fail\" >> $2" 
+"ssh root@$1 cat /var/log/cernvm-update.log | egrep \"error|warning|fail\" >> $2")
+
+	for test in "${BOOT_TESTS[@]}"
+	do
+		$test
+		    # If one of the tests finds boot error, set result as failure and break
+		    if [ "$?" -eq 0 ]
+		    then
+		            RESULT=1
+		            break
+		    fi
+	done
+	
+	return $RESULT
+}
+
+# CernVM Test Case - Check for correct time / running ntpd
+# @param $1 - The IP address of the machine to login via ssh
+check_time()
+{
+	ssh root@$1 ps -eaf | grep -q ntpd
+
+	return $?
+}
+

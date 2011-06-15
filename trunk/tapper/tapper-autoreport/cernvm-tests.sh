@@ -17,6 +17,7 @@
 
 . ./tapper-autoreport --import-utils
 . ./virt-interface
+. ./cernvm-testcases
 
 TAP[0]="ok - autoreport selftest"
 #TAP[1]="ok - some other description"
@@ -55,6 +56,7 @@ HOSTNAME="cernvm-fedora13-host"
 GUESTIP="192.168.122.252"
 TAPPER_REPORT_SERVER="cernvm-debian6-server"
 REPORTGROUP=selftest-`date +%Y-%m-%d | md5sum | cut -d" " -f1`
+BOOT_ERRORS="boot_error.log"
 NOSEND=0
 NOUPLOAD=0
 
@@ -94,32 +96,16 @@ has_console_support $VMNAME
 ok $? "Precondition Test 5 - Verify that virtual $VMNAME has console support"
 
 
-# CernVM TestCase 1 - Check login via ssh
-ssh -q -o "BatchMode=yes" root@$GUESTIP "echo 2>&1"
-ok $? "CernVM Test Case 1 - Check login via ssh"
+# CernVM TestCase 1 - Check login via ssh as root
+check_ssh root $GUESTIP
+ok $? "CernVM Test Case 1 - Check login via ssh as root"
 
 # CernVM TestCase 2 - No error messages at boot
-RESULT=0
-BOOT_ERRORS="boot_error.log"
-BOOT_TESTS=("ssh root@$GUESTIP dmesg | egrep \"error|warning|fail\" >> $BOOT_ERRORS" 
-"ssh root@$GUESTIP cat /var/log/boot.log | egrep \"error|warning|fail\" >> $BOOT_ERRORS" 
-"ssh root@$GUESTIP cat /var/log/messages | egrep \"error|warning|fail\" >> $BOOT_ERRORS" 
-"ssh root@$GUESTIP cat /var/log/cernvm-update.log | egrep \"error|warning|fail\" >> $BOOT_ERRORS")
-
-for test in "${BOOT_TESTS[@]}"
-do
-	$test
-        # If one of the tests finds boot error, set result as failure and break
-        if [ "$?" -eq 0 ]
-        then
-                RESULT=1
-                break
-        fi
-done
-ok $RESULT "CernVM Test Case 2 - No error messages at boot"
+check_boot_error $GUESTIP $BOOT_ERRORS
+ok $? "CernVM Test Case 2 - No error messages at boot"
 
 # CernVM TestCase 3 - Check for correct time / running ntpd
-ssh root@$GUESTIP ps -eaf | grep -q ntpd
+check_time $GUESTIP
 ok $? "CernVM Test Case 3 - Check for correct time / running ntpd"
 
 . ./tapper-autoreport $BOOT_ERRORS
