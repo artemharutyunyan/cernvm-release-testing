@@ -80,7 +80,7 @@ REPORTGROUP=selftest-`date +%Y-%m-%d | md5sum | cut -d" " -f1`
 BOOT_ERRORS="boot_error.log"
 NOSEND=0
 NOUPLOAD=0
-
+<<COMMENT
 # A very simple test
 uname -a | grep -q Linux  # example of an ok exit code
 ok $? "The system is running Linux"
@@ -115,45 +115,16 @@ ok $? "Precondition Test 4 - Verify that virtual machine $VMNAME has been stoppe
 start_vm $VMNAME
 has_console_support $VMNAME
 ok $? "Precondition Test 5 - Verify that virtual $VMNAME has console support"
-
+COMMENT
 
 # Precondition Test 6 - Verify that virtual machine has web interface support
-curl -i -v http://192.168.122.252:8004/login > web_interface.log 2>&1
-
-# Check that curl didn't have any error return codes, then verify that the
-# page is actually the CernVM web interface
-RESULT=1
-if [ "$?" -eq 0 ]
-then
-	if grep -q -e "CernVM Software Appliance" web_interface.log ; test "$?" -eq 0 \
-	&& grep -q -e '<body id="page-login">' web_interface.log ; test "$?" -eq 0
-	then
-		RESULT=0
-	fi
-fi
-
-ok $RESULT "Precondition Test 6 - Verify that virtual machine has web interface support"
+has_web_interface $GUESTIP web_interface.log
+ok $? "Precondition Test 6 - Verify that virtual machine has web interface support"
 add_file web_interface.log
 
-
 # Precondition Test 7 - Verify that it is possible to login on web interface
-curl -i -v --cookie cjar --cookie-jar cjar -H "Host: 192.168.122.252:8004" -H "User-Agent: Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.2.17) Gecko/20110428 Fedora/3.6.17-1.fc13 Firefox/3.6.17" -H "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" -H "Accept-Language: en-us,en;q=0.5" -H "Accept-Encoding: gzip,deflate" -H "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7" -H "Keep-Alive: 115" -H "Connection: keep-alive" -H "Referer: http://192.168.122.252:8004/login" -H "Content-Type: application/x-www-form-urlencoded" --data "user_name=admin" --data "password=VM4l1f3" --data "login=Login" --location-trusted http://192.168.122.252:8004/login > web_interface_login.log 2>&1
-
-# Check that curl didn't have any error return codes, then verify that it was
-# was possible to login on web interface by validating that curl was redirected
-# to the status page
-RESULT=1
-if [ "$?" -eq 0 ]
-then
-	if grep -q -e "Location: http://192.168.122.252:8004/status/Status/" web_interface_login.log ; \
-	test "$?" -eq 0 && grep -q -e '<title>CernVM Software Appliance - Appliance Status</title>' \
-	web_interface_login.log ; test "$?" -eq 0
-	then
-		RESULT=0
-	fi
-fi
-
-ok $RESULT "Precondition Test 7 - Verify that it is possible to login on web interface"
+web_check_login $GUESTIP admin VM4l1f3 web_interface_login.log
+ok $? "Precondition Test 7 - Verify that it is possible to login on web interface"
 add_file web_interface_login.log
 
 
@@ -174,8 +145,11 @@ ok $? "CernVM Test Case 3 - Check for correct time / running ntpd"
 
 
 # CernVM Test Case 4 - Create a new user using the CernVM web interface
-curl -i -v --cookie cjar --cookie-jar cjar -H "Host: 192.168.122.252:8004" -H "User-Agent: Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.2.17) Gecko/20110428 Fedora/3.6.17-1.fc13 Firefox/3.6.17" -H "Accept: application/json" -H "Accept-Language: en-us,en;q=0.5" -H "Accept-Encoding: gzip,deflate" -H "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7" -H "Keep-Alive: 115" -H "Connection: keep-alive" -H "Content-Type: application/x-www-form-urlencoded; charset=UTF-8" -H "Referer: http://192.168.122.252:8004/cernvm/User/" -H "Pragma: no-cache" -H "Cache-Control: no-cache" --data "cernvmUser=todd" --data "cernvmUserGroup=alice" --data "cernvmUserShell=%2Fbin%2Fbash" --data "newpass1=testing123" --data "newpass2=testing123" --location-trusted http://192.168.122.252:8004/cernvm/User/userUpdate > web_interface_newuser.log 2>&1
-
+# @param $1 - The hostname or ip address for the web interface
+# @param $2 - The name of the new user to create
+# @param $3 - The password for the new user
+# @param $4 - The name of the logfile
+web_create_user $GUESTIP gnuuser VM4l1f3 web_interface_newuser.log
 ok $? "CernVM Test Case 4 - Create a new user using the CernVM web interface"
 add_file web_interface_newuser.log
 
@@ -189,25 +163,8 @@ from ssh login"
 
 #	CernVM Test Case 6 - Restart through the web interface and check that there
 #						 are no error messages at boot
-curl -i -v --cookie cjar --cookie-jar cjar -H "Host: 192.168.122.252:8004" -H "User-Agent: Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.2.17) Gecko/20110428 Fedora/3.6.17-1.fc13 Firefox/3.6.17" -H "Accept: application/json" -H "Accept-Language: en-us,en;q=0.5" -H "Accept-Encoding: gzip,deflate" -H "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7" -H "Keep-Alive: 115" -H "Connection: keep-alive" -H "Content-Type: application/x-www-form-urlencoded; charset=UTF-8" -H "Referer: http://192.168.122.252:8004/reboot/Reboot/" -H "Pragma: no-cache" -H "Cache-Control: no-cache" --location-trusted http://192.168.122.252:8004/reboot/Reboot/rebootNow > web_interface_reboot.log 2>&1
-
-# Check that curl didn't have any error return codes, then verify that it was
-# possible to restart the 
-RESULT=1
-if [ "$?" -eq 0 ]
-then
-	if egrep -q "^\{\"message\"\:[[:space:]]*\"Rebooting[[:space:]]*now\.\"\,[[:space:]]*\"errors\"\:[[:space:]]*\[\]\,[[:space:]]*\"schedId\"\:[[:space:]]*[[:digit:]]*\}" web_interface_reboot.log ; test "$?" -eq 0
-	then
-		echo "PASS RESTART TEST!"
-		sleep 120
-		check_boot_error $GUESTIP web_restart_boot.log
-		if [ "$?" -eq 0 ]
-		then
-			RESULT=0
-		fi
-	fi
-fi
-ok $RESULT "CernVM Test Case 6 - Restart through the web interface and check that \
+web_restart $GUESTIP web_interface_reboot.log web_restart_boot.log
+ok $? "CernVM Test Case 6 - Restart through the web interface and check that \
 there are no error messages at boot"
 add_file web_interface_reboot.log
 add_file web_restart_boot.log
