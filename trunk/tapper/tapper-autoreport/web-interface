@@ -14,38 +14,37 @@
 #
 # =============================================================================
 
-# The base http header used
-HEADER=("")
+HEADER=('')
+# The base template http header used
 TEMPLATE_HEADER=(
-"Host: 192.168.122.252:8004" 
-"User-Agent: Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.2.17) Gecko/20110428 Fedora/3.6.17-1.fc13 Firefox/3.6.17" 
-"Accept-Language: en-us,en;q=0.5" 
-"Accept-Encoding: gzip,deflate" 
-"Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7" 
-"Keep-Alive: 115" 
-"Connection: keep-alive")
-ADDITIONAL_HEADER=("")
-
+'Host: 192.168.122.252:8004' \
+'User-Agent: Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.2.17) Gecko/20110428 Fedora/3.6.17-1.fc13 Firefox/3.6.17' \
+'Accept-Language: en-us,en;q=0.5' \
+'Accept-Encoding: gzip,deflate' \
+'Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7' \
+'Keep-Alive: 115' \
+'Connection: keep-alive')
+ADDITIONAL_HEADER=('')
 
 # List of web interface related log files
 WEBINTERFACE="web_interface.log"
 
-# Generate an http header with additional values
-# @param $2 - An array of the additional header values
+
+# Generate an http header using the template header and
+# any additional header values defined
 generate_header()
 {
-	for value in "${TEMPLATE_HEADER[@]}"
+	HEADER=('-H' "${TEMPLATE_HEADER[0]}")
+
+	for i in $(seq 1 $((${#TEMPLATE_HEADER[@]} - 1)))
 	do
-		HEADER="${HEADER} -H $value"
+		HEADER=("${HEADER[@]}" '-H' "${TEMPLATE_HEADER[i]}")
 	done
 
 	for value in "${ADDITIONAL_HEADER[@]}"
 	do
-		HEADER="${HEADER} -H $value"
+		HEADER=("${HEADER[@]}" '-H' "$value")
 	done
-
-	echo ${HEADER}
-	echo $HEADER
 }
 
 
@@ -72,7 +71,6 @@ has_web_interface()
 }
 
 
-
 # Verify that it is possible to login on web interface
 # @param $1 - The hostname or ip address for the web interface
 # @param $2 - The web interface username, usually admin
@@ -80,17 +78,18 @@ has_web_interface()
 # @param $4 - The name of the logfile
 web_check_login()
 {
-	ADDITIONAL_HEADER=("Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" 
-					   "Content-Type: application/x-www-form-urlencoded"
+	HEADER=('')
+	ADDITIONAL_HEADER=('Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' \
+					   'Content-Type: application/x-www-form-urlencoded' \
 					   "Referer: http://$1:8004/login")
 
 	generate_header
-	curl -i -v --cookie cjar --cookie-jar cjar ${HEADER} --data "user_name=$2" --data "password=$3" \
+	curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" --data "user_name=$2" --data "password=$3" \
 	--data "login=Login" --location-trusted http://$1:8004/login > $4 2>&1
 
 	# Check that curl didn't have any error return codes, then verify that it was
-	# was possible to login on web interface by validating that curl was redirected
-	# to the status page
+	# was possible to login on the web interface by validating that curl was 
+	# redirected to the status page
 	RESULT=1
 	if [ "$?" -eq 0 ]
 	then
@@ -105,6 +104,7 @@ web_check_login()
 	return $RESULT
 }
 
+
 # Create a new user using the CernVM web interface
 # @param $1 - The hostname or ip address for the web interface
 # @param $2 - The name of the new user to create
@@ -112,14 +112,15 @@ web_check_login()
 # @param $4 - The name of the logfile
 web_create_user()
 {
-	ADDITIONAL_HEADER=("Accept: application/json" 
-					   "Content-Type: application/x-www-form-urlencoded; charset=UTF-8" 
-					   "Referer: http://$1:8004/cernvm/User/"
-					   "Pragma: no-cache" 
-					   "Cache-Control: no-cache")
+	HEADER=('')
+	ADDITIONAL_HEADER=('Accept: application/json' \
+					   'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' \
+					   "Referer: http://$1:8004/cernvm/User/" \
+					   'Pragma: no-cache' \
+					   'Cache-Control: no-cache')
 
 	generate_header
-	curl -i -v --cookie cjar --cookie-jar cjar ${HEADER} --data "cernvmUser=$2" --data \
+	curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" --data "cernvmUser=$2" --data \
 	"cernvmUserGroup=alice" --data "cernvmUserShell=%2Fbin%2Fbash" --data "newpass1=$3" \
 	--data "newpass2=$3" --location-trusted http://$1:8004/cernvm/User/userUpdate \
 	> $4 2>&1
@@ -134,14 +135,16 @@ web_create_user()
 # @param $3 - The name of the boot error logfile
 web_restart()
 {
-	ADDITIONAL_HEADER=("Accept: application/json" 
-					   "Content-Type: application/x-www-form-urlencoded; charset=UTF-8" 
-					   "Referer: http://$1:8004/reboot/Reboot/" 
-					   "Pragma: no-cache" 
-					   "Cache-Control: no-cache")
+	HEADER=('')
+	ADDITIONAL_HEADER=('Accept: application/json' \
+					   'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' \
+					   "Referer: http://$1:8004/reboot/Reboot/" \
+					   'Pragma: no-cache' \
+					   'Cache-Control: no-cache')
 
 	generate_header
-	curl -i -v --cookie cjar --cookie-jar cjar --location-trusted \
+	echo "${HEADER[@]}"
+	curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" --location-trusted \
 	http://$1:8004/reboot/Reboot/rebootNow > $2 2>&1
 
 	# Check that curl didn't have any error return codes, then verify that it was
@@ -149,7 +152,9 @@ web_restart()
 	RESULT=1
 	if [ "$?" -eq 0 ]
 	then
-		if egrep -q "^\{\"message\"\:[[:space:]]*\"Rebooting[[:space:]]*now\.\"\,[[:space:]]*\"errors\"\:[[:space:]]*\[\]\,[[:space:]]*\"schedId\"\:[[:space:]]*[[:digit:]]*\}" $2 ; test "$?" -eq 0
+		if egrep -q "^\{\"message\"\:[[:space:]]*\"Rebooting[[:space:]]*now\.\"\,\
+		[[:space:]]*\"errors\"\:[[:space:]]*\[\]\,[[:space:]]*\"schedId\"\:\
+		[[:space:]]*[[:digit:]]*\}" $2 ; test "$?" -eq 0
 		then
 			sleep 120
 			check_boot_error $1 $3
