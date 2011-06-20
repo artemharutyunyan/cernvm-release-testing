@@ -1,4 +1,10 @@
 #!/bin/sh
+#
+# TAPPER_MCP      TAPPER_MCP daemon providing Tapper automation
+#
+# chkconfig: 2345 96 96
+# description: Start TAPPER_MCP to provide Tapper automation
+# processname: tapper_mcp_daemon
 
 ### BEGIN INIT INFO
 # Provides:          TAPPER_MCP

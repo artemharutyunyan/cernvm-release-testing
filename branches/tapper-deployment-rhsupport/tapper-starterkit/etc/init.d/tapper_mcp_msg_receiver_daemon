@@ -1,4 +1,12 @@
 #!/bin/sh
+#
+# TAPPER_MSGRECEIVER      TAPPER_MSGRECEIVER daemon to receive Tapper automation
+#                         state message
+#
+# chkconfig: 2345 97 97
+# description: Start TAPPER_MSGRECEIVER to receive Tapper automation state \
+#              messages
+# processname: tapper_mcp_msg_receiver_daemon
 
 ### BEGIN INIT INFO
 # Provides:          TAPPER_MSGRECEIVER

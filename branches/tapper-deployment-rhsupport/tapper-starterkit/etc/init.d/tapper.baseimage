@@ -1,4 +1,10 @@
 #!/bin/bash
+#
+# TAPPER_PRC      TAPPER_PRC Tapper program run control
+#
+# chkconfig: 2345 95 95
+# description: Start TAPPER_PRC to setup machine
+# processname: tapper.baseimage
 
 ### BEGIN INIT INFO
 # Provides:          TAPPER_PRC

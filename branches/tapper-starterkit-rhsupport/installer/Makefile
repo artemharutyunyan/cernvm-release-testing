@@ -324,7 +324,7 @@ cleanbaseimage64chroot:
 	-rm -fr $(BASEIMAGE64CHROOT)
 
 cleanbaseimage64file:
-	-rm -fr $(BASEIMAGE64FILE)
+	-rm -f $(BASEIMAGE64FILE)
 
 cleandb:
 	-echo "drop database testrundb; drop database reportsdb; drop user tapper;" | mysql -uroot -p$${MYSQL_ROOT_PW}
