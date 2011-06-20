@@ -276,7 +276,7 @@ $ gedit cernvm.xml
 
 \item	Finally, configure the the virtual machine network to automatically start when the system boots, then create
 		the virual machine and ensure that it can be started and stopped using virsh, \emph{all virsh commands require
-		root privileges, so it easiest to simply run as as root}.
+		root privileges, so it's easiest to simply run as as root}.
 		
 \lstset{caption= Configure the Virtual Machine and Verify it Works}
 \begin{lstlisting}
@@ -338,7 +338,7 @@ s0:2345:respawn:/sbin/agetty -L 38400 ttyS0 vt100
 
 \end{lstlisting}
 
-\item 	Now, login to the system using virsh console and then simply type ``root'' and enter the password to login as the 
+\item 	Now, reboot and login to the system using virsh console and then simply type ``root'' and enter the password to login as the 
 		root account, \emph{there will most likely not be any console display from the virtual machine until you press 
 		enter after entering the password}, then enable root login through SSH using the following commands. {\bf To 
 		disconnect from the virsh console and return to the host machine console, press CTRL + ]  which is ( \^~] )}
@@ -412,7 +412,7 @@ $ ssh root@cernvm-image-ipaddress
 $ vi demo_report.tap
 
 	1..2
-	# Tapper-Suite-Name: Tapper-Starterkit
+	# Tapper-Suite-Name: Tapper-Deployment
 	# Tapper-Suite-Version: 1.001
 	# Tapper-Machine-Name: cernvm-rhtestclient
 	ok - Hello test world
@@ -801,7 +801,7 @@ s0:2345:respawn:/sbin/agetty -L 38400 ttyS0 vt100
 
 \end{lstlisting}
 
-\item	Now, login to the system using virsh console and then simply type ``root'' and enter the password to login as the 
+\item	Now, reboot and login to the system using virsh console and then simply type ``root'' and enter the password to login as the 
 		root account, \emph{there will most likely not be any console display from the virtual machine until you press 
 		enter after entering the password}, then enable root login through SSH using the following commands. {\bf To 
 		disconnect from the virsh console and return to the host machine console, press CTRL + ]  which is ( \^~] )}
@@ -821,8 +821,8 @@ $ virsh console cernvm
 $ vi /etc/ssh/sshd_config
 \end{lstlisting}
 
-\item Next from the host machine \emph{ie. the machine you're currently using} enable automatic login as root 
-through ssh on the KVM guest, first ensure that the guest machine has been started.
+\item 	Next from the host machine \emph{ie. the machine you're currently using} enable automatic login as root 
+		through ssh on the KVM guest, first ensure that the guest machine has been started.
 \lstset{caption= Enable Automatic SSH Root Login}
 \begin{lstlisting}
 # Restart the virtual machine wait for 
@@ -838,7 +838,7 @@ $ arp -an
 
 # Next, run the following command to setup automatic login for ssh
 # without having to type the password. When prompted for the password
-# enter the password you just set previously
+# enter the root password you just set previously
 $ ssh-copy-id -i ~/.ssh/id_rsa.pub root@cernvm-image-ipaddress
 		
 # Disconnect, and try and login to the machine using ssh and ensure 
