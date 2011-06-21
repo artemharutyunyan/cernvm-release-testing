@@ -180,6 +180,9 @@ DEBTFTPPKG=atftpd
 # Debian init interface
 DEBINIT=insserv
 
+# Ubuntu init interface
+UBINIT=update-rc.d
+
 # Redhat automatic install/uninstall
 YUMOPTIONS=--assumeyes --quiet --errorlevel=0
 YUMREMOVE=remove
@@ -447,8 +450,8 @@ debug:
 	@echo $(TFTPPKG)
 	$(call ENABLEINIT,openvpn)
 
-# Enable init scripts 
-ENABLEINIT = $(shell if which $(DEBINIT) > /dev/null 2>&1 ; then echo $(DEBINIT) $(1) ; else echo $(REDINIT) --levels 2345 $(1) on ; fi)
+# Enable init scripts
+ENABLEINIT = $(shell if which $(UBINIT) > /dev/null 2>&1 ; then echo $(UBINIT) $(1) defaults ; elif which $(DEBINIT) > /dev/null 2>&1 ; then echo $(DEBINIT) $(1) ; else echo $(REDINIT) --levels 2345 $(1) on ; fi)
 
 distroprefs: $(DISTROPREFSDIR)/00.README
 
@@ -1084,8 +1087,11 @@ receiver: workingdirs dependencies tapperconfig libdeps optperl
 #
 	@echo "########## start scripts for reports-receiver"
 	$(SCRIPTENVIRONMENT) $(PREPAREPERLMODULE) Tapper::Reports::Receiver
+	@echo "########## Adding tapper_reports_receiver_daemon to init"
 	cp $(STARTERKITDIR)/etc/init.d/tapper_reports_receiver_daemon /etc/init.d/
+	@echo "########## Enable tapper_reports_receiver_daemon init"
 	$(call ENABLEINIT,tapper_reports_receiver_daemon)
+	@echo "########## Restart tapper_reports_receiver_daemon"
 	/etc/init.d/tapper_reports_receiver_daemon restart
 	sleep 5
 
