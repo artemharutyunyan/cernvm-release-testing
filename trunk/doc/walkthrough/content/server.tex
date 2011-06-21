@@ -79,7 +79,7 @@ $ mysqladmin -u root password <newpassword>
 \end{lstlisting}
 
 \item 	Now that the installion has completed and the security issue has been dealt with, ensure that you can access the tapper web
-		interface is working by viewing it in your browser using the url, \url{http://localhost/tapper}\footnote{This can be accessed
+		interface and that it is working by viewing it in your browser using the url, \url{http://localhost/tapper}\footnote{This can be accessed
 		locally and remotely from other systems using the server hostname or IP address}
 
 \item 	Next, install PHPMyAdmin so that it's easy to administrate and configure the Tapper databases, when prompted to select the
@@ -235,7 +235,7 @@ $ mysqladmin -u root password <newpassword>
 \end{lstlisting}
 
 \item 	Now that the installion has completed and the security issue has been dealt with, ensure that you can access the tapper web
-		interface is working by viewing it in your browser using the url, \url{http://localhost/tapper}\footnote{This can be accessed
+		interface and that it is working by viewing it in your browser using the url, \url{http://localhost/tapper}\footnote{This can be accessed
 		locally and remotely from other systems using the server hostname or IP address}
 
 \item 	Next, install PHPMyAdmin so that it's easy to administrate and configure the Tapper databases, when prompted to select the
@@ -462,12 +462,12 @@ $ sudo update-grub"
 
 \subsection{Installing the Tapper Server}
 \begin{enumerate}
-\item 	Next, execute the following commands to install necessary dependencies, \emph{from now on all commands begin with sudo}.
+\item 	Next, execute the following commands to install necessary dependencies.
 \lstset{caption= Install Dependencies}
 \begin{lstlisting}
-$ apt-get update
-$ apt-get install make
-$ apt-get install subversion
+$ sudo apt-get update
+$ sudo apt-get install make
+$ sudo apt-get install subversion
 \end{lstlisting}
 
 \item 	Now, download the latest copy of the Tapper-Deployment, which is an installer for \tapper from the \cernvmreleasetesting 
@@ -499,7 +499,7 @@ TESTMACHINE3=bullock
 \lstset{caption= Install Tapper-Deployment}
 \begin{lstlisting}
 $ cd installer/
-$ make localsetup 2>&1 | tee install.log
+$ sudo make localsetup 2>&1 | tee install.log
 \end{lstlisting}
 \end{enumerate}
 
@@ -510,11 +510,11 @@ $ make localsetup 2>&1 | tee install.log
 \lstset{caption= Set MySQL Root Password}
 \begin{lstlisting}
 # Example: mysqladmin -u root password abc123
-$ mysqladmin -u root password <newpassword>
+$ sudo mysqladmin -u root password <newpassword>
 \end{lstlisting}
 
 \item 	Now that the installion has completed and the security issue has been dealt with, ensure that you can access the tapper web
-		interface is working by viewing it in your browser using the url, \url{http://localhost/tapper}\footnote{This can be accessed
+		interface and that it is working by viewing it in your browser using the url, \url{http://localhost/tapper}\footnote{This can be accessed
 		locally and remotely from other systems using the server hostname or IP address}
 
 \item 	Next, install PHPMyAdmin so that it's easy to administrate and configure the Tapper databases, when prompted to select the
@@ -522,11 +522,11 @@ $ mysqladmin -u root password <newpassword>
 		prompted to ``configure databases for phpmyadmin with dbconfig-common'' select {\bf NO} }.
 \lstset{caption= Install PHPMyAdmin}
 \begin{lstlisting}
-$ apt-get update
+$ sudo apt-get update
 
 # When prompted for the server to reconfigure automatically select apache2
 # when prompted to configure the database with dbconfig-common select NO
-$ apt-get install phpmyadmin
+$ sudo apt-get install phpmyadmin
 \end{lstlisting}
 
 \item	Verify that PHPMyAdmin has been installed and configured correctly and that you can access the tapper web
