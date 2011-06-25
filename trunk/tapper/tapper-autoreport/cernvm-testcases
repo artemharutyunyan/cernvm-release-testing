@@ -43,21 +43,27 @@ check_ssh()
 check_boot_error()
 {
 	RESULT=0
-	BOOT_TESTS=("ssh root@$1 dmesg | egrep \"error|warning|fail\" > $2" 
-"ssh root@$1 cat /var/log/boot.log | egrep \"error|warning|fail\" >> $2" 
-"ssh root@$1 cat /var/log/messages | egrep \"error|warning|fail\" >> $2" 
-"ssh root@$1 cat /var/log/cernvm-update.log | egrep \"error|warning|fail\" >> $2")
+	BOOT_TESTS=("ssh -q -o \"BatchMode=yes\" root@$1 dmesg | egrep \"error|warning|fail\" > $2" 
+"ssh -q -o \"BatchMode=yes\" root@$1 cat /var/log/boot.log | egrep \"error|warning|fail\" >> $2" 
+"ssh -q -o \"BatchMode=yes\" root@$1 cat /var/log/messages | egrep \"error|warning|fail\" >> $2" 
+"ssh -q -o \"BatchMode=yes\" root@$1 cat /var/log/cernvm-update.log | egrep \"error|warning|fail\" >> $2")
 
+	# Precondition for ssh support as root for boot error tests
+	if check_ssh root $1 ; test "$?" -eq 0 ; then
 	for test in "${BOOT_TESTS[@]}"
 	do
 		eval $test
-		    # If one of the tests has boot error, set result as failure and break
+		    # If any of the tests has boot error, set result as failure and continue
+			# logging the rest of the boot messages that contain boot errors
 		    if [ "$?" -eq 0 ]
 		    then
 		            RESULT=1
-		            break
 		    fi
 	done
+	else
+		echo "FAIL - Precondition for ssh support as root for boot error tests"
+		RESULT=1
+	fi
 	
 	return $RESULT
 }
@@ -66,7 +72,7 @@ check_boot_error()
 # @param $1 - The IP address of the machine to login via ssh
 check_time()
 {
-	ssh root@$1 ps -eaf | grep -q ntpd
+	ssh -q -o "BatchMode=yes" root@$1 ps -eaf | grep -q ntpd
 
 	return $?
 }
