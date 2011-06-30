@@ -1210,7 +1210,115 @@ $ ssh root@cernvm-image-ipaddress
 \newpage
 \section{OS X Test Client Setup}
 \subsection{Installing the system}
+\label{sec:osxinstall}
+
+In most cases your Apple computer should have already came with the OS X operating system installed, but in case you need to
+install the operating system manually, or perhaps you wish to install the latest operating system, such as Snow Leopard or Lion
+the following instructions are provided. The following instructions outline the procedure for installing OS X on your Apple computer, 
+if your Apple computer already came installed with one of the newer versions of OS X, then simply procede to the next section,
+``Configuring the system''~\ref{sec:osxconfig}.
+
+\begin{enumerate}
+\item	First, begin by booting from the OS X installation CD and simply wait until it boots into the installation environment.
+
+\item	Now that the installation CD has booted, the next procedure is to prepare the hard drive you with to install OS X on 
+		for installation. From the menu at the top of the screen, select \verb|Utilties -> Disk Utility...| then from the left 
+		pane, select the drive that you wish to install OS X on. Now, it is a bit unintuitive, but in order to format and parition 
+		the drive so that it can be accessed by the OS X installer, you must click on the ``Erase'' tab, \emph{It is pretty self 
+		explanatory, but this will erase everything on the hard drive}. Now, for the option ``Volume Format:'' from the drop down menu
+		select ``Mac OS Extended (Journaled)'' \footnote{This is the optimal format to use as journaled file systems are the least likely
+		filesystem to become corrupted}, then for the option ``Name:'' enter a name for the hard drive, \emph{this is not a name for the
+		computer}, so simply enter a name in all capital letters such as \emph{CERNVM}. Finally, click the ``Erase...'' button to format
+		the drive and prepare it for OS X installation.
+		
+\item	Now, go back to the OS X installer and read through and agree to the End User License Agreement, \emph{make sure you read through
+		the EULA and agree to the terms}, then click the ``Agree'' button to continue the installation.
+		
+\item	Next, at the installation stage titled, ``Select a Destination'', click on the hard drive you formatted previously, as well 
+		the name you entered for the drive when it was created should be listed below the hard drive icon, then click ``Continue''.
+		
+\item	At the next stage of the intallation titled, ``Install Summary'', if you wish to make customizations to the packages installed
+		as part of the OS X system, click the ``Customize'' button, otherwise simply click the ``Install'' button to begin the
+		installation of OS X.
+		
+\item	After the system reboots, you will be presented with a welcome screen, select your country from the list and then click
+		``Continue''.
+		
+\item 	At the next installation stage, titled ``Select Your Keyboard'', chose a keyboard layout, it is probably best to just leave
+		it at the default ``U.S.'' keyboard layout.
+		
+\item	At the next installation stage, titled ``Do You Already Own a Mac?'' simply select the option ``Do not transfer my information
+		now'' and click ``Continue''.
+		
+\item	Next, for ``Enter Your Apple ID''\footnote{This is your iTunes and Apple store account, since this is a test client we won't
+		be using iTunes} leave everything blank and simply click ``Continue''.
+		
+\item	Next for the ``Registration Information'', again just click ``Continue'' and if you are prompted by a message about ``Some
+		of your registration information is missing'', just click ``Continue'' again.
+		
+\item	Now, at the next installation stage titled ``Create Your Account'', for the options ``Full Name'' and ``Account Name:''
+		enter a name and account name that is simple and relevant such as \emph{cernvm} and set the password to something you will
+		not forget and is fairly complex with numbers and letters. But, most importantly {\bf keep the username and password entered
+		consistent across all systems created as part of the infrastructure} as it makes administration and everything else much easier. 
+		
+\item	Next for ``Select Time Zone'' click on your location on the map of the world to change the time zone, and then for the option
+		``Closest City:'' select a city near your location.
+		
+\item	Finally, at the last stage of the installation click ``Done''.	
+\end{enumerate}
+
+
+\newpage
 \subsection{Configuring the system}
+\label{sec:osxconfig}
+
+\begin{enumerate}
+\item	After the system has booted, the first thing to configure are the power management settings and other preferences, as this system
+		will be running as a test client, sleep and other automatic energy saving features must be disabled. Begin by navigating to the
+		power options, \verb|Apple logo -> System Preferences -> Energy Saver| for the option ``Computer sleep'' slide the bar to the
+		far right so that it is set to ``Never'' and ensure that the following options are all disabled.
+\begin{itemize}
+\item	Put the hard disk(s) to sleep when possible
+
+\item	Wake for Ethernet network access
+
+\item 	Allow power button to put the computer to sleep
+\end{itemize}
+
+\item	Next, set a hostname for the system from the menu \verb|Apple logo -> System Preferences -> Sharing| beside the ``Computer Name:''
+		option at the top, click the ``Edit...'' button. Then enter a relevant hostname for the system based on the hardware or operating
+		system it is running; the hostname should be relevant and unique to better identify the system. A good naming convention should 
+		refer to the hardware or operating system and call it a host to differentiate from the virtual machine that will be running as 
+		a guest, for example a hostname such as \emph{cernvm-osx-host} could be used, {\bf whatever convention you use make sure it is 
+		consistent}.
+
+\item	Next, enable SSH access to the system by navigating to \verb|Apple logo -> System Preferences -> Sharing| and from the list of 
+		services that can be shared, enable ``Remote Login'', which is SSH.
+		
+\item	Now, to enable VNC access to the system, select from the same list of services that can be shared, ``Remote Management'' and
+		for local access options window that appears, enable all of the options listed such as ``Observe'' and ``Change settings''.
+		Then to enable VNC compatibilty so that the OS X system can be accessed by other non-Apple computers, click the ``Computer
+		Settings...'' button and enable the following options and set a password for the ``VNC viewers...'' option.
+\begin{itemize}
+\item	Show Remote Management status in menu bar
+\item	Anyone may request permission to control screen
+\item	VNC viewers may control screen with password
+\end{itemize}
+
+\item	Now, to ensure that your user logs in automatically, navigate to \verb|Apple logo -> System Preferences -> Accounts| and click
+		``Login Options'', you may have to click on the lock icon and enter your password in order to make changes to the login options. 
+		Then for the option ``Automatic login:'' select your user from the list of accounts to enable automatic login.
+		
+\item 	Finally, to ensure that the settings were configured properly, reboot the machine and ensure that the following work.
+\begin{itemize}
+\item	It automatically boots up into the full desktop environment without having to login
+\item	You have access to the machine using SSH and can login
+\item	You have VNC access to the machine and can control the system using VNC	
+\end{itemize}
+\end{enumerate}
+
+
+\newpage
 \subsection{Installing and configuring the hypervisors}
 \subsection{Configuring the CernVM Image}
 \subsection{Setting up the Tapper Test Suite}
