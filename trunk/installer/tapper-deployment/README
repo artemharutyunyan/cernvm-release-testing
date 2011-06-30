@@ -25,8 +25,9 @@ Try most common targets:
   make web              -- update WebGUI
   make mcp              -- update MCP
   make cli              -- update CLI
-  make api              -- update Reports::API
-  make receiver         -- update Reports::Receiver
+  make api              -- update Tapper::Reports::API
+  make receiver         -- update Tapper::Reports::Receiver
+  make action           -- update Tapper::Action
   make nfsrootperl      -- update Tapper::Installer & friends in nfsroot
   make clientpkgs       -- create client packages (64bit + 32bit)
   make clientpkgs++     -- update client packages (64bit + 32bit)

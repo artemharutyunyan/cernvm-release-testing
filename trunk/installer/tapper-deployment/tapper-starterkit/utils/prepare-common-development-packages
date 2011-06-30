@@ -5,6 +5,7 @@ set -x
 export TAPPERFROMGIT
 export GITPREFIXTAPPERLIBS
 export GITPREFIXTESTSUITES
+export PYTHONSTATICTWEAKS
 
 apt-get --yes --allow-unauthenticated install patch
 apt-get --yes --allow-unauthenticated install makepatch

@@ -5,6 +5,7 @@ set -x
 export TAPPERFROMGIT
 export GITPREFIXTAPPERLIBS
 export GITPREFIXTESTSUITES
+export PYTHONSTATICTWEAKS
 
 # ==================== config ====================
 
@@ -15,7 +16,7 @@ PYTHONURL=http://www.python.org/ftp/python/${PYTHONVERSION}/${PYTHONTGZ}
 EASYINSTALL=setuptools-0.6c11
 EASYINSTALLTGZ=${EASYINSTALL}.tar.gz
 EASYINSTALLEGG=${EASYINSTALL}-py2.6.egg
-EASYINSTALLURL=http://pypi.python.org/packages/source/s/setuptools/${EASYINSTALLTGZ}#md5=27a3fe3a4973c0cc97534bc9e9720c3d
+EASYINSTALLURL="http://pypi.python.org/packages/source/s/setuptools/${EASYINSTALLTGZ}#md5=27a3fe3a4973c0cc97534bc9e9720c3d"
 #EASYINSTALLURL=http://pypi.python.org/packages/2.6/s/setuptools/${EASYINSTALLEGG}#md5=bfa92100bd772d5a213eedd356d64086
 
 # Debian dependencies, maybe not strictly neccessary
@@ -30,6 +31,13 @@ tar xzf $PYTHONTGZ
 cd Python-$PYTHONVERSION
 make distclean
 ./configure --prefix=${PYTHONPREFIX}
+if [ "x1" == "x$PYTHONSTATICTWEAKS" ] ; then
+    # comment out special respective static/shared handling of those modules
+    perl -pni -e 's/^_md5 /#_md5 /g'       Modules/Setup
+    perl -pni -e 's/^_sha /#_sha /g'       Modules/Setup
+    perl -pni -e 's/^_sha256 /#_sha256 /g' Modules/Setup
+    perl -pni -e 's/^_sha512 /#_sha512 /g' Modules/Setup
+fi
 make -j16
 #make test
 make install

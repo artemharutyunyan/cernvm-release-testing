@@ -6,7 +6,9 @@ echo ""
 echo ""
 echo ""
 echo ""
-echo "********** WORKAROUND in prepare-clientpkg-in-chroot -- DELETE THE apt-get line ************"
+echo "********** WORKAROUND in prepare-clientpkg-in-chroot: ************"
+echo "**********   DELETE THE apt-get line once you did     ************"
+echo "**********   $ make baseimages clientpkgs             ************"
 echo ""
 echo ""
 echo ""
@@ -22,6 +24,7 @@ set -x
 export TAPPERFROMGIT
 export GITPREFIXTAPPERLIBS
 export GITPREFIXTESTSUITES
+export PYTHONSTATICTWEAKS
 
 # ===========================================================
 
@@ -64,6 +67,8 @@ PYTHONPREFIX=/opt/tapper/python
  TestSuite-StressAppTest-Python \
  TestSuite-SysBench-Python \
  TestSuite-TIOBench-Python \
+ TestSuite-KvmUnitTests-Python \
+ Tapper-Data-Python \
  TestSuite-Topology-Python
 
 # TestSuite-TSMaster-Python

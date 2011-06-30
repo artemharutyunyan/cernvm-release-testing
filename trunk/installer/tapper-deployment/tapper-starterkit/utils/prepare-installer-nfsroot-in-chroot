@@ -5,13 +5,21 @@ set -x
 export TAPPERFROMGIT
 export GITPREFIXTAPPERLIBS
 export GITPREFIXTESTSUITES
+export PYTHONSTATICTWEAKS
 
 # deactivate network interfaces coming up in NFS root
 insserv -r ifupdown
 
-# deactivate udev
+# deactivate udev which makes trouble on bleeding edge hardware
 insserv -r udev-mtab
 insserv -r udev
+
+# deactivate hwclock
+insserv -r hwclock
+insserv -r hwclockfirst
+
+# deactivate misc services not need in installer
+insserv -r cron
 
 # setup locales
 apt-get --yes --allow-unauthenticated install locales
@@ -21,6 +29,8 @@ echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen
 # some utils
 /tmp/tapper-starterkit/utils/prepare-common-development-packages
 apt-get --yes --allow-unauthenticated install pciutils
+apt-get --yes --allow-unauthenticated install kpartx
+apt-get --yes --allow-unauthenticated install mount  # for losetup
 
 # set default password
 echo "root:tapper" | chpasswd
@@ -33,8 +43,7 @@ chmod +x /etc/init.d/tapper
 insserv tapper
 
 # create the required files and directories
-
-mkdir -p /mnt/target/
+mkdir -p /mnt/target
 mkdir -p /mnt/guests
 mkdir -p /mnt/nfs
 mkdir -p /mnt/images
@@ -61,5 +70,3 @@ cp /tmp/tapper-starterkit/misc/MAKEDEV /dev/MAKEDEV
 chmod +x /dev/MAKEDEV
 cd /dev
 ./MAKEDEV generic
-
-

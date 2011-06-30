@@ -3,6 +3,7 @@
 export TAPPERFROMGIT
 export GITPREFIXTAPPERLIBS
 export GITPREFIXTESTSUITES
+export PYTHONSTATICTWEAKS
 
 BIN=/opt/tapper/bin
 mkdir -p $BIN

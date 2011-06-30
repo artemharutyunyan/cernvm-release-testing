@@ -38,6 +38,9 @@ DEBIANMIRROR ?= http://ftp.de.debian.org/debian/
 # install Tapper libs from Git repositories
 TAPPERFROMGIT ?= 0
 
+# build Python with some tweaks to static/shared modules
+# (urrently only used for the baseimages/clientpkgs [tapper-starterkit/utils/prepare-baseimage-in-chroot])
+PYTHONSTATICTWEAKS ?= 0
 GITPREFIXTAPPERLIBS ?= git://github.com/amd
 GITPREFIXTESTSUITES ?= git://wotan
 
@@ -122,6 +125,8 @@ PERLPREPARE=prepare-optperl
 PYTHONDIR=/opt/tapper/python
 PYTHONBIN=$(PYTHONDIR)/bin
 PYTHONPREPARE=prepare-optpython
+### opentftpd
+OPENTFTPDURL=http://downloads.sourceforge.net/project/tftp-server/tftp%20server%20single%20port/opentftpspV1.65.tar.gz
 
 # Debian automatic install
 APTGETOPTIONS=-o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --yes
@@ -160,9 +165,11 @@ help:
 	@echo "  make web              -- update WebGUI"
 	@echo "  make mcp              -- update MCP"
 	@echo "  make cli              -- update CLI"
-	@echo "  make api              -- update Reports::API"
-	@echo "  make receiver         -- update Reports::Receiver"
-	@echo "  make nfsrootperl      -- update Tapper::Installer & friends in nfsroot"
+	@echo "  make api              -- update Tapper::Reports::API"
+	@echo "  make receiver         -- update Tapper::Reports::Receiver"
+	@echo "  make action           -- update Tapper::Action"
+	@echo "  make testplan         -- update Testplan"
+	@echo "  make nfsroot++        -- update Tapper::Installer & friends in nfsroot"
 	@echo "  make clientpkgs       -- create client packages (64bit + 32bit)"
 	@echo "  make clientpkgs++     -- update client packages (64bit + 32bit)"
 	@echo "  make baseimages       -- create base images     (64bit + 32bit)"
@@ -180,6 +187,8 @@ help:
 	@echo "  make mcpmsgreceiver   -- MCP-MessageReceiver"
 	@echo "                           => only do if *REALLY* needed"
 	@echo "                              because it risks MCP persistence!"
+	@echo "  make schema-upgrade   -- run DB schema upgrade scripts"
+	@echo "                           => after 'make schema' with structural changes"
 	@echo ""
 	@echo "Other targets:"
 	@echo "--------------"
@@ -405,6 +414,7 @@ $(INSTALLERCHROOT)/etc/log4perl.cfg:
 	echo 'ramfs /var/run   ramfs defaults 0 0' >> $(INSTALLERCHROOT)/etc/fstab
 	echo 'ramfs /var/spool ramfs defaults 0 0' >> $(INSTALLERCHROOT)/etc/fstab
 	echo 'ramfs /var/lib/nfs ramfs defaults 0 0' >> $(INSTALLERCHROOT)/etc/fstab
+	echo 'tmpfs /mnt       tmpfs rw,size=4096k 2 0' >> $(INSTALLERCHROOT)/etc/fstab
 #
 ### configure NFS working directory
 #
@@ -425,8 +435,6 @@ $(INSTALLERCHROOT)/etc/log4perl.cfg:
 	cd $(INSTALLERCHROOT)/tmp/ ; tar xzf $(TMP)/$(STARTERKIT)
 	$(SCRIPTENVIRONMENT) chroot $(INSTALLERCHROOT) /tmp/tapper-starterkit/utils/$(INSTALLERCHROOTPREPARE)
 
-nfsrootperl: installerchrootperl nfsrootdir
-
 installerchrootperl: installerchroot
 	@echo "########## prepare subdirs"
 	-umount $(INSTALLERCHROOT)/sys
@@ -438,6 +446,7 @@ installerchrootperl: installerchroot
 	cd $(INSTALLERCHROOT)/tmp/ ; tar xzf $(TMP)/$(STARTERKIT)
 	$(SCRIPTENVIRONMENT) chroot $(INSTALLERCHROOT) /tmp/tapper-starterkit/utils/$(INSTALLERCHROOTPREPAREPERLMODULES)
 
+nfsroot++: installerchrootperl nfsrootdir
 # ==============================================================
 # *
 # *
@@ -449,8 +458,12 @@ installerchrootperl: installerchroot
 # ==============================================================
 
 baseimage64chroot: dependencies $(BASEIMAGE64CHROOT)/etc/log4perl.cfg
+# always update starterkit for subsequent targets
+	cd $(BASEIMAGE64CHROOT)/tmp/ ; tar xzf $(TMP)/$(STARTERKIT)
 
 baseimage32chroot: dependencies $(BASEIMAGE32CHROOT)/etc/log4perl.cfg
+# always update starterkit for subsequent targets
+	cd $(BASEIMAGE32CHROOT)/tmp/ ; tar xzf $(TMP)/$(STARTERKIT)
 
 $(BASEIMAGE64CHROOT)/etc/log4perl.cfg:
 	@echo "########################################################"
@@ -865,6 +878,32 @@ libdeps:
 	$(APTGET) install apache2
 	$(APTGET) install libapache2-mod-fcgid
 
+opentftpd:
+#
+# Prepare CPAN libs
+#
+	cd $(TMP)
+	curl -z$(TMP)/opentftpd.tgz -L $(OPENTFTPDURL) -o $(TMP)/opentftpd.tgz
+	rm -fr $(TMP)/opentftp
+	cd $(TMP) ; tar xzf opentftpd.tgz
+	cd $(TMP)/opentftp/ ; g++ opentftpd.cpp -lpthread -o opentftpd
+	-cp /opt/opentftp/opentftpd /opt/opentftp/opentftpd_`date +%Y%m%d%H%M`
+	rsync -rc $(TMP)/opentftp/ /opt/opentftp/
+	cp $(STARTERKITDIR)/etc/opentftp.ini /etc/
+	cp $(STARTERKITDIR)/etc/init.d/opentftp /etc/init.d/
+	insserv opentftp
+	-# We do not use atftp anymore as it can not serve big files (like images)
+	-# This fragile opentftpd fiddling is not nice, we know...
+	-/etc/init.d/atftpd stop
+	sleep 2
+	/etc/init.d/opentftp stop
+	sleep 2
+	/etc/init.d/opentftp start
+
+# ** TODO hardwaredb changes trigger "ssh root@tapper -c make hwdbsync"
+hwdbsync:
+	$(SCRIPTENVIRONMENT) $(PREPAREPERLMODULE) Tapper::HardwareDB
+	$(PERLBIN)/hardwaredb_transfer
 perlpkgs:
 #
 # Prepare CPAN libs
@@ -961,11 +1000,36 @@ receiver: workingdirs dependencies tapperconfig libdeps optperl
 	$(SCRIPTENVIRONMENT) $(PREPAREPERLMODULE) Tapper::Reports::Receiver
 	cp $(STARTERKITDIR)/etc/init.d/tapper_reports_receiver_daemon /etc/init.d/
 	insserv tapper_reports_receiver_daemon
-	/etc/init.d/tapper_reports_receiver_daemon restart
-	sleep 2
+	/etc/init.d/tapper_reports_receiver_daemon stop
+	sleep 5
+	/etc/init.d/tapper_reports_receiver_daemon start
+	sleep 5
 
 cli: workingdirs dependencies tapperconfig libdeps optperl
 	$(SCRIPTENVIRONMENT) $(PREPAREPERLMODULE) Tapper::CLI
+# OSRC specific - do not expect that on CPAN
+hardwaredb: workingdirs dependencies tapperconfig libdeps optperl
+	$(SCRIPTENVIRONMENT) $(PREPAREPERLMODULE) Tapper::HardwareDB
+
+harness: workingdirs dependencies tapperconfig libdeps optperl
+	$(SCRIPTENVIRONMENT) $(PREPAREPERLMODULE) Tapper::TAP::Harness
+
+schema: workingdirs dependencies tapperconfig libdeps optperl
+	$(SCRIPTENVIRONMENT) $(PREPAREPERLMODULE) Tapper::Schema
+
+schema-upgrade: schema cli
+	-$(PERL) $(PERLBIN)/tapper-db-deploy upgrade --db ReportsDB
+	-$(PERL) $(PERLBIN)/tapper-db-deploy upgrade --db TestrunDB
+	/etc/init.d/tapper_reports_receiver_daemon restart
+	/etc/init.d/tapper_reports_api_daemon restart
+	/etc/init.d/tapper_action_daemon restart
+	/etc/init.d/tapper_mcp_daemon restart
+	/etc/init.d/apache2 restart
+	-### Explicitely do *not* restart tapper_mcp_msg_receiver_daemon!
+	-### This has to be done manually to ensure a human thinks about it.
+
+testplan: workingdirs dependencies tapperconfig libdeps optperl
+	$(SCRIPTENVIRONMENT) $(PREPAREPERLMODULE) Tapper::Testplan
 
 api: workingdirs dependencies tapperconfig libdeps optperl
 #
@@ -995,10 +1059,13 @@ mcp: workingdirs dependencies tapperconfig libdeps optperl
 #
 	@echo "########## start scripts for MCP"
 	PERL_AUTOINSTALL="--defaultdeps" TEST_JOBS=$(CPUCOUNT) $(CPAN) App::Daemon
+	$(SCRIPTENVIRONMENT) $(PREPAREPERLMODULE) Tapper::Producer
 	$(SCRIPTENVIRONMENT) $(PREPAREPERLMODULE) Tapper::MCP
 	cp $(STARTERKITDIR)/etc/init.d/tapper_mcp_daemon /etc/init.d/
 	insserv tapper_mcp_daemon
-	/etc/init.d/tapper_mcp_daemon restart
+	/etc/init.d/tapper_mcp_daemon stop
+	-ps aux | grep -v awk | grep -v grep | awk '/mcp-daemon/ {print $$2}' | xargs kill $$1
+	/etc/init.d/tapper_mcp_daemon start
 
 mcpmsgreceiver: workingdirs dependencies tapperconfig libdeps optperl
 #
@@ -1012,20 +1079,31 @@ mcpmsgreceiver: workingdirs dependencies tapperconfig libdeps optperl
 	insserv tapper_mcp_msg_receiver_daemon
 	/etc/init.d/tapper_mcp_msg_receiver_daemon restart
 
-web: workingdirs dependencies tapperconfig libdeps optperl
+web: workingdirs dependencies tapperconfig libdeps optperl schema testplan
 #
 # start scripts for web frontend
 #
 	@echo "########## start scripts for web frontend"
-	$(SCRIPTENVIRONMENT) $(PREPAREPERLMODULE) Tapper::Schema
-	$(SCRIPTENVIRONMENT) $(PREPAREPERLMODULE) Tapper::Testplan
 	$(SCRIPTENVIRONMENT) $(PREPAREPERLMODULE) Tapper::Reports::Web
 	cp $(STARTERKITDIR)/usecases/kernel_build.mpc $(USECASEDIR)/
 	cp $(STARTERKITDIR)/usecases/tests.yml   $(USECASEDIR)/
 	cp $(STARTERKITDIR)/etc/apache2/conf.d/tapper_reports_web.conf /etc/apache2/conf.d/
+	ln -sf $(METAREPORTSDIR) $$(dirname $$($(PERLBIN)/perldoc -l Tapper::Reports::Web))/Web/root/tapper/static/
 	/etc/init.d/apache2 restart
 
-tftpserver:
+# We get mental on this topic!
+#
+# Sometimes "atftp" stops working with big files.
+#
+# Then we use "opentftp", which gets broken exactly once we were happy
+# with it.
+#
+# So just choose one of those two here that works for you:
+#   atftp
+#   opentftpd
+tftpserver: atftp
+
+atftp:
 #
 # Install an TFTP server and export $(DATATAPPER)
 #

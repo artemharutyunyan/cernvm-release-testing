@@ -8,6 +8,8 @@ EXAMPLEFILES = $(STARTERKIT)/etc/log4perl.cfg \
                $(STARTERKIT)/etc/init.d/tapper_action_daemon \
                $(STARTERKIT)/etc/init.d/tapper \
                $(STARTERKIT)/etc/init.d/tapper.baseimage \
+               $(STARTERKIT)/etc/init.d/opentftp \
+               $(STARTERKIT)/etc/opentftp.ini \
                $(STARTERKIT)/etc/dhcp.conf \
                $(STARTERKIT)/etc/tapper.cfg \
                $(STARTERKIT)/misc/MAKEDEV \

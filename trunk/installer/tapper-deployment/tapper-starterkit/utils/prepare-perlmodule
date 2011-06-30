@@ -3,6 +3,7 @@
 export TAPPERFROMGIT
 export GITPREFIXTAPPERLIBS
 export GITPREFIXTESTSUITES
+export PYTHONSTATICTWEAKS
 
 export CPUCOUNT=`cat /proc/cpuinfo | grep vendor_id | wc -l`
 export PERLVERSION=5.12.3
@@ -37,8 +38,10 @@ if [ "x1" == "x$TAPPERFROMGIT" ] ; then
         cd $dist
         perl Makefile.PL
         make
-        make test
-        make install
+        make manifest
+        DISTDIR=$(make distdir 2>&1 | grep 'rm -rf ' | cut -d" " -f3-)
+        cd $DISTDIR
+        $CPAN -f .
     done
 fi
 

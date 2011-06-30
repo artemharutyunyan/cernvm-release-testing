@@ -6,6 +6,7 @@
 export TAPPERFROMGIT
 export GITPREFIXTAPPERLIBS
 export GITPREFIXTESTSUITES
+export PYTHONSTATICTWEAKS
 
 export CPUCOUNT=`cat /proc/cpuinfo | grep vendor_id | wc -l`
 
