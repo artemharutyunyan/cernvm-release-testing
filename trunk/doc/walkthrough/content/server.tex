@@ -7,6 +7,10 @@ working \releasetesting environment by outlining the procedure for setting up th
 document. This guide is intended for users familiar enough with computers and desktop environments to enter basic commands in a terminal 
 and install various operating systems. 
 
+
+
+
+\newpage
 \section{Red Hat Based Server Setup}
 \subsection{Installing the system}
 \subsection{Configuring the system}
@@ -18,11 +22,14 @@ and install various operating systems.
 		indicate that it is running the \tapper server, {\bf again keep the hostname convention consistent}.
 \end{enumerate}
 
+
+\newpage
 \subsection{Installing the Tapper Server}
 \label{installtapserver}
 \begin{enumerate}
 \item 	Next, execute the following commands to install necessary dependencies, \emph{from now on all commands require root privileges}.
-\lstset{caption= Install Dependencies}
+
+\lstset{language=bash,caption= Install Dependencies}
 \begin{lstlisting}
 $ yum install make
 $ yum install subversion
@@ -30,7 +37,8 @@ $ yum install subversion
 
 \item 	Now, download the latest copy of the Tapper-Deployment, which is an installer for \tapper from the \cernvmreleasetesting 
 		Google Code Project page
-\lstset{caption= Download Tapper-Deployment}
+
+\lstset{language=bash,caption= Download Tapper-Deployment}
 \begin{lstlisting}
 $ svn checkout http://cernvm-release-testing.googlecode.com/svn/trunk/\
 installer/tapper-deployment
@@ -39,7 +47,8 @@ installer/tapper-deployment
 \item 	Now edit the Makefile in the Tapper-Deployment installer folder and configure variable TAPPER\_SERVER which 
 		is the hostname of the machine that is currently installing the starter-kit. For now disregard the TESTMACHINE 
 		variables, you should have something similar to this in the Makefile.
-\lstset{caption= Makefile Configuration}
+
+\lstset{language=bash,caption= Makefile Configuration}
 \begin{lstlisting}
 # initial machine names
 TAPPER_SERVER=cernvm-server
@@ -60,19 +69,22 @@ TESTMACHINE3=bullock
 % THIS SECTION NEEDS TO BE VERIFIED AND TESTED, THESE PROCEDURES MOST LIKELY DON'T WORK FOR ALL RED HAT SYSTEMS
 %
 
-\lstset{caption= Install Tapper-Deployment}
+\lstset{language=bash,caption= Install Tapper-Deployment}
 \begin{lstlisting}
 $ cd installer/
 $ make localsetup 2>&1 | tee install.log
 \end{lstlisting}
 \end{enumerate}
 
+
+\newpage
 \subsection{Setting up Tapper Web Interface and Database}
 \label{tapperwebdb}
 \begin{enumerate}
 \item 	Next you need to set a password for the root account of the mysql database\footnote{This will eventually be implemented in the 
 		makefile}
-\lstset{caption= Set MySQL Root Password}
+
+\lstset{language=bash,caption= Set MySQL Root Password}
 \begin{lstlisting}
 # Example: mysqladmin -u root password abc123
 $ mysqladmin -u root password <newpassword>
@@ -85,7 +97,8 @@ $ mysqladmin -u root password <newpassword>
 \item 	Next, install PHPMyAdmin so that it's easy to administrate and configure the Tapper databases, when prompted to select the
 		``Web server to reconfigure automatically'' select apache2 by pressing the space bar and press enter. \emph{If you are 
 		prompted to ``configure databases for phpmyadmin with dbconfig-common'' select {\bf NO} }.
-\lstset{caption= Install PHPMyAdmin}
+
+\lstset{language=bash,caption= Install PHPMyAdmin}
 \begin{lstlisting}
 # When prompted for the server to reconfigure automatically select apache2
 # when prompted to configure the database with dbconfig-common select NO
@@ -102,7 +115,7 @@ $ yum install phpmyadmin
 		for each test client and change the hostname \emph{cernvm-host} and the values for mem, core,vendor, and has\_ecc 
 		as needed; the vendor can be AMD or Intel.
 		
-\lstset{caption= Adding Test Clients to Tapper Database}
+\lstset{language=bash,caption= Adding Test Clients to Tapper Database}
 \begin{lstlisting}
 # Add the hostname of the test client to database
 $ tapper-testrun newhost --name cernvm-host --active
@@ -124,7 +137,8 @@ $ insert into host_feature(host_id, entry, value)  values \
 		framework are all working by viewing the tapper reports in your browser at the following url, 
 		\url{http://localhost/tapper/reports} You should now see a report from whatever the ``Tapper-Machine-Name'' in 
 		demo\_report.tap was set as. \emph{For the example demo\_report.tap provided below it would be cernvm-server}.
-\lstset{caption= Send a Report from the \tapper~Server to Itself}
+
+\lstset{language=bash,caption= Send a Report from the \tapper~Server to Itself}
 \begin{lstlisting}
 # Save the following in a file named demo_report.tap
 $ vi demo_report.tap
@@ -145,7 +159,8 @@ $ cat demo_report.tap | netcat -q7 -w1 cernvm-server 7357
 		by viewing the tapper reports in your browser at the following url: \url{http://localhost/tapper/reports} You should now see a
 		report from whatever the ``Tapper-Machine-Name'' in demo\_report.tap was set as. \emph{For the example demo\_report.tap provided 
 		below it would be cernvm-testclient}.
-\lstset{caption= Send a Report to the \tapper~Server from a Test Client}
+
+\lstset{language=bash,caption= Send a Report to the \tapper~Server from a Test Client}
 \begin{lstlisting}
 # Save the following in a file named demo_report.tap
 $ vi demo_report.tap
@@ -170,6 +185,7 @@ $ cat demo_report.tap | netcat -q7 -w1 cernvm-server 7357
 
 
 
+\newpage
 \section{Debian Based Server Setup}
 \subsection{Installing the system}
 \subsection{Configuring the system}
@@ -181,10 +197,13 @@ $ cat demo_report.tap | netcat -q7 -w1 cernvm-server 7357
 		indicate that it is running the \tapper server, {\bf again keep the hostname convention consistent}.
 \end{enumerate}
 
+
+\newpage
 \subsection{Installing the Tapper Server}
 \begin{enumerate}
 \item 	Next, execute the following commands to install necessary dependencies, \emph{from now on all commands require root privileges}.
-\lstset{caption= Install Dependencies}
+
+\lstset{language=bash,caption= Install Dependencies}
 \begin{lstlisting}
 $ apt-get update
 $ apt-get install make
@@ -193,7 +212,8 @@ $ apt-get install subversion
 
 \item 	Now, download the latest copy of the Tapper-Deployment, which is an installer for Tapper from the \cernvmreleasetesting 
 		Google Code Project page
-\lstset{caption= Download Tapper-Deployment}
+
+\lstset{language=bash,caption= Download Tapper-Deployment}
 \begin{lstlisting}
 $ svn checkout http://cernvm-release-testing.googlecode.com/svn/trunk/\
 installer/tapper-deployment
@@ -202,7 +222,8 @@ installer/tapper-deployment
 \item 	Now edit the Makefile in the Tapper-Deployment installer folder and configure variable TAPPER\_SERVER which 
 		is the hostname of the machine that is currently installing the starter-kit. For now disregard the TESTMACHINE 
 		variables, you should have something similar to this in the Makefile.
-\lstset{caption= Makefile Configuration}
+
+\lstset{language=bash,caption= Makefile Configuration}
 \begin{lstlisting}
 # initial machine names
 TAPPER_SERVER=cernvm-server
@@ -217,18 +238,22 @@ TESTMACHINE3=bullock
 		existing MySQL installation/database with a password set for the ``root'' account}. Finally, if you have any errors or
 		other issues during the installation, please contact us with a summary of the problem and send us a copy of the installation 
 		log ``install.log''.
-\lstset{caption= Install Tapper-Deployment}
+
+\lstset{language=bash,caption= Install Tapper-Deployment}
 \begin{lstlisting}
 $ cd installer/
 $ make localsetup 2>&1 | tee install.log
 \end{lstlisting}
 \end{enumerate}
 
+
+\newpage
 \subsection{Setting up Tapper Web Interface and Database}
 \begin{enumerate}
 \item 	Next you need to set a password for the root account of the mysql database\footnote{This will eventually be implemented in the 
 		makefile}
-\lstset{caption= Set MySQL Root Password}
+
+\lstset{language=bash,caption= Set MySQL Root Password}
 \begin{lstlisting}
 # Example: mysqladmin -u root password abc123
 $ mysqladmin -u root password <newpassword>
@@ -241,7 +266,8 @@ $ mysqladmin -u root password <newpassword>
 \item 	Next, install PHPMyAdmin so that it's easy to administrate and configure the Tapper databases, when prompted to select the
 		``Web server to reconfigure automatically'' select apache2 by pressing the space bar and press enter. \emph{If you are 
 		prompted to ``configure databases for phpmyadmin with dbconfig-common'' select {\bf NO} }.
-\lstset{caption= Install PHPMyAdmin}
+
+\lstset{language=bash,caption= Install PHPMyAdmin}
 \begin{lstlisting}
 $ apt-get update
 
@@ -260,7 +286,7 @@ $ apt-get install phpmyadmin
 		for each test client and change the hostname \emph{cernvm-host} and the values for mem, core,vendor, and has\_ecc 
 		as needed; the vendor can be AMD or Intel.
 		
-\lstset{caption= Adding Test Clients to Tapper Database}
+\lstset{language=bash,caption= Adding Test Clients to Tapper Database}
 \begin{lstlisting}
 # Add the hostname of the test client to database
 $ tapper-testrun newhost --name cernvm-host --active
@@ -282,7 +308,8 @@ $ insert into host_feature(host_id, entry, value)  values \
 		framework are all working by viewing the tapper reports in your browser at the following url, 
 		\url{http://localhost/tapper/reports} You should now see a report from whatever the ``Tapper-Machine-Name'' in 
 		demo\_report.tap was set as. \emph{For the example demo\_report.tap provided below it would be cernvm-server}.
-\lstset{caption= Send a Report from the \tapper~Server to Itself}
+
+\lstset{language=bash,caption= Send a Report from the \tapper~Server to Itself}
 \begin{lstlisting}
 # Save the following in a file named demo_report.tap
 $ vi demo_report.tap
@@ -303,7 +330,8 @@ $ cat demo_report.tap | netcat -q7 -w1 cernvm-server 7357
 		by viewing the tapper reports in your browser at the following url: \url{http://localhost/tapper/reports}. You should now see a 
 		report from whatever the ``Tapper-Machine-Name'' in demo\_report.tap was set as. \emph{For the example demo\_report.tap provided 
 		below it would be cernvm-testclient}.
-\lstset{caption= Send a Report to the \tapper~Server from a Test Client}
+
+\lstset{language=bash,caption= Send a Report to the \tapper~Server from a Test Client}
 \begin{lstlisting}
 # Save the following in a file named demo_report.tap
 $ vi demo_report.tap
@@ -327,6 +355,7 @@ $ cat demo_report.tap | netcat -q7 -w1 cernvm-server 7357
 
 
 
+\newpage
 \section{Ubuntu 10.04 Based Server Setup}
 \subsection{Installing the system}
 \label{sec:ubuntuinstall}
@@ -364,6 +393,7 @@ $ cat demo_report.tap | netcat -q7 -w1 cernvm-server 7357
 \end{enumerate}
 
 
+\newpage
 \subsection{Configuring the system}
 \label{sec:ubuntuconfig}
 \begin{enumerate}
@@ -401,6 +431,7 @@ that the following options are configured
 \end{itemize}
 
 \item	Next, open the terminal and enable SSH support by installing openSSH using the following commands
+
 \lstset{}
 \begin{lstlisting}
 # You will be prompted to enter your password
@@ -412,7 +443,8 @@ $ sudo apt-get install openssh-server
 		monitor connected to the computer.
 \begin{itemize}
 \item[a.] Edit the xorg.conf file and put the following in it
-\lstset{caption=Configuring Xorg for Headless Support}
+
+\lstset{language=bash,caption=Configuring Xorg for Headless Support}
 \begin{lstlisting}
 $ sudo gedit /etc/X11/xorg.conf
 
@@ -438,7 +470,8 @@ EndSection
 \end{lstlisting}
 	
 \item[b.] Then edit grub and set the option ``nomodeset'', and proceed to update grub and reboot
-\lstset{caption=Configuring Grub for Headless Support}
+
+\lstset{language=bash,caption=Configuring Grub for Headless Support}
 \begin{lstlisting}
 $ sudo gedit /etc/default/grub
 
@@ -460,10 +493,12 @@ $ sudo update-grub"
 \end{enumerate}
 
 
+\newpage
 \subsection{Installing the Tapper Server}
 \begin{enumerate}
 \item 	Next, execute the following commands to install necessary dependencies.
-\lstset{caption= Install Dependencies}
+
+\lstset{language=bash,caption= Install Dependencies}
 \begin{lstlisting}
 $ sudo apt-get update
 $ sudo apt-get install make
@@ -472,7 +507,8 @@ $ sudo apt-get install subversion
 
 \item 	Now, download the latest copy of the Tapper-Deployment, which is an installer for \tapper from the \cernvmreleasetesting 
 		Google Code Project page
-\lstset{caption= Download Tapper-Deployment}
+
+\lstset{language=bash,caption= Download Tapper-Deployment}
 \begin{lstlisting}
 $ svn checkout http://cernvm-release-testing.googlecode.com/svn/trunk/\
 installer/tapper-deployment
@@ -481,7 +517,8 @@ installer/tapper-deployment
 \item 	Now edit the Makefile in the Tapper-Deployment installer folder and configure variable TAPPER\_SERVER which 
 		is the hostname of the machine that is currently installing the starter-kit. For now disregard the TESTMACHINE 
 		variables, you should have something similar to this in the Makefile.
-\lstset{caption= Makefile Configuration}
+
+\lstset{language=bash,caption= Makefile Configuration}
 \begin{lstlisting}
 # initial machine names
 TAPPER_SERVER=cernvm-server
@@ -496,18 +533,22 @@ TESTMACHINE3=bullock
 		existing MySQL installation/database with a password set for the ``root'' account}. Finally, if you have any errors or
 		other issues during the installation, please contact us with a summary of the problem and send us a copy of the installation 
 		log ``install.log''. 
-\lstset{caption= Install Tapper-Deployment}
+
+\lstset{language=bash,caption= Install Tapper-Deployment}
 \begin{lstlisting}
 $ cd installer/
 $ sudo make localsetup 2>&1 | tee install.log
 \end{lstlisting}
 \end{enumerate}
 
+
+\newpage
 \subsection{Setting up Tapper Web Interface and Database}
 \begin{enumerate}
 \item 	Next you need to set a password for the root account of the mysql database\footnote{This will eventually be implemented in the 
 		makefile}
-\lstset{caption= Set MySQL Root Password}
+
+\lstset{language=bash,caption= Set MySQL Root Password}
 \begin{lstlisting}
 # Example: mysqladmin -u root password abc123
 $ sudo mysqladmin -u root password <newpassword>
@@ -520,7 +561,8 @@ $ sudo mysqladmin -u root password <newpassword>
 \item 	Next, install PHPMyAdmin so that it's easy to administrate and configure the Tapper databases, when prompted to select the
 		``Web server to reconfigure automatically'' select apache2 by pressing the space bar and press enter. \emph{If you are 
 		prompted to ``configure databases for phpmyadmin with dbconfig-common'' select {\bf NO} }.
-\lstset{caption= Install PHPMyAdmin}
+
+\lstset{language=bash,caption= Install PHPMyAdmin}
 \begin{lstlisting}
 $ sudo apt-get update
 
@@ -539,7 +581,7 @@ $ sudo apt-get install phpmyadmin
 		for each test client and change the hostname \emph{cernvm-host} and the values for mem, core,vendor, and has\_ecc 
 		as needed; the vendor can be AMD or Intel.
 		
-\lstset{caption= Adding Test Clients to Tapper Database}
+\lstset{language=bash,caption= Adding Test Clients to Tapper Database}
 \begin{lstlisting}
 # Add the hostname of the test client to database
 $ tapper-testrun newhost --name cernvm-host --active
@@ -561,7 +603,8 @@ $ insert into host_feature(host_id, entry, value)  values \
 		framework are all working by viewing the tapper reports in your browser at the following url, 
 		\url{http://localhost/tapper/reports} You should now see a report from whatever the ``Tapper-Machine-Name'' in 
 		demo\_report.tap was set as. \emph{For the example demo\_report.tap provided below it would be cernvm-server}.
-\lstset{caption= Send a Report from the \tapper~Server to Itself}
+
+\lstset{language=bash,caption= Send a Report from the \tapper~Server to Itself}
 \begin{lstlisting}
 # Save the following in a file named demo_report.tap
 $ vi demo_report.tap
@@ -582,7 +625,8 @@ $ cat demo_report.tap | netcat -q7 -w1 cernvm-server 7357
 		by viewing the tapper reports in your browser at the following url: \url{http://localhost/tapper/reports}. You should now see a 
 		report from whatever the ``Tapper-Machine-Name'' in demo\_report.tap was set as. \emph{For the example demo\_report.tap provided 
 		below it would be cernvm-testclient}.
-\lstset{caption= Send a Report to the \tapper~Server from a Test Client}
+
+\lstset{language=bash,caption= Send a Report to the \tapper~Server from a Test Client}
 \begin{lstlisting}
 # Save the following in a file named demo_report.tap
 $ vi demo_report.tap

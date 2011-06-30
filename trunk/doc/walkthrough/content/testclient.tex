@@ -2,10 +2,10 @@
 \label{sec:testclientsetup}
 
 \section{Introduction}
-The intent of this document is to provided a step-by-step guide on setting up an entire \cernvmreleasetesting\ infrastructure, including instructions
-on how to set up and configure test clients, the main server running the web interface and database, as well as writing and executing tests. If you are
-new to release testing and want a document to guide you through the entire process of setting up a working \cernvmreleasetesting\ infrastructure,
-then this guide for you.
+The intent of this document is to provided a step-by-step guide on setting up an entire \cernvmreleasetesting\ infrastructure, including 
+instructions on how to set up and configure test clients, the main server running the web interface and database, as well as writing and 
+executing tests. If you are new to release testing and want a document to guide you through the entire process of setting up a working
+ \cernvmreleasetesting\ infrastructure, then this guide for you.
 
 This section provides complete step by step instructions on how to setup and configure the test clients which are part of a basic working
 \releasetesting environment by outlining the procedure for setting up test clients on numerous platforms, hence why this is called a 
@@ -13,10 +13,11 @@ This section provides complete step by step instructions on how to setup and con
 in a terminal and install various operating systems. 
 
 As this guide is directed towards users who are new to \cernvmreleasetesting and \tapper and
-are interested in quickly getting a \cernvm testing infrastructure quickly set up, many assumptions regarding the requirements necessary are made.
-As is the case, these instructions are provided for a generalized audience based on our own experience and the requirements that we feel most users
-will have, \emph{so feel free to deviate from the instructions}. 
+are interested in quickly getting a \cernvm testing infrastructure quickly set up, many assumptions regarding the requirements necessary are 
+made.As is the case, these instructions are provided for a generalized audience based on our own experience and the requirements that we feel 
+most users will have, \emph{so feel free to deviate from the instructions}. 
 
+\newpage
 \section{Windows 7 Test Client Setup}
 \subsection{Installing the system}
 \label{sec:windows7install}
@@ -75,6 +76,7 @@ will have, \emph{so feel free to deviate from the instructions}.
 \item	Finally, at the last stage of the installation titled, ``Select your computer's current location'' select the option ``Work 
 		network'',\emph{this is very important for networking configurations and virtual machine networking}.
 \end{enumerate}
+\newpage
 \subsection{Configuring the system}
 \label{sec:windows7config}
 \begin{enumerate}
@@ -202,15 +204,25 @@ will have, \emph{so feel free to deviate from the instructions}.
 \end{itemize}
 \end{enumerate}
 
+\newpage
 \subsection{Installing and configuring the hypervisors}
 \subsection{Configuring the CernVM Image}
 \subsection{Installing and configuring Cygwin}
+%TODO: ADD INSTRUCTIONS FOR SETTING UP CYGWIN ENVIRONMENT, WHICH IS NECESSARY TO RUN TEST SUITE
+%		THE CYGWIN ENVIRONMENT REQUIRES THE FOLLOWING TO RUN TEST SUITES
+%		-> BASH
+%		-> ALL UNIX UTILITIES (GREP, WGET, CURL, SSH, AWK, SED, NETCAT, TEST, FIND, ...)
+%		-> PERL, THE ISSUE WILL BE TO USE STRAWBERRY PERL (WINDOWS ENVIRONMENT) OR PERL 5
+%			RUNNING IN THE CYGWIN ENVIRONMENT
+%
+%TODO:	ADD INSTRUCTIONS FOR SETTING UP SSH ON WINDOWS (THROUGH CYGWIN)
 \subsection{Setting up the Tapper Test Suite}
 
 
 
 
 
+\newpage
 \section{Red Hat Based Test Client Setup}
 \subsection{Installing the system}
 \label{sec:rhinstall}
@@ -286,6 +298,7 @@ will have, \emph{so feel free to deviate from the instructions}.
 \end{enumerate}
 
 
+\newpage
 \subsection{Configuring the system}
 \label{sec:rhconfig}
 \begin{enumerate}
@@ -334,7 +347,7 @@ $ su -c "gedit /etc/gdm/custom.conf"
 \item[b.]	Then in the custom.conf file, put the following under the heading [daemon], which will automatically
 			log the system in as the user you created, \emph{make sure you replace the user cernvm with the user
 			that you created}.
-\lstset{caption=Configure Automatic Login}
+\lstset{language=bash,caption=Configure Automatic Login}
 \begin{lstlisting}
 AutomaticLoginEnable=true
 AutomaticLogin=cernvm
@@ -394,7 +407,7 @@ $ gunzip cernvm*.gz
 \item \verb|<mac address>| not a necessity, but change it to something slightly different
 \end{itemize}
 
-\lstset{caption=Create CernVM KVM Definition File}
+\lstset{language=bash,caption=Create CernVM KVM Definition File}
 \begin{lstlisting}
 # Install uuid tool and generate uuid
 $ su -c "yum install uuid"
@@ -465,23 +478,164 @@ $ gedit cernvm.xml
 		the virual machine and ensure that it can be started and stopped using virsh, \emph{all virsh commands require
 		root privileges, so it's easiest to simply run as as root}.
 		
-\lstset{caption= Configure the Virtual Machine and Verify it Works}
+\lstset{language=bash,caption=Configure the Virtual Machine and Verify it Works}
 \begin{lstlisting}
 $ su
-$ virsh net-autostart default
-$ virsh define /home/cernvm/image/cernvm.xml
+$ virsh -c qemu:///system 
+$ net-autostart default
+$ define /home/cernvm/image/cernvm.xml
 
 # Verify the virtual machine was added, should be in list
-$ virsh list --all
+$ list --all
 
 # Verify the virtual machine can be turned on/off
-$ virsh start cernvm
+$ start cernvm
 # Wait about 2 minutes for the system to boot
-$ virsh shutdown cernvm
+$ shutdown cernvm
 \end{lstlisting}
 \end{enumerate}
 
 
+\newpage
+\subsection{Installing and configuring VirtualBox}
+\label{sec:rhvbox}
+\begin{enumerate}
+\item	First, begin by downloading the latest version of VirtualBox from the VirtualBox download page,
+		\url{http://www.virtualbox.org/wiki/Downloads} ensure that you select the appropriate Red Hat based
+		distribution, version and architecture for your system. The following instructions for this section of
+		the guide uses VirtualBox 4.0.10 for Fedora 13, AMD64.
+		
+\item	Next, after downloading the latest version of VirtualBox for your distribution install VirtualBox as the root
+		account using the following command.
+\begin{lstlisting}
+# Enter the root password when prompted
+$ su
+$ rpm -iv VirtualBox-*.rpm
+\end{lstlisting}	
+
+\item	Next, in order to use VirtualBox and have full access to the drivers needed for USB support, ensure that the root
+		account belongs to the group ``vboxusers''. Begin by navigating to \verb|System -> Users and Groups| and then from
+		the ``User Manager'' window click the ``Groups'' tab, under the column ``Group Name'' for the group ``vboxusers'' 
+		ensure that root is one of the group members. If the root account is not a group member of ``vboxusers'' highlight
+		the ``vboxusers'' entry and click the ``Properties'' button, then enable the root account from the list of users
+		and click ``OK'' to apply the changes.
+		
+\item	Due to an issue with VirtualBox\footnote{The issues is that VirtualBox looks for virtual machine configuration files (*.vbox)
+		in the ``VirtualBox VMs'' folder of the user that launched VirtualBox. The issue is worsened by the fact that there can
+		only be one ``VirtualBox VMs'' folder which causes conflicts with multiple users.}, in order for it to work with virsh 
+		the virtual machine(s) must be created and configured as the root account, otherwise when you try to connect or start a 
+		VirtualBox virtual machine with virsh you will get an ``unknown error'', which is obviously very vague and difficult to 
+		resolve. {\bf Therefore ALWAYS start VirtualBox as the root account using the following procedure}.
+
+\lstset{language=bash,caption=Always Start VirtualBox as Root}
+\begin{lstlisting}
+# Switch to the root account, enter root password
+$ su
+
+# Start VirtualBox as root
+$ virtualbox
+\end{lstlisting}
+
+\item	Next, to verify that VirtualBox has been installed properly and that virsh can connect to the VirtualBox hypervisor, 
+		verify that the VirtualBox module, \emph{vboxdrv} has been loaded and that you are able to connect to the virsh console 
+		without any errors.
+
+\lstset{language=bash,caption=Verify that virsh can Access VirtualBox}
+\begin{lstlisting}
+$ su
+
+# Verify that the vboxdrv module is loaded
+$ lsmod | grep -i vboxdrv
+
+# Verify that virsh can connect to virtualbox
+$ virsh -c vbox:///session
+\end{lstlisting}
+
+\item	Now, proceed to download and extract the desired VirtualBox virtual machine image onto the system from the \cernvm download 
+		portal, url{http://cernvm.cern.ch/portal/downloads} it is recommended that you download the VirtualBox Desktop image for your 
+		architecture. For this guide the Desktop image will be downloaded as it is the most practical image for the majority of 
+		users.
+		
+\lstset{language=bash,caption=Download and Extract CernVM VirtualBox Desktop Image}
+\begin{lstlisting}
+$ wget http://rbuilder.cern.ch/downloadImage?fileId=1711
+$ gunzip cernvm*.gz
+\end{lstlisting}
+
+\item 	Now, to ensure that VirtualBox is properly configured and installed, follow this guide provided on the CernVM website
+		\url{http://cernvm.cern.ch/portal/vbinstallation} which provides step by step instructions.{\bf Again, ensure that you 
+		ALWAYS start VirtualBox as the root account}.
+
+\item	Furthermore the following VirtualBox options must also be applied, as they are specific to configuring a \cernvm test client.
+\begin{itemize}
+\item[a.]	Navigate to \verb|Settings -> System -> Motherboard| for boot order list, floppy disks are redundant nowadays so disable 
+			floppy from the boot order list. Then, disable the option ``Enable absolute pointing device'', which is for tablets.
+			
+\item[b.]	Next, go to the option \verb|System -> Processor|, and ensure that the option ``Enable PAE/NX'' is disabled
+			as it best left disabled for \cernvm images~\footnote{Physical Address Extension (PAE) is useful if you are running a 
+			32-bit processor as this enables a 32-bit operating system to access to more than 4GB of memory}.
+			
+\item[c.] 	Now, go to the next option \verb|System -> Acceleration|, if your system supports VT-x or AMD-V it is {\bf HIGHLY} 
+			recommended that you enable these options ``Enable Nested Paging'' and ``Enable VT-x/AMD-V'' for performance gains. 
+			To verify that your system supports this execute the following command, the output should not be empty. 
+
+\lstset{language=bash}
+\begin{lstlisting}
+egrep '(vmx|svm)' --color=always /proc/cpuinfo
+\end{lstlisting}
+
+\item[d.]	Next go the setting for ``Audio'', audio is mostly redundant and unnecessary for \cernvm, so disable the audio unless
+			you explicitly require audio support.
+			
+\item[e.]	Finally, since virsh only supports console access through a serial port for LXC, Xen, QEMU/KVM, and UML, go to the
+			setting ``Serial Ports'' and simply verify that all of the serial ports as disabled for VirtualBox.
+\end{itemize}
+
+\item	Now that the virtual machine has been created and configured verify that it is able to boot completely without crashing,
+		\emph{you will be presented with a login screen when it has booted completely}. Then shutdown the virtual machine by clicking 
+		``Actions'' from within the virtual machine and selecting `Shutdown'', after the virtual machine has shutdown close
+		VirtualBox and then connect to the VirtualBox hypervisor and determine that you can view, start, and stop virtual machine.
+
+\lstset{language=bash,caption=Verify VirtualBox Works with Virsh}
+\begin{lstlisting}
+$ su
+$ virsh --connect vbox:///session
+
+# Verify the virtualbox virtual machine is accessible
+# Name of the virtual machine created should be listed
+$ list --all
+
+# Verify the virtual machine can be turned on/off
+$ start <name of virtual machine>
+# Wait about 2 minutes for the system to boot
+$ shutdown <name of virtual machine>
+\end{lstlisting}
+
+\item	Finally, configure the the virtual machine network to automatically start when the system boots and then create an
+		XML definition file of the virtual machine, which will be used later by the test scripts. In the following example 
+		save the XML definition file with the same name as the virtual machine that was created, such as 
+		\emph{cernvm-vbox-2.3.0.xml} so that it is easy to differentiate between multiple virtual machines for different
+		hypervisors.
+
+\lstset{language=bash,caption=Create XML Definition File and Configure Network}
+\begin{lstlisting}
+$ su
+
+# Create virtual machine XML definition file
+$ virsh --connect vbox:///session dumpxml <name of virtual machine> \
+> <name of virtual machine>.xml
+
+# Configure virsh network for VirtualBox
+$ virsh --connect vbox:///session
+$ net-start vboxnet0
+$ net-autostart vboxnet0
+\end{lstlisting}				
+\end{enumerate}
+
+
+
+
+\newpage
 \subsection{Configuring the CernVM Image}
 \label{sec:rhcernvmconfig}
 \begin{enumerate}
@@ -505,7 +659,7 @@ $ ssh <user you created>@cernvm-image-ipaddress
 
 \item	Now that you are logged into the system through SSH, execute the following instructions to enable virsh console access.
 		
-\lstset{caption= Enable Virsh Console Access}
+\lstset{language=bash,caption=Enable Virsh Console Access}
 \begin{lstlisting}
 # Type the following command, and enter a root password you won't forget
 $ sudo passwd root
@@ -530,7 +684,7 @@ s0:2345:respawn:/sbin/agetty -L 38400 ttyS0 vt100
 		enter after entering the password}, then enable root login through SSH using the following commands. {\bf To 
 		disconnect from the virsh console and return to the host machine console, press CTRL + ]  which is ( \^~] )}
 				
-\lstset{caption= Enable SSH Root Login}
+\lstset{language=bash,caption=Enable SSH Root Login}
 \begin{lstlisting}
 # Reboot the system and the console should now work
 # Wait for it to completely shut off and turn on
@@ -549,7 +703,7 @@ $ vi /etc/ssh/sshd_config
 \item 	Next from the host machine \emph{ie. the machine you're currently using} enable automatic login as root 
 		through ssh on the KVM guest, first ensure that the guest machine has been started.
 		
-\lstset{caption= Enable Automatic SSH Root Login}
+\lstset{language=bash,caption=Enable Automatic SSH Root Login}
 \begin{lstlisting}
 # Restart the virtual machine wait for 
 # it to completely shut off and turn on
@@ -577,6 +731,7 @@ $ ssh root@cernvm-image-ipaddress
 		Setup''~\ref{sec:serversetup} as the \tapper~server does not require virtual machine creation and configuration.
 \end{enumerate}
 
+\newpage
 \subsection{Setting up the Tapper Test Suite}
 \label{sec:rhtestsuite}
 \begin{enumerate}
@@ -593,7 +748,7 @@ $ ssh root@cernvm-image-ipaddress
 		\footnote{This is why a consistent hostname convention was emphasized earlier, as reports are often sorted and organized 
 		based on hostnames}.
 		
-\lstset{caption= Send a Basic Report to the \tapper~Server}
+\lstset{language=bash,caption=Send a Basic Report to the \tapper~Server}
 \begin{lstlisting}
 # Save the following in a file named demo_report.tap
 $ vi demo_report.tap
@@ -612,7 +767,7 @@ $ cat demo_report.tap | nc -w10 cernvm-server 7357
 \item 	Next, download a copy of tapper-autoreport and the CernVM Test Cases from the Google Code svn repository
 		\cite{GCreleasetesting} and install the tapper-autoreport dependencies.
 		
-\lstset{caption= Install \tapper~AutoReport and Dependencies}
+\lstset{language=bash,caption=Install \tapper~AutoReport and Dependencies}
 \begin{lstlisting}
 # Install subversion, required to checkout auto-tapper
 $ yum install subversion
@@ -649,13 +804,14 @@ $ install XML::XPath
 		following url: \url{http://localhost/tapper/reports}. You should now see new report from the test client, there should be a 
 		report from a system with the same hostname\footnote{This is why a consistent hostname convention was emphasized earlier, as 
 		reports are often sorted and organized based on hostnames}.
-\lstset{caption= Run \tapper-AutoReport for CernVM Test Cases}
+\lstset{language=bash,caption=Run \tapper-AutoReport for CernVM Test Cases}
 \begin{lstlisting}
 # Simply execute the script and wait for it to finish
 ./cernvm-tests.sh
 \end{lstlisting}
 \end{enumerate}
 
+\newpage
 \section{Debian Based Test Client Setup}
 \subsection{Installing the system}
 \label{sec:debianinstall}
@@ -695,7 +851,7 @@ the following
 		and the second primary partition as a SWAP file using the remaining free space. The following is an example of what the partiton 
 		layout would look like for a 40.0 GB hard drive with 2GB of ram.
 
-\lstset{caption=Manual Partition Layout Example}
+\lstset{language=bash,caption=Manual Partition Layout Example}
 \begin{lstlisting}
 #1	PRIMARY	36.0 GB		B f	 EXT4	/
 #2	PRIMARY	4.0  GB		  f	 SWAP	SWAP
@@ -721,6 +877,7 @@ the following
 \end{enumerate}
 
 
+\newpage
 \subsection{Configuring the system}
 \label{sec:debianconfig}
 \begin{enumerate}
@@ -761,14 +918,14 @@ and then set it to login to the user account you created previously (such as cer
 \item Next, remove cd-rom support from sources.list, which is used by Debian for updates \footnote{And is a nuisance for any new user
 as it forces you to find the CD and put it in the computer for the update to continue}, execute the following command with root privileges
 and comment out any lines that start with ``deb cdrom'' by using a \#
-\lstset{caption=Removing CD-ROM Requirement for Updates}
+\lstset{language=bash,caption=Removing CD-ROM Requirement for Updates}
 \begin{lstlisting}
 $ su -c "gedit /etc/apt/sources.list"
 \end{lstlisting}
 
 \item	Again, continue to edit /etc/apt/sources.list still with root privileges and ensure that each line ends with ``main 
 		contrib non-free'', then save the file and do the following command with root privileges.
-\lstset{caption=Updating the System}
+\lstset{language=bash,caption=Updating the System}
 \begin{lstlisting}
 $ su -c "apt-get update"
 \end{lstlisting}
@@ -783,7 +940,7 @@ configured
 		monitor connected to the computer
 \begin{itemize}
 \item[a.] Edit the xorg.conf file and put the following in it
-\lstset{caption=Configuring Xorg for Headless Support}
+\lstset{language=bash,caption=Configuring Xorg for Headless Support}
 \begin{lstlisting}
 $ su -c "gedit /etc/X11/xorg.conf"
 
@@ -809,7 +966,7 @@ EndSection
 \end{lstlisting}
 	
 \item[b.] Then edit grub and set the option ``nomodeset'', and proceed to update grub and reboot
-\lstset{caption=Configuring Grub for Headless Support}
+\lstset{language=bash,caption=Configuring Grub for Headless Support}
 \begin{lstlisting}
 $ su -c "gedit /etc/default/grub"
 
@@ -830,11 +987,12 @@ $ su -c "update-grub"
 		completed the updates reboot the system
 \end{enumerate}
 
+\newpage
 \subsection{Installing and configuring the hypervisors}
 \label{sec:debianhypervisor}
 \begin{enumerate}
 \item The first step is to install the hypervisor, start by installing kvm and virsh using the following command with root privileges
-\lstset{caption=Installing KVM and Virsh Support}
+\lstset{language=bash,caption=Installing KVM and Virsh Support}
 \begin{lstlisting}
 $ su 	-c "apt-get install qemu-kvm libvirt-bin"
 \end{lstlisting}
@@ -844,7 +1002,7 @@ $ su 	-c "apt-get install qemu-kvm libvirt-bin"
 		download the KVM Basic image for your architecture}, for this guide the basic image will be downloaded as it is the most 
 		practical image for the majority of users.
 
-\lstset{caption=Download and Extract CernVM KVM Basic Image}
+\lstset{language=bash,caption=Download and Extract CernVM KVM Basic Image}
 \begin{lstlisting}
 $ wget http://rbuilder.cern.ch/downloadImage?fileId=1719
 $ gunzip cernvm*.gz
@@ -860,7 +1018,7 @@ $ gunzip cernvm*.gz
 \item \verb|<mac address>| not a necessity, but change it to something slightly different
 \end{itemize}
 
-\lstset{caption=Create CernVM KVM Definition File}
+\lstset{language=bash,caption=Create CernVM KVM Definition File}
 \begin{lstlisting}
 # Install uuid tool and generate uuid
 $ su -c "apt-get install uuid"
@@ -930,7 +1088,7 @@ $ gedit cernvm.xml
 \item	Finally, configure the the virtual machine network to automatically start when the system boots, then create 
 		the virual machine and ensure that it can be started and stopped using virsh, \emph{all virsh commands require
 		root privileges, so it easiest to simply run as as root}.
-\lstset{caption= Configure the Virtual Machine and Verify it Works}
+\lstset{language=bash,caption= Configure the Virtual Machine and Verify it Works}
 \begin{lstlisting}
 $ su
 $ virsh net-autostart default
@@ -946,6 +1104,7 @@ $ virsh shutdown cernvm
 \end{lstlisting}
 \end{enumerate}
 
+\newpage
 \subsection{Configuring the CernVM Image}
 \label{sec:cernvmconfig}
 \begin{enumerate}
@@ -968,7 +1127,7 @@ $ ssh <user you created>@cernvm-image-ipaddress
 
 \item	Now that you are logged into the system through SSH, execute the following instructions to enable virsh console access.
 		
-\lstset{caption= Enable Virsh Console Access}
+\lstset{language=bash,caption= Enable Virsh Console Access}
 \begin{lstlisting}
 # Type the following command, and enter a root password you won't forget
 $ sudo passwd root
@@ -993,7 +1152,7 @@ s0:2345:respawn:/sbin/agetty -L 38400 ttyS0 vt100
 		enter after entering the password}, then enable root login through SSH using the following commands. {\bf To 
 		disconnect from the virsh console and return to the host machine console, press CTRL + ]  which is ( \^~] )}
 		
-\lstset{caption= Enable SSH Root Login}
+\lstset{language=bash,caption= Enable SSH Root Login}
 \begin{lstlisting}
 # Reboot the system and the console should now work
 # Wait for it to completely shut off and turn on
@@ -1010,7 +1169,7 @@ $ vi /etc/ssh/sshd_config
 
 \item 	Next from the host machine \emph{ie. the machine you're currently using} enable automatic login as root 
 		through ssh on the KVM guest, first ensure that the guest machine has been started.
-\lstset{caption= Enable Automatic SSH Root Login}
+\lstset{language=bash,caption=Enable Automatic SSH Root Login}
 \begin{lstlisting}
 # Restart the virtual machine wait for 
 # it to completely shut off and turn on
@@ -1038,6 +1197,7 @@ $ ssh root@cernvm-image-ipaddress
 		Setup''~\ref{sec:serversetup} as the \tapper~server does not require virtual machine creation and configuration.
 \end{enumerate}
 
+\newpage
 \subsection{Setting up the Tapper Test Suite}
 \label{sec:debiantestsuite}
 \begin{enumerate}
@@ -1047,6 +1207,7 @@ $ ssh root@cernvm-image-ipaddress
 \end{enumerate}
 
 
+\newpage
 \section{OS X Test Client Setup}
 \subsection{Installing the system}
 \subsection{Configuring the system}
