@@ -17,6 +17,9 @@ are interested in quickly getting a \cernvm testing infrastructure quickly set u
 made.As is the case, these instructions are provided for a generalized audience based on our own experience and the requirements that we feel 
 most users will have, \emph{so feel free to deviate from the instructions}. 
 
+
+
+
 \newpage
 \section{Windows 7 Test Client Setup}
 \subsection{Installing the system}
@@ -76,6 +79,8 @@ most users will have, \emph{so feel free to deviate from the instructions}.
 \item	Finally, at the last stage of the installation titled, ``Select your computer's current location'' select the option ``Work 
 		network'',\emph{this is very important for networking configurations and virtual machine networking}.
 \end{enumerate}
+
+
 \newpage
 \subsection{Configuring the system}
 \label{sec:windows7config}
@@ -204,6 +209,7 @@ most users will have, \emph{so feel free to deviate from the instructions}.
 \end{itemize}
 \end{enumerate}
 
+
 \newpage
 \subsection{Installing and configuring the hypervisors}
 \subsection{Configuring the CernVM Image}
@@ -217,7 +223,6 @@ most users will have, \emph{so feel free to deviate from the instructions}.
 %
 %TODO:	ADD INSTRUCTIONS FOR SETTING UP SSH ON WINDOWS (THROUGH CYGWIN)
 \subsection{Setting up the Tapper Test Suite}
-
 
 
 
@@ -332,6 +337,7 @@ most users will have, \emph{so feel free to deviate from the instructions}.
 			daemons and should not be a problem if this is just being accessed internally}.
 
 \item[b.]	Now that the firewall is disabled, configure sshd, the ssh daemon, to run on startup
+
 \begin{lstlisting}
 $ su -c "chkconfig --level 345 sshd on"
 \end{lstlisting}
@@ -347,6 +353,7 @@ $ su -c "gedit /etc/gdm/custom.conf"
 \item[b.]	Then in the custom.conf file, put the following under the heading [daemon], which will automatically
 			log the system in as the user you created, \emph{make sure you replace the user cernvm with the user
 			that you created}.
+
 \lstset{language=bash,caption=Configure Automatic Login}
 \begin{lstlisting}
 AutomaticLoginEnable=true
@@ -375,24 +382,137 @@ TimedLoginDelay=0
 \end{enumerate}
 
 
-\subsection{Installing and configuring the hypervisors}
-\label{sec:rhhypervisor}
+\newpage
+\subsection{Installing libvirt and virsh}
+\label{sec:rhvirsh}
 \begin{enumerate}
-\item	The first step is to install the hypervisor, start by installing kvm and virsh using the following commands with root 
-		privileges
+\item	The virtualization API libvirt and the command line tool virsh~\cite{libvirt} are the essential components required 
+		for setting up a test client and must be installed and properly configured before any testing can begin. Ensure that
+		you follow the proceeding directions carefully and validate that virsh is working properly before proceeding to 
+		install and configure the various hypervisors.
 		
-\lstset{caption=Installing KVM and Virsh Support}
+\item	First, begin by reviewing the release news listed on the libvirt website, \url{http://libvirt.org/news.htm} and read 
+		through the release notes for the latest version released to make sure that there are no regressions or deprecated 
+		support for the platforms you wish to support. If you intend to set up an entire infrastructure and support all of the
+		\cernvm virtualization platforms, which would include \emph{Xen, KVM, VirtualBox, and VMware}, then you must download
+		a version later than \emph{0.8.7} as there was no support for VMware prior to that release.
+
+\item	Next, download the latest release that is a {\bf src.rpm} file from the libvirt release server, 
+		\url{http://libvirt.org/sources/} based on the latest release which does not have any regressions or deprecations for
+		the virtualization platforms you wish to support~\footnote{This shouldn't be an issue but just in case there is a 
+		newer version in which Xen support is deprecated, then you would need to use the last release which has Xen support}.
+		As of this date, the latest release of libvirt is version 0.9.2, this is the release that will be used for the
+		following instructions and examples.
+		
+\item	Next, install the following dependencies which are required to generate the libvirt rpm files from the src.rpm file
+		that was downloaded, \emph{from now on execute all commands as root}.
+		
+\lstset{language=bash,caption=Install src.rpm Dependencies}
 \begin{lstlisting}
-$ su -c "yum install @virtualization"
-$ su -c "service libvirtd start"
+# Change to root account, enter password if prompted
+$ su
+
+# Install dependencies for using a src.rpm
+$ yum install rpm rpm-devel rpm-libs rpmdevtools rpm-python \
+rpm-build rpmrebuild
 \end{lstlisting}
 
-\item	Now, proceed to download and extract the desired kvm virtual machine image onto the system from the CernVM download 
-		portal\footnote{The images can be obtained here: \url{http://cernvm.cern.ch/portal/downloads} it is recommended that you 
-		download the KVM Basic image for your architecture}, for this guide the basic image will be downloaded as it is the most 
-		practical image for the majority of users.
+\item	Next, install the following dependencies which are required to install libvirt.
 
-\lstset{caption=Download and Extract CernVM KVM Basic Image}
+\lstset{language=bash,caption=Install libvirt Dependencies}
+\begin{lstlisting}
+# Change to root account, enter password if prompted
+$ su
+
+# Install dependencies for libvirt
+$ yum install xhtml1-dtds readline-devel ncurses-devel gettext augeas \
+libpciaccess-devel yajl-devel libpcap-devel avahi-devel radvd \
+cyrus-sasl-devel parted-devel libcap-ng-devel libssh2-devel \
+audit-libs-devel systemtap-sdt-devel gnutls-utils gnutls-devel \
+python-devel xen-devel libudev-devel libnl-devel device-mapper-devel \
+numactl-devel netcf-devel libcurl-devel libcgroup
+\end{lstlisting}
+	
+\item 	Next, create the libvirt RPM installation files using the following command, replace the src.rpm file
+		shown in the example with the file you downloaded previously.
+
+\lstset{language=bash,caption=Create libvirt RPM Files}
+\begin{lstlisting}
+# Change to root account, enter password if prompted
+$ su
+
+$ rpmbuild --rebuild libvirt-0.9.2-1.fc14.src.rpm
+\end{lstlisting}
+
+\item	Finally, install the libvirt RPM files by navigating to the \verb|/root/rpmbuild/RPMS| folder and
+		then changing to the directory for your computer architecture \emph{such as x86\_64}. Then install
+		the files in the same order as shown in the example, replacing the version of src.rpm file shown in 
+		the example	with the version of the files in your directory, most importantly install the files
+		in the following order: \emph{libvirt-client, libvirt-devel, libvirt-python, libvirt}. Finally,
+		if a package does not install or complains about conflicts use the \emph{--force} argument to
+		force the installation.
+
+\lstset{language=bash,caption=Install libvirt}
+\begin{lstlisting}
+# Change to root account, enter password if prompted
+$ su
+
+# Change to location of RPM files
+$ cd /root/rpmbuild/RPMS/x86_64/
+
+# Install the files in the following order, if install
+# fails or has conflicts use   rpm -iv --force   
+$ rpm -iv libvirt-client-0.9.2-1.fc13.x86_64.rpm 
+$ rpm -iv libvirt-devel-0.9.2-1.fc13.x86_64.rpm
+$ rpm -iv libvirt-python-0.9.2-1.fc13.x86_64.rpm
+$ rpm -iv libvirt-0.9.2-1.fc13.x86_64.rpm
+\end{lstlisting}
+
+\item 	Finally, start the service libvirtd, and ensure that virsh installed correctly and is running by 
+		connecting to the test hypervisor and ensuring that the test virtual machine, named ``test'' is running.
+
+\lstset{language=bash,caption=Verify virsh was Installed Properly}
+\begin{lstlisting}
+# Change to root account, enter password if prompted
+$ su
+
+# Verify virsh is working, test should be running
+$ service libvirtd start
+$ virsh -c test:///default list --all
+\end{lstlisting}
+\end{enumerate}
+
+
+\newpage
+\subsection{Installing and configuring KVM}
+\label{sec:rhkvm}
+\begin{enumerate}
+\item	The first step is to install the KVM hypervisor, start by installing KVM and the other additional packages such
+		as virt-manager, which is a graphical management tool and virt-install, which is a command line interface (CLI)
+		virtual machine creation/installation/configuration tool using the following commands with root privileges. If
+		you receive a message that a package is already installed then simply continue.
+
+\lstset{language=bash,caption=Installing KVM and Other Related Programs}
+\begin{lstlisting}
+$ yum install virt-manager qemu-kvm python-virtinst virt-viewer
+\end{lstlisting}
+
+\item	Next, verify that KVM has been installed properly and that virsh can connect to the KVM hypervisor using the
+		following command, if you are able to connect to the virsh console without any errors then virsh is able
+		to connect to the KVM hypervisor.
+
+\lstset{language=bash,caption=Verify that virsh can Access KVM}
+\begin{lstlisting}
+$ su
+$ virsh -c qemu:///session
+\end{lstlisting}
+
+\item	Now, proceed to download and extract the desired KVM virtual machine image onto the system from the \cernvm download 
+		portal, url{http://cernvm.cern.ch/portal/downloads} it is recommended that you download the KVM Basic image for your 
+		architecture. For this guide the basic image will be downloaded as it is the most practical image for the majority of 
+		users.
+		
+\lstset{language=bash,caption=Download and Extract CernVM KVM Basic Image}
 \begin{lstlisting}
 $ wget http://rbuilder.cern.ch/downloadImage?fileId=1719
 $ gunzip cernvm*.gz
@@ -731,6 +851,7 @@ $ ssh root@cernvm-image-ipaddress
 		Setup''~\ref{sec:serversetup} as the \tapper~server does not require virtual machine creation and configuration.
 \end{enumerate}
 
+
 \newpage
 \subsection{Setting up the Tapper Test Suite}
 \label{sec:rhtestsuite}
@@ -804,12 +925,16 @@ $ install XML::XPath
 		following url: \url{http://localhost/tapper/reports}. You should now see new report from the test client, there should be a 
 		report from a system with the same hostname\footnote{This is why a consistent hostname convention was emphasized earlier, as 
 		reports are often sorted and organized based on hostnames}.
+
 \lstset{language=bash,caption=Run \tapper-AutoReport for CernVM Test Cases}
 \begin{lstlisting}
 # Simply execute the script and wait for it to finish
 ./cernvm-tests.sh
 \end{lstlisting}
 \end{enumerate}
+
+
+
 
 \newpage
 \section{Debian Based Test Client Setup}
@@ -918,6 +1043,7 @@ and then set it to login to the user account you created previously (such as cer
 \item Next, remove cd-rom support from sources.list, which is used by Debian for updates \footnote{And is a nuisance for any new user
 as it forces you to find the CD and put it in the computer for the update to continue}, execute the following command with root privileges
 and comment out any lines that start with ``deb cdrom'' by using a \#
+
 \lstset{language=bash,caption=Removing CD-ROM Requirement for Updates}
 \begin{lstlisting}
 $ su -c "gedit /etc/apt/sources.list"
@@ -925,6 +1051,7 @@ $ su -c "gedit /etc/apt/sources.list"
 
 \item	Again, continue to edit /etc/apt/sources.list still with root privileges and ensure that each line ends with ``main 
 		contrib non-free'', then save the file and do the following command with root privileges.
+
 \lstset{language=bash,caption=Updating the System}
 \begin{lstlisting}
 $ su -c "apt-get update"
@@ -940,6 +1067,7 @@ configured
 		monitor connected to the computer
 \begin{itemize}
 \item[a.] Edit the xorg.conf file and put the following in it
+
 \lstset{language=bash,caption=Configuring Xorg for Headless Support}
 \begin{lstlisting}
 $ su -c "gedit /etc/X11/xorg.conf"
@@ -966,6 +1094,7 @@ EndSection
 \end{lstlisting}
 	
 \item[b.] Then edit grub and set the option ``nomodeset'', and proceed to update grub and reboot
+
 \lstset{language=bash,caption=Configuring Grub for Headless Support}
 \begin{lstlisting}
 $ su -c "gedit /etc/default/grub"
@@ -987,11 +1116,13 @@ $ su -c "update-grub"
 		completed the updates reboot the system
 \end{enumerate}
 
+
 \newpage
 \subsection{Installing and configuring the hypervisors}
 \label{sec:debianhypervisor}
 \begin{enumerate}
 \item The first step is to install the hypervisor, start by installing kvm and virsh using the following command with root privileges
+
 \lstset{language=bash,caption=Installing KVM and Virsh Support}
 \begin{lstlisting}
 $ su 	-c "apt-get install qemu-kvm libvirt-bin"
@@ -1088,6 +1219,7 @@ $ gedit cernvm.xml
 \item	Finally, configure the the virtual machine network to automatically start when the system boots, then create 
 		the virual machine and ensure that it can be started and stopped using virsh, \emph{all virsh commands require
 		root privileges, so it easiest to simply run as as root}.
+
 \lstset{language=bash,caption= Configure the Virtual Machine and Verify it Works}
 \begin{lstlisting}
 $ su
@@ -1103,6 +1235,7 @@ $ virsh start cernvm
 $ virsh shutdown cernvm
 \end{lstlisting}
 \end{enumerate}
+
 
 \newpage
 \subsection{Configuring the CernVM Image}
@@ -1169,6 +1302,7 @@ $ vi /etc/ssh/sshd_config
 
 \item 	Next from the host machine \emph{ie. the machine you're currently using} enable automatic login as root 
 		through ssh on the KVM guest, first ensure that the guest machine has been started.
+
 \lstset{language=bash,caption=Enable Automatic SSH Root Login}
 \begin{lstlisting}
 # Restart the virtual machine wait for 
@@ -1197,6 +1331,7 @@ $ ssh root@cernvm-image-ipaddress
 		Setup''~\ref{sec:serversetup} as the \tapper~server does not require virtual machine creation and configuration.
 \end{enumerate}
 
+
 \newpage
 \subsection{Setting up the Tapper Test Suite}
 \label{sec:debiantestsuite}
@@ -1205,6 +1340,8 @@ $ ssh root@cernvm-image-ipaddress
 		to follow the instructions for setting up and configuring the \tapper~server in the section ``Server Platform Setup''}		
 		~\ref{sec:serversetup}.
 \end{enumerate}
+
+
 
 
 \newpage
