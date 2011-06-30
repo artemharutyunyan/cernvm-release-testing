@@ -1,6 +1,6 @@
 #! /bin/bash
 
-# =============================================================================
+# ====================================================================
 #
 # tapper-autoreport
 # -----------------
@@ -19,10 +19,10 @@
 #
 # It is licensed under a 2-clause BSD license. See the LICENSE file.
 #
-# =============================================================================
+# ====================================================================
 
 
-# ========================== Utility functions ================================
+# ==================== Utility functions =============================
 
 # gets vendor "AMD" or "Intel" from /proc/cpuinfo
 get_vendor () {
@@ -166,6 +166,15 @@ require_root () {
         autoreport_skip_all "Need to run as root"
     fi
 }
+first_file () {
+    for i in $(seq 1 $#) ; do
+        file=${!i}
+        if [ -r "$file" ] ; then
+            echo "$file"
+            return
+        fi
+    done
+}
 # ==================== TAP utils ====================
 
 get_tap_counter () {
@@ -177,13 +186,19 @@ get_tapdata_counter () {
 }
 
 append_tap () {
-    tap_report="${1:-'not ok - unknown TAP line in utility function append_tap'}"
-    TAP=( "${TAP[@]}" "$1" )
+    tapline="${1:-'not ok - unknown TAP line in utility function append_tap'}"
+    TAP=( "${TAP[@]}" "$tapline" )
 }
 
 append_tapdata () {
-    tap_report="${1:-'not ok - unknown TAP line in utility function append_tapdata'}"
-    TAPDATA=( "${TAPDATA[@]}" "$1" )
+    tapline="${1:-'not ok - unknown TAP line in utility function append_tapdata'}"
+    TAPDATA=( "${TAPDATA[@]}" "$tapline" )
+}
+
+append_comment () {
+    tapline="# ${1:-''}"
+    TAP=( "${TAP[@]}" "$tapline" )
+    COMMENTCOUNTER=$((COMMENTCOUNTER + 1))
 }
 
 # Add a file to the list of additional files to be uploaded
@@ -301,6 +316,9 @@ cpuinfo=$(
 )
 # TODO: bogomips from /proc/cpuinfo
 
+BOOTCONFIG="/boot/config-$kernelrelease"
+PROCCONFIG="/proc/config.gz"
+
 ticketurl=${TICKETURL:-""}
 wikiurl=${WIKIURL:-""}
 planningid=${PLANNINGID:-""}
@@ -406,9 +424,6 @@ done
 
 # ===== kernel config files ==================
 
-BOOTCONFIG="/boot/config-$kernelrelease"
-PROCCONFIG="/proc/config.gz"
-
 if [ ! "$NOUPLOAD" ] ; then
     if [ ! "x1" = "x$DONTREPEATMETA" ] ; then
         if [ -e "$BOOTCONFIG" ] ; then
@@ -445,7 +460,7 @@ TAPPER_API_PORT=${TAPPER_API_PORT:-${ARTEMIS_API_PORT:-7358}}
 prepare_plan() {
     # count of our own tests
     COUNT=${#TAP[@]}
-    PLAN=$(($MYPLAN + $COUNT))
+    PLAN=$(($MYPLAN + $COUNT - $COMMENTCOUNTER))
 }
 
 # Append the files that were added to the list of files to be uploaded
@@ -482,6 +497,7 @@ upload_files() {
 # ===== main =========================================
 
 autoreport_main() {
+    COMMENTCOUNTER=${COMMENTCOUNTER:-0}
     if [ -n "$SKIPALL" ] ; then
         echo "$SKIPALL"
         tapper_suite_meta
@@ -495,6 +511,7 @@ autoreport_main() {
     # count of tests until "END of own tests"
     MYPLAN=4
     prepare_plan
+    echo "TAP Version 13"
     echo "1..$PLAN"
 
     # ==================== meta info ====================
