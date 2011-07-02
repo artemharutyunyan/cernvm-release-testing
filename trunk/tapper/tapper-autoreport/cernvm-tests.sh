@@ -9,34 +9,73 @@
 # and functionality of tapper, as well as to demo some sample
 # tests specific to cernvm-testing
 #
-# The following tests are executed
 #
 #
-#	Precondition Test 1 - Verify that virtual machine NAT network is active and 
-#						  set to autostart
-#	Precondition Test 2 - Verify that virtual machine domain has been created 
-#						  from an xml file
-#	Precondition Test 3 - Verify that virtual machine can be started
-#	Precondition Test 4 - Verify that virtual machine has been stopped
-#	Precondition Test 5 - Verify that the virtual has console support
-#	Precondition Test 6 - Verify that virtual machine has web interface support
-#	Precondition Test 7 - Verify that it is possible to login on web interface
+# Precondition Tests 
+# ------------------
+#
+# Precondition tests are required preconditions that must pass for
+# the results of test cases to be accurate
+#
+#
+#	Precondition Test 1  - Verify that the virtual machine XML definition file exists
+#
+#	Precondition Test 2  - Verify that the XML definition file provided is valid
+#
+# 	Precondition Test 3  - Verify that the mandatory configuration settings for the
+#						 virtual machine XML definition file have been provided
+#						 and are valid
+#
+# 	Precondition Test 4  - Verify that the hypervisor for the current virtual machine
+#						 tested is accessible, set the URI as a global variable
+#
+# 	Precondition Test 5  - Verify that virtual machine NAT network is active and 
+#						 set to autostart
+#
+# 	Precondition Test 6 - Verify that virtual machine domain has been created 
+#						from an xml file
+#
+#	Precondition Test 7	 - Verify that virtual machine can be started
+#
+#	Precondition Test 8  - Verify that virtual machine has been stopped
+#
+#	Precondition Test 9  - Verify that the virtual has console support
+#
+#	Precondition Test 10 - Verify that virtual machine has web interface support
+#
+#	Precondition Test 11 - Verify that it is possible to login on web interface
 #						  
 #
+#
+# CernVM Tests Cases
+# ------------------
+#
+# CernVM test cases are the actual test cases for testing CernVM images, the
+# following is a list of the available CernVM test cases, please refer to the
+# test suite developer manual for more detailed information about each test,
+# including an API reference for each test case
+#
+#
 #	CernVM Test Case 1 - Check login via ssh as root
+#
 #  	CernVM Test Case 2 - No error messages at boot
+#
 #  	CernVM Test Case 3 - Check for correct time / running ntpd
+#
 #	CernVM Test Case 4 - Create a new user using the CernVM web interface
+#
 #	CernVM Test Case 5 - Verify that the user is created and can be accessed
 #						 from ssh login
+#
 #	CernVM Test Case 6 - Restart through the web interface and check that there
 #						 are no error messages at boot
 #
 # =============================================================================
 
 . ./tapper-autoreport --import-utils
-. ./web-interface
 . ./virt-interface
+. ./web-interface
+. ./cernvm-preconditions
 . ./cernvm-testcases
 
 TAP[0]="ok - autoreport selftest"
@@ -66,13 +105,13 @@ main_after_hook ()
     echo "# did not get caught by the tests."
 }
 
-SUITENAME="CernVM-VirtualBox-Tests"
+SUITENAME="CernVM-VMware-Tests"
 SUITEVERSION="1.00"
 OSNAME="Fedora 13"
-VMNAME="cernvm-vbox"
-VM_XML_DEFINITION="/root/cernvm-vbox.xml" # Virtual machine XML config file
+VMNAME="cernvm-vmware"
+VM_XML_DEFINITION="/root/cernvm-vmware.xml" # Virtual machine XML config file
 CHANGESET="0"
-HOSTNAME="fedora13-vbox-host"
+HOSTNAME="fedora13-vmware-host"
 GUESTIP="192.168.1.139"
 TAPPER_REPORT_SERVER="cernvm-debian6-server"
 REPORTGROUP=selftest-`date +%Y-%m-%d | md5sum | cut -d" " -f1`
@@ -89,41 +128,67 @@ ok $? "The system is running Linux"
 # Create/configure, start, and control virtual machines tests
 #
 
-# Precondition Test 1 - Verify that virtual machine NAT network is active and 
-#						set to autostart
-set_default_net
-ok $? "Precondition Test 1 - Verify that virtual machine NAT network is active \
-and set to autostart"
+# Precondition Test 1  - Verify that the virtual machine XML definition file exists
+file_exists $VM_XML_DEFINITION
+ok $? "Precondition Test 1  - Verify that the virtual machine XML definition file exists"
 
-# Precondition Test 2 - Verify that virtual machine domain has been created 
+
+# Precondition Test 2  - Verify that the XML definition file provided is valid
+validate_def_xml $VM_XML_DEFINITION
+ok $? "Precondition Test 2  - Verify that the XML definition file provided is valid"
+
+
+# Precondition Test 3  - Verify that the mandatory configuration settings for the
+#						 virtual machine XML definition file have been provided and are valid
+validate_def_settings $VM_XML_DEFINITION
+ok $? "Precondition Test 3  - Verify that the mandatory configuration settings for the \
+virtual machine XML definition file have been provided and are valid"
+
+
+# Precondition Test 4  - Verify that the hypervisor for the current virtual machine
+#						 tested is accessible, set the URI as a global variable
+verify_hypervisor $VM_XML_DEFINITION
+ok $? "Precondition Test 4  - Verify that the hypervisor for the current virtual machine \
+tested is accessible, set the URI as a global variable"
+
+
+# Precondition Test 5  - Verify that virtual machine NAT network is active and 
+#						 set to autostart
+verify_vm_net default
+ok $? "Precondition Test 5  - Verify that virtual machine NAT network is active and \
+set to autostart"
+
+
+# Precondition Test 6 - Verify that virtual machine domain has been created 
 #						from an xml file
 create_vm $VM_XML_DEFINITION $VMNAME
-ok $? "Precondition Test 2 - Verify that virtual machine domain $VMNAME has been \
+ok $? "Precondition Test 6 - Verify that virtual machine domain $VMNAME has been \
 created from an xml file"
 
-# Precondition Test 3 - Verify that virtual machine can be started
+# Precondition Test 7 - Verify that virtual machine can be started
 start_vm $VMNAME
-ok $? "Precondition Test 3 - Verify that virtual machine $VMNAME has been started"
+ok $? "Precondition Test 7 - Verify that virtual machine $VMNAME has been started"
 
-# Precondition Test 4 - Verify that virtual machine $VMNAME has been stopped
+# Precondition Test 8 - Verify that virtual machine $VMNAME has been stopped
 stop_vm $VMNAME
-ok $? "Precondition Test 4 - Verify that virtual machine $VMNAME has been stopped"
+ok $? "Precondition Test 8 - Verify that virtual machine $VMNAME has been stopped"
 
-# Precondition Test 5 - Verify that the virtual machine has console support
+# Precondition Test 9 - Verify that the virtual machine has console support
 # Start the virtual machine and verify that it has console support
 start_vm $VMNAME
 has_console_support $VMNAME
-ok $? "Precondition Test 5 - Verify that virtual machine $VMNAME has console support"
+ok $? "Precondition Test 9 - Verify that virtual machine $VMNAME has console support"
 
-# Precondition Test 6 - Verify that virtual machine has web interface support
+# Precondition Test 10 - Verify that virtual machine has web interface support
 has_web_interface $GUESTIP web_interface.log
-ok $? "Precondition Test 6 - Verify that virtual machine $VMNAME has web interface support"
+ok $? "Precondition Test 10 - Verify that virtual machine $VMNAME has web interface support"
 add_file web_interface.log
 
-# Precondition Test 7 - Verify that it is possible to login on web interface
+# Precondition Test 11 - Verify that it is possible to login on web interface
 web_check_login $GUESTIP admin VM4l1f3 web_interface_login.log
-ok $? "Precondition Test 7 - Verify that it is possible to login on web interface"
+ok $? "Precondition Test 11 - Verify that it is possible to login on web interface"
 add_file web_interface_login.log
+
 
 
 # CernVM Test Case 1 - Check login via ssh as root
