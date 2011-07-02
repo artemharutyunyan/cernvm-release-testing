@@ -76,7 +76,105 @@ validate_def_xml()
 	return $RESULT
 }	
 		
+# Precondition Test - Verify that the mandatory configuration settings for the virtual
+#					  machine XML definition file have been provided and are valid
+# @param $1 - The virtual machine XML definition file
+validate_def_settings()
+{
+	RESULT=1
 
+	# Precondition - verify file exists
+	# Precondition - verify xml file is valid
+	if file_exists $1 ; test "$?" -eq 0 \
+	&& validate_def_xml $1 ; test "$?" -eq 0
+	then
+		# Check that mandatory settings are correct
+		# Verify domain type from xml file, return failure if not valid type
+		DOMAIN_TYPE=$(egrep -E "^<domain[[:space:]]*type='([a-zA-Z]+)'" $1 | sed -E "s/.*type='([^']+)'.*/\\1/")
+		case "$DOMAIN_TYPE" in
+		"kvm")
+		  ;;
+		"vbox")
+		  ;;
+		"vmware")
+		  ;;
+		*)
+		  return $RESULT
+		  ;;
+		esac
+
+		# Verify that the name is set
+		if egrep -q -E "^[[:space:]]*<name>.+</name>" $1 ; test "$?" -ne 0
+		then
+			# No virtual machine name set
+			return $RESULT
+		fi
+
+		# Verify that the memory is set
+		if egrep -q -E "^[[:space:]]*<memory>[0-9]+</memory>" $1 ; test "$?" -ne 0
+		then
+			# No memory set
+			return $RESULT
+		fi
+
+		# Verify that the number of virtual cpus is set
+		if egrep -q -E "^[[:space:]]*<vcpu>[0-9]{1}</vcpu>" $1 ; test "$?" -ne 0
+		then
+			# No vcpus set
+			return $RESULT
+		fi
+
+		# Verify that the virtual machine image file is set and exists
+		IMAGE_FILE=$(egrep -E "^[[:space:]]*<source file='(.*)'" $1 | sed -E "s/.*'([^']+)'.*/\\1/")
+		if file_exists $IMAGE_FILE ; test "$?" -ne 0
+		then
+			# Image file note set, or doesn't exist
+			return $RESULT
+		fi
+	
+		# All mandatory configuration settings for the virtual machine XML 
+		# definition file have been provided and are valid
+		RESULT=0
+	fi
+
+	return $RESULT
+}
+
+# Precondition Test - Verify that the hypervisor for the current virtual machine
+#					  tested is accessible, set the hypervisor URI as a global variable
+# @param $1 - The virtual machine XML definition file
+verify_hypervisor()
+{
+	RESULT=1
+	URI="test:///default"
+
+	# Precondition - Validate the mandatory virtual machine settings for the hypervisor
+	if validate_def_settings $1 ; test "$?" -eq 0
+	then
+		# Set the virsh URI for the virtual machine hypervisor
+		DOMAIN_TYPE=$(egrep -E "^<domain[[:space:]]*type='([a-zA-Z]+)'" $1 | sed -E "s/.*type='([^']+)'.*/\\1/")
+		case "$DOMAIN_TYPE" in
+		"kvm")
+		  URI="qemu:///system"
+		  ;;
+		"vbox")
+		  URI="vbox:///session"
+		  ;;
+		"vmware")
+		  URI="vmwarews:///session"
+		  ;;
+		esac
+	fi
+
+	# If it is possible to connect to the hypervisor through virsh export URI
+	if connect_virsh $URI ; test "$?" -eq 0
+	then
+		export "$URI"
+		RESULT=0
+	fi
+
+	return $RESULT
+}
 
 # 	TODO CLEAN UP THE FOLLOWING PRECONDITON TESTS AND PLACE THEM IN THIS FILE
 #	Precondition Test 2 - Verify that virtual machine domain has been created 
