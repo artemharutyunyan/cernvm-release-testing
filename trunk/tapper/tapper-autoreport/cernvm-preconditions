@@ -1,0 +1,93 @@
+#! /bin/bash
+
+# =============================================================================
+#
+# cernvm-preconditions
+# --------------------
+#
+# This script contains each of the CernVM Release Testing precondition
+# tests, which are required preconditions that must pass for the results 
+# of test cases to be accurate. The precondition tests have a simple
+# interface to execute each test and each test returns either a success or 
+# failure, (0 or 1)
+#
+# More complex precondition tests can be created by combining other 
+# precondition tests as prerequisites for a precondition test
+#
+# =============================================================================
+
+# GENERIC PRECONDITION TESTS
+# --------------------------
+
+# Precondition Test - Verify that a file exists
+# @param $1 - The location and name of the file
+file_exists()
+{
+	RESULT=1
+
+	if [ -f "$1" ]
+	then
+		RESULT=0
+	fi
+
+	return $RESULT
+}
+
+
+# VIRTUAL MACHINE RELATED PRECONDITION TESTS
+# ------------------------------------------
+
+# Precondition Test - Verify that virtual machine NAT network is active and 
+#					  set to autostart
+# @param $1 - The virtual machine network name
+verify_vm_net()
+{
+	RESULT=1
+
+	# Verify that the network is set as active
+	if vm_net_active $1 ; test "$?" -eq 0
+	then
+		# Verify that the network set as autostart
+		if vm_net_autostart $1 ; test "$?" -eq 0
+		then
+			RESULT=0
+		fi
+	fi
+
+	return $RESULT
+}
+
+# Precondition Test - Verify that the XML definition file provided is valid
+# @param $1 - The virtual machine XML definition file
+validate_def_xml()
+{
+	RESULT=1
+
+	# Precondition - verify file exists
+	if file_exists $1 ; test "$?" -eq 0
+	then
+		# Verify xml file is valid
+		if xmllint --noout $1 ; test "$?" -eq 0
+		then
+			RESULT=0
+		fi
+	fi
+
+	return $RESULT
+}	
+		
+
+
+# 	TODO CLEAN UP THE FOLLOWING PRECONDITON TESTS AND PLACE THEM IN THIS FILE
+#	Precondition Test 2 - Verify that virtual machine domain has been created 
+#						  from an xml file
+#
+#	Precondition Test 3 - Verify that virtual machine can be started
+#
+#	Precondition Test 4 - Verify that virtual machine has been stopped
+#
+#	Precondition Test 5 - Verify that the virtual has console support
+#
+#	Precondition Test 6 - Verify that virtual machine has web interface support
+#
+#	Precondition Test 7 - Verify that it is possible to login on web interface
