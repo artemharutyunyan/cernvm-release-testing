@@ -17,21 +17,43 @@
 
 
 # Set the default network as active and verify it is active
-set_default_net()
-{
-	virsh net-autostart default
-	virsh net-list --all | egrep -q "^default[[:space:]]*active[[:space:]]*yes"
+# @param $1 - The virtual machine network name
+vm_net_active()
+{	
+	virsh --connect $URI net-list --all | egrep -q "^$1[[:space:]]*active"
+	
+	if [ "$?" -eq 1 ]
+	then
+		virsh --connect $URI net-start $1
+		virsh --connect $URI net-list --all | egrep -q "^$1[[:space:]]*active"
+	fi	
 	
 	return $?
 }
+
+# Set the default network to autostart and verify that it is set to autostart
+# @param $1 - The virtual machine network name
+vm_net_autostart()
+{
+	virsh --connect $URI net-list --all | egrep -q "^$1[[:space:]]*active[[:space:]]*yes"
+
+	if [ "$?" -eq 1 ]
+	then
+		virsh --connect $URI net-autostart $1
+		virsh --connect $URI net-list --all | egrep -q "^$1[[:space:]]*active[[:space:]]*yes"
+	fi	
+
+	return $?
+}
+
 
 # Create a virtual machine from an xml file, verify it has been created 
 # @param $1 - The path to the virtual machine
 # @param $2 - The name of the virtual machine
 create_vm()
 {
-	virsh define $1
-	virsh list --all | grep -q $2
+	virsh --connect $URI create $1
+	virsh --connect $URI list --all | grep -q $2
 	
 	return $?
 }
@@ -42,8 +64,8 @@ create_vm()
 # @param $1 - The name of the virtual machine
 destroy_vm()
 {
-	virsh undefine $1
-	virsh list --all | grep -q $1
+	virsh --connect $URI undefine $1
+	virsh --connect $URI list --all | grep -q $1
 	
 	if [ $? -eq 0 ]
 	then
@@ -57,10 +79,10 @@ destroy_vm()
 # @param $1 - The name of the virtual machine
 start_vm()
 {	
-	virsh start $1
+	virsh --connect $URI start $1
 	# Wait two minutes for virtual machine to start
 	sleep 120
-	virsh list --all | egrep -q "^[[:space:]]*[[:digit:]]*[[:space:]]*$1[[:space:]]*running"
+	virsh --connect $URI list --all | egrep -q "^[[:space:]]*[[:digit:]]*[[:space:]]*$1[[:space:]]*running"
 
 	return $?
 }
@@ -69,10 +91,10 @@ start_vm()
 # @param $1 - The name of the virtual machine
 stop_vm()
 {
-	virsh shutdown $1
+	virsh --connect $URI shutdown $1
 	# Wait 2 minutes for virtual machine to turn off
 	sleep 120
-	virsh list --all | egrep -q "^[[:space:]]*-[[:space:]]*$1[[:space:]]*shut[[:space:]]off"
+	virsh --connect $URI list --all | egrep -q "^[[:space:]]*-[[:space:]]*$1[[:space:]]*shut[[:space:]]off"
 
 	return $?
 }
@@ -85,7 +107,16 @@ stop_vm()
 # @param $1 - The name of the virtual machine
 has_console_support()
 {
-	virsh ttyconsole $1
+	virsh --connect $URI ttyconsole $1
 	
+	return $?
+}
+
+# Connect to virsh for the current virtual machine hypervisor URI and display URI
+# @param $1 - The URI of the hypervisor
+connect_virsh()
+{
+	virsh -q --connect $1 uri
+
 	return $?
 }
