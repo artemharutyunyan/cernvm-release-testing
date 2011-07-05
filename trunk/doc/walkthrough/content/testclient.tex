@@ -1455,6 +1455,69 @@ if your Apple computer already came installed with one of the newer versions of 
 \end{enumerate}
 
 
+
+
+\newpage
+\subsection{Installing libvirt and virsh}
+\label{sec:osxvirsh}
+\begin{enumerate}
+\item	The virtualization API libvirt and the command line tool virsh~\cite{libvirt} are the essential components required 
+		for setting up a test client and must be installed and properly configured before any testing can begin. Ensure that
+		you follow the proceeding directions carefully and validate that virsh is working properly before proceeding to 
+		install and configure the various hypervisors.
+
+\item	First, to build libvirt from source Xcode must be installed, \url{http://developer.apple.com/xcode/}, Xcode 4 requires 
+		either a paid developer membership, or must be purchased from the App Store; but, Xcode 3 is freely available, {\bf this 
+		guide uses Xcode 3 to build libvirt from source}.
+
+\item	Next, review the release news listed on the libvirt website, \url{http://libvirt.org/news.htm} and read 
+		through the release notes for the latest version released to make sure that there are no regressions or deprecated 
+		support for the platforms you wish to support. If you intend to set up a test client which supports VMware then you must 
+		download a version later than \emph{0.8.7} as there was no support for VMware prior to that release.
+
+\item	Next, download the latest source release that is a {\bf tar.gz} file from the libvirt release server, 
+		\url{http://libvirt.org/sources/} based on the latest release which does not have any regressions or deprecations for
+		the virtualization platforms you wish to support. As of this date, the latest release of libvirt is version 0.9.2, this 
+		is the release that will be used for the following instructions and examples.
+		
+\item	Next, download and install the following dependencies which are required by libvirt, some of the newer releases are broken
+		on OS X so the follow versions must be used. Before issuing make, configure each with \emph{--prefix=/usr/local} and for
+		libgcrypt also add \emph{--disable-asm}.
+
+\begin{itemize}
+\item	libgpgerror-1.7	-	ftp://ftp.gnupg.org/gcrypt/libgpg-error/libgpg-error-1.7.tar.gz
+\item	libgcrypt-1.4.5 -	ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-1.4.5.tar.gz
+\item	gnutls-2.8.5 	-	ftp://ftp.gnu.org/pub/gnu/gnutls/gnutls-2.8.5.tar.bz2
+\end{itemize}
+
+\item	Next, configure and install libvirt using the following commands, which builds libvirt with support for VMware and
+		VirtualBox.
+
+\lstset{language=bash,caption=Configure and Install libvirt}
+\begin{lstlisting}
+# Configure libvirt with VMware/VirtualBox support
+./configure --without-xen --without-sasl --without-avahi \
+--without-polkit --without-qemu --without-lxc --without-openvz \
+--without-remote --with-libvirtd --without-uml --with-vmware --with-vbox
+
+# Build/install libvirt
+sudo make
+sudo make install
+\end{lstlisting}	
+
+\item 	Finally, ensure that virsh installed correctly and is running by connecting to the test hypervisor and ensuring 
+		that the test virtual machine, named ``test'' is running.
+
+\lstset{language=bash,caption=Verify virsh was Installed Properly}
+\begin{lstlisting}
+# Verify virsh is working, test should be running
+$ virsh -c test:///default list --all
+\end{lstlisting}
+\end{enumerate}
+
+
+
+
 \newpage
 \subsection{Installing and configuring the hypervisors}
 \subsection{Configuring the CernVM Image}
