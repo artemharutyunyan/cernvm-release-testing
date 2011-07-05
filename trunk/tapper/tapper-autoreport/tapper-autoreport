@@ -167,7 +167,7 @@ require_root () {
     fi
 }
 first_file () {
-    for i in $(seq 1 $#) ; do
+    for i in $(eval echo {1..$#}) ; do
         file=${!i}
         if [ -r "$file" ] ; then
             echo "$file"
@@ -403,7 +403,7 @@ KNOWNUSERS="root tapper"
 
 KNOWNUSERS_REGEX=$(for k in $KNOWNUSERS ; do echo $k ; done | sort | paste -sd- | sed -e 's/-/\\|/g')
 
-for i in $(seq 1 $#) ; do
+for i in $(eval echo {1..$#}) ; do
     a=${!i}
     # echo "<${a}>"
     if echo "$a" | grep -Eq '^-?[0-9]+$' ; then
@@ -466,7 +466,7 @@ prepare_plan() {
 # Append the files that were added to the list of files to be uploaded
 append_files()
 {
-    for f in $(seq 0 $(($ADDITIONALCOUNT - 1))) ; do
+    for f in $(eval echo {0..$(($ADDITIONALCOUNT - 1))}) ; do
         file="${ADDITIONALFILES[f]}"
 		FILES[$FILECOUNT]=$file
 		let FILECOUNT=FILECOUNT+1
@@ -476,7 +476,7 @@ append_files()
 upload_files() {
     MYNETCAT="$NETCAT $TAPPER_REPORT_SERVER $TAPPER_API_PORT"
     # echo "# Uploading:  $MYNETCAT ..." 1>&2
-    for f in $(seq 0 $(($FILECOUNT - 1))) ; do
+    for f in $(eval echo {0..$(($FILECOUNT - 1))}) ; do
         file="${FILES[f]}"
         filetype=""
         if echo $file | grep -Eq '\.(gz|bz2)$' ; then
@@ -520,7 +520,7 @@ autoreport_main() {
 
     # =============== own headers (later entries win) ===============
     HEADERSCOUNT=${#HEADERS[@]}
-    for l in $(seq 0 $(($HEADERSCOUNT - 1))) ; do
+    for l in $(eval echo {0..$(($HEADERSCOUNT - 1))}) ; do
         echo ${HEADERS[l]}
     done
 
@@ -546,7 +546,7 @@ autoreport_main() {
     # `==================== END of own tests ====================
 
     # ==================== remaining TAP ====================
-    for l in $(seq 0 $(($COUNT - 1))) ; do
+    for l in $(eval echo {0..$(($COUNT - 1))}) ; do
         echo ${TAP[l]}
     done
 
@@ -556,7 +556,7 @@ autoreport_main() {
     echo "  tapdata: 1"
     TAPDATACOUNT=${#TAPDATA[@]}
     if [ "$TAPDATACOUNT" -gt 0 ] ; then
-        for l in $(seq 0 $(($TAPDATACOUNT - 1))) ; do
+        for l in $(eval echo {0..$(($TAPDATACOUNT - 1))}) ; do
             echo "  ${TAPDATA[l]}"
         done
     fi
@@ -564,12 +564,12 @@ autoreport_main() {
 
     # ==================== remaining output ====================
     OUTPUTCOUNT=${#OUTPUT[@]}
-    for l in $(seq 0 $(($OUTPUTCOUNT - 1))) ; do
+    for l in $(eval echo {0..$(($OUTPUTCOUNT - 1))}) ; do
         echo ${OUTPUT[l]}
     done
 
     # ==================== files ====================
-    for f in $(seq 0 $(($FILECOUNT - 1))) ; do
+    for f in $(eval echo {0..$(($FILECOUNT - 1))}) ; do
         echo "# File upload: '${FILES[f]}'"
     done
 
