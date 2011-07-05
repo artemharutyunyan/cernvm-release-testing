@@ -1590,6 +1590,47 @@ $ net-autostart vboxnet0
 
 
 \newpage
+\subsection{Installing and configuring VMware}
+\label{sec:osxvmware}
+\begin{enumerate}
+\item	First, begin by downloading and installing the latest version of VMware Fusion for OS X from the VMware product 
+		page, \url{http://www.vmware.com/products/}, VMware Fusion requires a license, so you will have to purchase it
+		in order to continue.
+		
+% VMWARE FUSION DOES NOT WORK WITH VIRSH, WHEN YOU CONNECT TO THE VIRSH CONSOLE VMWARE WINDOW LOADS IN AND YOU CANNOT
+% EXECUTE ANY COMMANDS FROM WITHIN VIRSH, ONLY WAY TO FIX IT IS FOR ME TO START HACKING THE LIBVIRT CODE AND SUBMIT
+% CHANGES BACK UPSTREAM ON THE MAILING LISTS, WHICH REQUIRES A LOT OF WORK AND READING THROUGH THE DEVELOPERS MANUAL
+\item	Next, to verify that VMware Fusion has been installed properly, verify that the following VMware kernel extensions 
+		are loaded, currently virsh has support to connect to the VMware hypervisor, but does not support interacting with
+		VMware through VMware Fusion.
+		
+\begin{itemize}
+\item	com.vmware.kext.vmx86
+\item	com.vmware.kext.vmci
+\item	com.vmware.kext.vmioplug
+\item	com.vmware.kext.vmnet
+\end{itemize}
+
+\lstset{language=bash,caption=Verify VMware Kernel Extensions Loaded}
+\begin{lstlisting}
+# Verify that the kernel extentsions are loaded
+$ kextstat | grep -i vmware
+\end{lstlisting}
+
+\item	Now, proceed to download and extract the desired VMware virtual machine image onto the system from the \cernvm download 
+		portal, url{http://cernvm.cern.ch/portal/downloads} it is recommended that you download the VMware Desktop image for your 
+		architecture. For this guide the Desktop image will be downloaded as it is the most practical image for the majority of 
+		users.
+
+%\item  TODO: ADD INSTRUCTIONS ON EXECUTING THE SCRIPT WHICH WILL AUTOMATICALLY GENERATE AN XML DEFINTION FILE FOR THE VIRTUAL MACHINE
+%		WITHOUT HAVING TO MANUALLY (AND TEDIOUSLY) GO THROUGH AND CONFIGURE THE VIRTUAL MACHINE AND CREATE AN XML FILE MANUALLY...
+
+\end{enumerate}
+
+
+
+
+\newpage
 \subsection{Installing and configuring the hypervisors}
 \subsection{Configuring the CernVM Image}
 \subsection{Setting up the Tapper Test Suite}
