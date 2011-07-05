@@ -1519,6 +1519,77 @@ $ virsh -c test:///default list --all
 
 
 \newpage
+\subsection{Installing and configuring VirtualBox}
+\label{sec:osxvbox}
+\begin{enumerate}
+\item	First, begin by downloading and installing the latest version of VirtualBox for OS X from the VirtualBox download 
+		page, \url{http://www.virtualbox.org/wiki/Downloads} ensure that you select the appropriate architecture for your 
+		system. The following instructions for this section of the guide uses VirtualBox 4.0.10 for AMD64.
+		
+\item	Next, to verify that VirtualBox has been installed properly and that virsh can connect to the VirtualBox hypervisor, 
+		verify that the following VirtualBox kernel extensions are loaded and that you are able to connect to the virsh console 
+		without any errors.
+		
+\begin{itemize}
+\item	org.virtualbox.kext.VBoxDrv
+\item	org.virtualbox.kext.VBoxUSB
+\item	org.virtualbox.kext.VBoxNetFlt
+\item	org.virtualbox.kext.VBoxNetAdp
+\end{itemize}
+
+\lstset{language=bash,caption=Verify that virsh can Access VirtualBox}
+\begin{lstlisting}
+# Verify that the kernel extentsions are loaded
+$ kextstat | grep -i virtualbox
+
+# Verify that virsh can connect to virtualbox
+$ virsh -c vbox:///session
+\end{lstlisting}
+
+\item	Now, proceed to download and extract the desired VirtualBox virtual machine image onto the system from the \cernvm download 
+		portal, \url{http://cernvm.cern.ch/portal/downloads} it is recommended that you download the VirtualBox Desktop image for your 
+		architecture. For this guide the Desktop image will be downloaded as it is the most practical image for the majority of 
+		users.
+
+%\item  TODO: ADD INSTRUCTIONS ON EXECUTING THE SCRIPT WHICH WILL AUTOMATICALLY GENERATE AN XML DEFINTION FILE FOR THE VIRTUAL MACHINE
+%		WITHOUT HAVING TO MANUALLY (AND TEDIOUSLY) GO THROUGH AND CONFIGURE THE VIRTUAL MACHINE AND CREATE AN XML FILE MANUALLY...
+		
+
+% THIS IS AUTOMATED ANYWAYS AND PART OF THE PRECONDITION TESTS, IT'S STILL GOOD TO MANUALLY MAKE SURE VIRTUAL IMAGE ACTUALLY WORKS
+\item	Now that the virtual machine has been created and configured verify that it is able to boot completely without crashing,
+		\emph{you will be presented with a login screen when it has booted completely}. Then shutdown the virtual machine by clicking 
+		``Actions'' from within the virtual machine and selecting `Shutdown'', after the virtual machine has shutdown close
+		VirtualBox and then connect to the VirtualBox hypervisor and determine that you can view, start, and stop virtual machine.
+
+\lstset{language=bash,caption=Verify VirtualBox Works with Virsh}
+\begin{lstlisting}
+$ virsh --connect vbox:///session
+
+# Verify the virtualbox virtual machine is accessible
+# Name of the virtual machine created should be listed
+$ list --all
+
+# Verify the virtual machine can be turned on/off
+$ start <name of virtual machine>
+# Wait about 2 minutes for the system to boot
+$ shutdown <name of virtual machine>
+\end{lstlisting}
+
+\item	Finally, configure the the virtual machine network to automatically start when the system boots.
+
+\lstset{language=bash,caption=Configure Network}
+\begin{lstlisting}
+# Configure virsh network for VirtualBox
+$ virsh --connect vbox:///session
+$ net-start vboxnet0
+$ net-autostart vboxnet0
+\end{lstlisting}				
+\end{enumerate}
+
+
+
+
+\newpage
 \subsection{Installing and configuring the hypervisors}
 \subsection{Configuring the CernVM Image}
 \subsection{Setting up the Tapper Test Suite}
