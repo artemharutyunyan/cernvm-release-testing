@@ -21,17 +21,19 @@
 
 # Precondition Test - Verify that a file exists
 # @param $1 - The location and name of the file
-file_exists()
+verify_file_exists()
 {
-	RESULT=1
-
-	if [ -f "$1" ]
-	then
-		RESULT=0
-	fi
-
-	return $RESULT
+	file_exists $1
+	
+	return $?
 }
+
+# Precondition Test - Verify the hash of a file
+# @param $1 - The location and name of the file
+verify_hash()
+{
+}
+
 
 
 # VIRTUAL MACHINE RELATED PRECONDITION TESTS
@@ -128,7 +130,7 @@ validate_def_settings()
 		IMAGE_FILE=$(egrep -E "^[[:space:]]*<source file='(.*)'" $1 | sed -E "s/.*'([^']+)'.*/\\1/")
 		if file_exists $IMAGE_FILE ; test "$?" -ne 0
 		then
-			# Image file note set, or doesn't exist
+			# Image file not set, or doesn't exist
 			return $RESULT
 		fi
 	

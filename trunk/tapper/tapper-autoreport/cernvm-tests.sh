@@ -56,23 +56,26 @@
 # including an API reference for each test case
 #
 #
-#	CernVM Test Case 1 - Check login via ssh as root
+#	CernVM Test Case 1 - Download and extract the CernVM image
 #
-#  	CernVM Test Case 2 - No error messages at boot
+#	CernVM Test Case 2 - Check login via ssh as root
 #
-#  	CernVM Test Case 3 - Check for correct time / running ntpd
+#  	CernVM Test Case 3 - No error messages at boot
 #
-#	CernVM Test Case 4 - Create a new user using the CernVM web interface
+#  	CernVM Test Case 4 - Check for correct time / running ntpd
 #
-#	CernVM Test Case 5 - Verify that the user is created and can be accessed
+#	CernVM Test Case 5 - Create a new user using the CernVM web interface
+#
+#	CernVM Test Case 6 - Verify that the user is created and can be accessed
 #						 from ssh login
 #
-#	CernVM Test Case 6 - Restart through the web interface and check that there
+#	CernVM Test Case 7 - Restart through the web interface and check that there
 #						 are no error messages at boot
 #
 # =============================================================================
 
 . ./tapper-autoreport --import-utils
+. ./general-interface
 . ./virt-interface
 . ./web-interface
 . ./cernvm-preconditions
@@ -191,39 +194,49 @@ add_file web_interface_login.log
 
 
 
-# CernVM Test Case 1 - Check login via ssh as root
+#
+# CernVM Test Cases
+# Execute CernVM image specific Test Cases
+#
+
+# CernVM Test Case 1 - Download and extract the CernVM image
+download_extract http://arch-server/cernvm-2.3.0-x86_64.vmware.tar.gz \
+http://arch-server/cernvm-2.3.0-x86_64.vmware.md5 cernvm_image_download.log
+ok $? "CernVM Test Case 1 - Download and extract the CernVM image"
+
+# CernVM Test Case 2 - Check login via ssh as root
 check_ssh root $GUESTIP
-ok $? "CernVM Test Case 1 - Check login via ssh as root"
+ok $? "CernVM Test Case 2 - Check login via ssh as root"
 
 
-# CernVM Test Case 2 - No error messages at boot
+# CernVM Test Case 3 - No error messages at boot
 check_boot_error $GUESTIP $BOOT_ERRORS
-ok $? "CernVM Test Case 2 - No error messages at boot"
+ok $? "CernVM Test Case 3 - No error messages at boot"
 add_file $BOOT_ERRORS
 
 
-# CernVM Test Case 3 - Check for correct time / running ntpd
+# CernVM Test Case 4 - Check for correct time / running ntpd
 check_time $GUESTIP
-ok $? "CernVM Test Case 3 - Check for correct time / running ntpd"
+ok $? "CernVM Test Case 4 - Check for correct time / running ntpd"
 
 
-# CernVM Test Case 4 - Create a new user using the CernVM web interface
+# CernVM Test Case 5 - Create a new user using the CernVM web interface
 web_create_user $GUESTIP gnuuser VM4l1f3 web_interface_newuser.log
-ok $? "CernVM Test Case 4 - Create a new user using the CernVM web interface"
+ok $? "CernVM Test Case 5 - Create a new user using the CernVM web interface"
 add_file web_interface_newuser.log
 
 
-# CernVM Test Case 5 - Verify that the user is created and can be accessed
+# CernVM Test Case 6 - Verify that the user is created and can be accessed
 #					   from ssh login
 check_ssh todd $GUESTIP
-ok $? "CernVM Test Case 5 - Verify that the user is created and can be accessed \
+ok $? "CernVM Test Case 6 - Verify that the user is created and can be accessed \
 from ssh login"
 
 
-# CernVM Test Case 6 - Restart through the web interface and check that there
+# CernVM Test Case 7 - Restart through the web interface and check that there
 #					   are no error messages at boot
 web_restart $GUESTIP web_interface_reboot.log web_restart_boot.log
-ok $? "CernVM Test Case 6 - Restart through the web interface and check that \
+ok $? "CernVM Test Case 7 - Restart through the web interface and check that \
 there are no error messages at boot"
 add_file web_interface_reboot.log
 add_file web_restart_boot.log
