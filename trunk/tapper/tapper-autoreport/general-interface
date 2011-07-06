@@ -29,6 +29,39 @@ file_exists()
 	return $RESULT
 }
 
+# Extracts a file based on extension and returns location of extracted folder
+# @param $1 - The location and name of the file
+extract_file()
+{
+	RESULT=1
+	FOLDER=""
+
+	# Determine the extension of the file
+	EXTENSION=$(echo $1 | sed -E "s/^.*\.(.*\..*)/\\1/")
+	
+	# Extract the file based on extension
+	case "${EXTENSION}" in
+	"tar.gz")
+	  FOLDER=$(echo $1 | sed -E "s/^(.*)\.tar\.gz/\\1/")
+	  mkdir -p ${FOLDER}
+	  tar -xvzf ${FILENAME} -C ${FOLDER} > /dev/null 2>&1
+	  ;;
+	"*.gz")
+	  FOLDER=$(echo $1 | sed -E "s/^(.*)\.gz/\\1/")
+	  mkdir -p ${FOLDER}
+	  mv -f $1 ${FOLDER}/
+	  cd ${FOLDER}/ ; gunzip -vd ${FILENAME} > /dev/null 2>&1
+	  ;;
+	*)
+	  return $RESULT
+	  ;;
+	esac
+
+	RESULT="$?"
+	echo ${FOLDER}
+	return $RESULT
+}
+
 # Function that returns the name of a file to be downloaded given a url
 # @param $1 - The download url of the file
 filename_from_url()
@@ -41,4 +74,43 @@ filename_from_url()
 	FILENAME=$(echo ${LOCATION} | sed -E "s/^.*\/(.*)/\\1/")
 	
 	echo ${FILENAME}
+}
+
+# Simple function that returns the hash of a file
+# @param $1 - The location and name of the file
+# @param $2 - The type of hash, currently supported hashes are: 
+#			  crc32, md5, sha, sha1, sha224, sha256, sha384, sha512 
+get_hash()
+{
+	HASH=""
+		
+		# Get the hash of the file
+		case "$2" in
+		"crc32")
+		  HASH=$(cksum $1 | awk '{print $1}')
+		  ;;
+		"md5")
+		  HASH=$(md5sum $1 | awk '{print $1}')
+		  ;;
+		"sha")
+		  HASH=$(shasum $1 | awk '{print $1}')
+		  ;;
+		"sha1")
+		  HASH=$(sha1sum $1 | awk '{print $1}')
+		  ;;
+		"sha224")
+		  HASH=$(sha224sum $1 | awk '{print $1}')
+		  ;;
+		"sha256")
+		  HASH=$(sha256sum $1 | awk '{print $1}')
+		  ;;
+		"sha384")
+		  HASH=$(sha384sum $1 | awk '{print $1}')
+		  ;;
+		"sha512")
+		  HASH=$(sha512sum $1 | awk '{print $1}')
+		  ;;
+		esac
+
+	echo ${HASH}
 }
