@@ -1,0 +1,44 @@
+#! /bin/bash
+
+# =============================================================================
+#
+# general-interface
+# -----------------
+#
+# This script contains general interface functions that interface with 
+# the host system and provide generic functionality such as checking the
+# host architecture, getting the host operating system, checking if a file
+# exists, etc.
+#
+# These functions can be utilized to create precondition tests and test 
+# cases which require generic functionality that is not part of the
+# virt or web interface functions
+#
+# =============================================================================
+
+# Simple function that checks if a file exists
+# @param $1 - The location and name of the file
+file_exists()
+{
+	RESULT=1
+	if [ -e "$1" ]
+	then
+		RESULT=0
+	fi
+
+	return $RESULT
+}
+
+# Function that returns the name of a file to be downloaded given a url
+# @param $1 - The download url of the file
+filename_from_url()
+{
+	# Get the http header with actual location of the file
+	# Filter the ^M characters out of the stream (this caused many headaches)
+	LOCATION=$(curl -i $1 | sed 's/'"$(printf '\015')"'$//g' | egrep -E "^Location:[[:space:]]*")
+
+	# Get the filename from location
+	FILENAME=$(echo ${LOCATION} | sed -E "s/^.*\/(.*)/\\1/")
+	
+	echo ${FILENAME}
+}
