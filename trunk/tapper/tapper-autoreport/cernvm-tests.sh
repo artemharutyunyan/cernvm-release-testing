@@ -18,6 +18,15 @@
 # the results of test cases to be accurate
 #
 #
+# 	Precondition Test   - Download and extract the CernVM image, returns the location 
+#					  	 of the extracted cernvm image file
+#
+# 	Precondition Test   - Create an XML definition file for the virtual machine based
+#						 on the template XML definition file and settings defined and
+#						 return the location of the final xml defintion file
+
+
+
 #	Precondition Test 1  - Verify that the virtual machine XML definition file exists
 #
 #	Precondition Test 2  - Verify that the XML definition file provided is valid
@@ -56,8 +65,6 @@
 # including an API reference for each test case
 #
 #
-#	CernVM Test Case 1 - Download and extract the CernVM image
-#
 #	CernVM Test Case 2 - Check login via ssh as root
 #
 #  	CernVM Test Case 3 - No error messages at boot
@@ -85,9 +92,9 @@ TAP[0]="ok - autoreport selftest"
 #TAP[1]="ok - some other description"
 #append_tap "ok - the simplest of all tests"
 
-#HEADERS[0]="# Tapper-KVM-Version: 4.0.1"
-#HEADERS[1]="# Tapper-CernVM-Changeset: 1234"
-#HEADERS[2]="# Tapper-KVM-Base-OS-description: CernVM 2.3.0"
+HEADERS[0]="# Tapper-KVM-Version: 4.0.1"
+HEADERS[1]="# Tapper-CernVM-Changeset: 1234"
+HEADERS[2]="# Tapper-KVM-Base-OS-description: CernVM 2.3.0"
 
 #OUTPUT[0]="I am misc output"
 #OUTPUT[1]="I am put near the end"
@@ -108,15 +115,23 @@ main_after_hook ()
     echo "# did not get caught by the tests."
 }
 
+TEMPLATE_DIR=$(pwd)/templates
+IMAGES_DIR="/usr/share/images"		# Root directory for cernvm images
 SUITENAME="CernVM-VMware-Tests"
 SUITEVERSION="1.00"
-OSNAME="Fedora 13"
-VMNAME="cernvm-vmware"
-VM_XML_DEFINITION="/root/cernvm-vmware.xml" # Virtual machine XML config file
-CHANGESET="0"
-HOSTNAME="fedora13-vmware-host"
-GUESTIP="192.168.1.139"
 TAPPER_REPORT_SERVER="cernvm-debian6-server"
+IMAGE_URL="http://arch-server/cernvm-2.3.0-x86_64.hdd.gz"
+HASH_URL="http://arch-server/cernvm-2.3.0-x86_64.md5"
+OSNAME="Fedora 13"
+VM_XML_DEFINITION=""	# The location and name of the virtual machine definition file
+VM_NAME="cernvm-kvm-2.3.0"
+VM_CPUS="1"
+VM_MEMORY=""
+CERNVM_IMAGE=""		# The location and name of the CernVM image file
+CHANGESET="0"
+HOSTNAME="fedora13-kvm-host"
+GUESTIP="192.168.1.139"
+
 REPORTGROUP=selftest-`date +%Y-%m-%d | md5sum | cut -d" " -f1`
 BOOT_ERRORS="boot_error.log"
 NOSEND=0
@@ -130,6 +145,19 @@ ok $? "The system is running Linux"
 # CernVM Precondition Tests
 # Create/configure, start, and control virtual machines tests
 #
+
+# Precondition Test 1  - Download and extract the CernVM image
+CERNVM_IMAGE=$(download_extract  $IMAGE_URL $HASH_URL cernvm_image_download.log)
+ok $? "Precondition Test 1 - Download and extract the CernVM image"
+
+# Precondition Test 2  - Create an XML definition file for the virtual machine based on 
+#				       the template XML definition file and settings provided
+# @param $1	The template file to use
+# @param $2 The directory to save the final xml definition file in 
+VM_XML_DEFINITION=$(create_def cernvm-kvm.xml $IMAGES_DIR/kvm)
+ok $? "Precondition Test 2 - Create an XML definition file for the virtual machine \
+based on the template XML definition file and settings provided"
+
 
 # Precondition Test 1  - Verify that the virtual machine XML definition file exists
 file_exists $VM_XML_DEFINITION
@@ -198,11 +226,6 @@ add_file web_interface_login.log
 # CernVM Test Cases
 # Execute CernVM image specific Test Cases
 #
-
-# CernVM Test Case 1 - Download and extract the CernVM image
-download_extract http://arch-server/cernvm-2.3.0-x86_64.vmware.tar.gz \
-http://arch-server/cernvm-2.3.0-x86_64.vmware.md5 cernvm_image_download.log
-ok $? "CernVM Test Case 1 - Download and extract the CernVM image"
 
 # CernVM Test Case 2 - Check login via ssh as root
 check_ssh root $GUESTIP

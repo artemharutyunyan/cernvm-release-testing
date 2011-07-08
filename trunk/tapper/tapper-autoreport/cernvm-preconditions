@@ -32,9 +32,50 @@ verify_file_exists()
 # @param $1 - The location and name of the file
 verify_hash()
 {
+	return 0
 }
 
+# Precondition Test - Download and extract the CernVM image, returns the location 
+#					  of the extracted cernvm image file
+# @param $1 - The CernVM image download url
+# @param $2 - The CernVM image hash url
+# @param $3 - The name of the log file
+download_extract()
+{
+	RESULT=1
+	# This is specific to the cernvm website which doesn't give the actual location
+	FILENAME=$(filename_from_url http://rbuilder.cern.ch/downloadImage?fileId=1719)
+	IMAGE_FOLDER=""
+	IMAGE_LOCATION=""
 
+	# Precondition - verify file has not already been downloaded
+	if verify_file_exists ${FILENAME} ; test "$?" -eq 1
+	then
+		# Download the image
+		wget --verbose $1 > $3 2>&1
+		echo $?
+		# If download succeeded extract file		
+		if test "$?" -eq 0 && verify_file_exists ${FILENAME} ; test "$?" -eq 0
+		then
+			echo "file downloaded, extracting"
+			# Extract image into a subfolder of the root directory for CernVM images
+			IMAGE_FOLDER=$(extract_file ${FILENAME} $IMAGES_DIR)
+			
+			echo ${IMAGE_FOLDER}
+			# Verify extraction succeeded and folder exists
+			if test "$?" -eq 0 && verify_file_exists ${IMAGE_FOLDER} ; test "$?" -eq 0
+			then
+				# Set the global setting for location of the image
+				IMAGE_LOCATION=$(filename_from_ext ${IMAGE_FOLDER} hdd)
+				echo ${IMAGE_LOCATION}
+				RESULT=0
+			fi
+		fi			
+	fi
+
+	echo ${IMAGE_LOCATION}
+	return $RESULT
+}
 
 # VIRTUAL MACHINE RELATED PRECONDITION TESTS
 # ------------------------------------------
@@ -87,12 +128,13 @@ validate_def_settings()
 
 	# Precondition - verify file exists
 	# Precondition - verify xml file is valid
-	if file_exists $1 ; test "$?" -eq 0 \
+	if verify_file_exists $1 ; test "$?" -eq 0 \
 	&& validate_def_xml $1 ; test "$?" -eq 0
 	then
 		# Check that mandatory settings are correct
 		# Verify domain type from xml file, return failure if not valid type
-		DOMAIN_TYPE=$(egrep -E "^<domain[[:space:]]*type='([a-zA-Z]+)'" $1 | sed -E "s/.*type='([^']+)'.*/\\1/")
+		DOMAIN_TYPE=$(egrep -E "^<domain[[:space:]]*type='([a-zA-Z]+)'" $1 | sed -E \
+					"s/.*type='([^']+)'.*/\\1/")
 		case "$DOMAIN_TYPE" in
 		"kvm")
 		  ;;
@@ -112,13 +154,6 @@ validate_def_settings()
 			return $RESULT
 		fi
 
-		# Verify that the memory is set
-		if egrep -q -E "^[[:space:]]*<memory>[0-9]+</memory>" $1 ; test "$?" -ne 0
-		then
-			# No memory set
-			return $RESULT
-		fi
-
 		# Verify that the number of virtual cpus is set
 		if egrep -q -E "^[[:space:]]*<vcpu>[0-9]{1}</vcpu>" $1 ; test "$?" -ne 0
 		then
@@ -126,9 +161,16 @@ validate_def_settings()
 			return $RESULT
 		fi
 
+		# Verify that the memory is set
+		if egrep -q -E "^[[:space:]]*<memory>[0-9]+</memory>" $1 ; test "$?" -ne 0
+		then
+			# No memory set
+			return $RESULT
+		fi
+
 		# Verify that the virtual machine image file is set and exists
 		IMAGE_FILE=$(egrep -E "^[[:space:]]*<source file='(.*)'" $1 | sed -E "s/.*'([^']+)'.*/\\1/")
-		if file_exists $IMAGE_FILE ; test "$?" -ne 0
+		if verify_file_exists $IMAGE_FILE ; test "$?" -ne 0
 		then
 			# Image file not set, or doesn't exist
 			return $RESULT
@@ -154,7 +196,8 @@ verify_hypervisor()
 	if validate_def_settings $1 ; test "$?" -eq 0
 	then
 		# Set the virsh URI for the virtual machine hypervisor
-		DOMAIN_TYPE=$(egrep -E "^<domain[[:space:]]*type='([a-zA-Z]+)'" $1 | sed -E "s/.*type='([^']+)'.*/\\1/")
+		DOMAIN_TYPE=$(egrep -E "^<domain[[:space:]]*type='([a-zA-Z]+)'" $1 | sed -E \
+					"s/.*type='([^']+)'.*/\\1/")
 		case "$DOMAIN_TYPE" in
 		"kvm")
 		  URI="qemu:///system"
@@ -177,6 +220,79 @@ verify_hypervisor()
 
 	return $RESULT
 }
+
+# Precondition Test 2  - Create an XML definition file for the virtual machine based
+#						 on the template XML definition file and settings defined and
+#						 return the location of the final xml defintion file
+# @param $1	- The template file to use
+# @param $2 - The directory to save the final xml definition file in
+create_def()
+{
+	RESULT=1
+	TEMPLATE_FILE="$TEMPLATE_DIR/$1"
+	DEFINITION_FILE=""
+	
+	# Precondition - Verify that the template file and destination directory exist
+	if verify_file_exists $TEMPLATE_FILE ; test "$?" -eq 0 \
+	&& verify_file_exists $2 ; test "$?" -eq 0
+	then
+		echo "success, creating file"
+		# Copy template file to the directory specied
+		cp -f $TEMPLATE_FILE $2
+		
+		# Set the definition file location
+		DEFINITION_FILE="$2/$1"
+
+		# Apply each virtual setting specified to create the final definition file
+		# Set the only mandatory definition setting not specified in template
+		if [ "$CERNVM_IMAGE" ]
+		then
+			# Set the location of the cernvm image file
+			# Must use a different delimeter since variable is a path
+			sed -i -E "s|<source file='.*'|<source file='$CERNVM_IMAGE'|" $DEFINITION_FILE
+		fi
+		
+		# Set the following template setting overrides, if specified
+		if [ "$VM_NAME" ]
+		then
+			# Override the default virtual machine name
+			sed -i -E "s|<name>.*</name>|<name>$VM_NAME</name>|" $DEFINITION_FILE
+		fi
+
+		if [ "$VM_CPUS" ]
+		then
+			# Override the default number of cpus
+			sed -i -E "s|<vcpu>.*</vcpu>|<vcpu>$VM_CPUS</vcpu>|" $DEFINITION_FILE
+		fi
+
+		if [ "$VM_MEMORY" ]
+		then
+			# Override the default amount of memory
+			sed -i -E "s|<memory>.*</memory>|<memory>$VM_MEMORY</memory>|" \
+			$DEFINITION_FILE
+		fi
+
+		if [ "$VM_NET" ]
+		then
+			# Override the default virtual network name
+			sed -i -E "s|<source[[:space:]]*network='.*'\/>|<source network='$VM_NET'\/>|" 
+			\ $DEFINITION_FILE
+		fi
+
+		if [ "$VM_VIDEO_MEMORY" ]
+		then
+			# Override the default amount of video memory
+			sed -i -E "s|vram='.*'|vram='$VM_VIDEO_MEMORY'|" $DEFINITION_FILE
+		fi
+
+		RESULT=0
+	fi
+	
+	echo $DEFINITION_FILE
+	return $RESULT
+}
+
+
 
 # 	TODO CLEAN UP THE FOLLOWING PRECONDITON TESTS AND PLACE THEM IN THIS FILE
 #	Precondition Test 2 - Verify that virtual machine domain has been created 
