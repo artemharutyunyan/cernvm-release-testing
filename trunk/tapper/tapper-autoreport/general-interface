@@ -31,6 +31,7 @@ file_exists()
 
 # Extracts a file based on extension and returns location of extracted folder
 # @param $1 - The location and name of the file
+# @param $2	- The root directory to extract the file to
 extract_file()
 {
 	RESULT=1
@@ -38,19 +39,19 @@ extract_file()
 
 	# Determine the extension of the file
 	EXTENSION=$(echo $1 | sed -E "s/^.*\.(.*\..*)/\\1/")
-	
+
 	# Extract the file based on extension
 	case "${EXTENSION}" in
 	"tar.gz")
 	  FOLDER=$(echo $1 | sed -E "s/^(.*)\.tar\.gz/\\1/")
-	  mkdir -p ${FOLDER}
-	  tar -xvzf ${FILENAME} -C ${FOLDER} > /dev/null 2>&1
+	  mkdir -p $2/${FOLDER}
+	  tar -xvzf $1 -C ${FOLDER} > /dev/null 2>&1
 	  ;;
-	"*.gz")
+	*.gz)
 	  FOLDER=$(echo $1 | sed -E "s/^(.*)\.gz/\\1/")
-	  mkdir -p ${FOLDER}
-	  mv -f $1 ${FOLDER}/
-	  cd ${FOLDER}/ ; gunzip -vd ${FILENAME} > /dev/null 2>&1
+	  mkdir -p $2/${FOLDER}
+	  mv -f $1 $2/${FOLDER}/
+	  cd $2/${FOLDER}/ ; gunzip -vd $1 > /dev/null 2>&1
 	  ;;
 	*)
 	  return $RESULT
@@ -58,7 +59,7 @@ extract_file()
 	esac
 
 	RESULT="$?"
-	echo ${FOLDER}
+	echo $2/${FOLDER}
 	return $RESULT
 }
 
@@ -74,6 +75,23 @@ filename_from_url()
 	FILENAME=$(echo ${LOCATION} | sed -E "s/^.*\/(.*)/\\1/")
 	
 	echo ${FILENAME}
+}
+
+# Function that returns the name and path of a file given the root directory and 
+# the extension of the file
+# @param $1	- The root directory to search for the file
+# @param $2 - The extension of the file to look for
+filename_from_ext()
+{
+	RESULT=1
+	
+	# Search for the file in the root directory based on extension
+	FILE_LOCATION=$(find $1/* -name "*.$2")
+	
+	RESULT="$?"
+	echo ${FILE_LOCATION}
+	
+	return $RESULT
 }
 
 # Simple function that returns the hash of a file

@@ -26,37 +26,6 @@
 #
 # =============================================================================
 
-# CernVM Test Case - Download and extract the CernVM image
-# @param $1 - The CernVM image download url
-# @param $2 - The CernVM image hash url
-# @param $3 - The name of the log file
-download_extract()
-{
-	RESULT=1
-	# This is specific to the cernvm website which doesn't give the actual location
-	FILENAME=$(filename_from_url $1)
-	FOLDER=""
-
-	# Precondition - verify file has not already been downloaded
-	if verify_file_exists ${FILENAME} ; test "$?" -eq 1
-	then
-		wget --verbose $1 > $3 2>&1
-
-		# If download succeeded extract file		
-		if test "$?" -eq 0 && verify_file_exists ${FILENAME} ; test "$?" -eq 0
-		then
-			FOLDER=$(extract_file ${FILENAME})
-
-			# Verify extraction succeeded and folder exists
-			if test "$?" -eq 0 && verify_file_exists ${FOLDER} ; test "$?" -eq 0
-			then
-				RESULT=0
-			fi
-		fi			
-	fi
-
-	return $RESULT
-}
 
 # CernVM Test Case - Check login via ssh
 # @param $1 - The username to login with

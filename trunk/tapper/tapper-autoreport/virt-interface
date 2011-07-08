@@ -48,7 +48,7 @@ vm_net_autostart()
 
 
 # Create a virtual machine from an xml file, verify it has been created 
-# @param $1 - The path to the virtual machine
+# @param $1 - The path to the virtual machine definition file
 # @param $2 - The name of the virtual machine
 create_vm()
 {
