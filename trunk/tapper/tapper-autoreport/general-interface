@@ -39,13 +39,13 @@ extract_file()
 
 	# Determine the extension of the file
 	EXTENSION=$(echo $1 | sed -E "s/^.*\.(.*\..*)/\\1/")
-
+	
 	# Extract the file based on extension
 	case "${EXTENSION}" in
 	"tar.gz")
 	  FOLDER=$(echo $1 | sed -E "s/^(.*)\.tar\.gz/\\1/")
 	  mkdir -p $2/${FOLDER}
-	  tar -xvzf $1 -C ${FOLDER} > /dev/null 2>&1
+	  tar -xvzf $1 -C $2/${FOLDER} > /dev/null 2>&1
 	  ;;
 	*.gz)
 	  FOLDER=$(echo $1 | sed -E "s/^(.*)\.gz/\\1/")
