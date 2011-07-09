@@ -16,7 +16,7 @@
 #
 # =============================================================================
 
-# Simple function that checks if a file exists
+# Simple function that checks if a file/folder exists
 # @param $1 - The location and name of the file
 file_exists()
 {
@@ -29,29 +29,27 @@ file_exists()
 	return $RESULT
 }
 
-# Extracts a file based on extension and returns location of extracted folder
+# Extracts a file based on extension within the directory it is located in
 # @param $1 - The location and name of the file
-# @param $2	- The root directory to extract the file to
 extract_file()
 {
 	RESULT=1
-	FOLDER=""
-
+	
+	# Set the root directory to extract the file within
+	FOLDER=$(echo $1 | sed -E "s/^(\/.*)+\/.*\..*/\\1/")
+	
 	# Determine the extension of the file
 	EXTENSION=$(echo $1 | sed -E "s/^.*\.(.*\..*)/\\1/")
 	
 	# Extract the file based on extension
 	case "${EXTENSION}" in
 	"tar.gz")
-	  FOLDER=$(echo $1 | sed -E "s/^(.*)\.tar\.gz/\\1/")
-	  mkdir -p $2/${FOLDER}
-	  tar -xvzf $1 -C $2/${FOLDER} > /dev/null 2>&1
+	  tar -xvzf $1 -C ${FOLDER} > /dev/null 2>&1
 	  ;;
 	*.gz)
-	  FOLDER=$(echo $1 | sed -E "s/^(.*)\.gz/\\1/")
-	  mkdir -p $2/${FOLDER}
-	  mv -f $1 $2/${FOLDER}/
-	  cd $2/${FOLDER}/ ; gunzip -vd $1 > /dev/null 2>&1
+	  # cd to folder and extract file
+	  FILE=$(echo $1 | sed -E "s/^\/.*\/(.*\.gz)/\\1/")
+	  cd ${FOLDER} ; gunzip -vd ${FILE} > /dev/null 2>&1
 	  ;;
 	*)
 	  return $RESULT
@@ -59,7 +57,6 @@ extract_file()
 	esac
 
 	RESULT="$?"
-	echo $2/${FOLDER}
 	return $RESULT
 }
 
@@ -67,7 +64,18 @@ extract_file()
 # @param $1 - The download url of the file
 filename_from_url()
 {
-	# Get the http header with actual location of the file
+	# Get the filename from location
+	FILENAME=$(echo $1 | sed -E "s/^.*\/(.*)/\\1/")
+	
+	echo ${FILENAME}
+}
+
+# Function that returns the name of a file to be downloaded given a url by
+# looking at the "Location:" specified in HTTP header
+# @param $1 - The download url of the file
+filename_from_header()
+{
+	# Get the HTTP header with actual location of the file
 	# Filter the ^M characters out of the stream (this caused many headaches)
 	LOCATION=$(curl -i $1 | sed 's/'"$(printf '\015')"'$//g' | egrep -E "^Location:[[:space:]]*")
 
@@ -77,17 +85,16 @@ filename_from_url()
 	echo ${FILENAME}
 }
 
-# Function that returns the name and path of a file given the root directory and 
-# the extension of the file
+# Function that finds a file and returns the name and path of a file given the 
+# root directory and the extension of the file
 # @param $1	- The root directory to search for the file
-# @param $2 - The extension of the file to look for
-filename_from_ext()
+# @param $2 -The extension of the file to look for
+find_file()
 {
 	RESULT=1
 	
 	# Search for the file in the root directory based on extension
 	FILE_LOCATION=$(find $1/* -name "*.$2")
-	
 	RESULT="$?"
 	echo ${FILE_LOCATION}
 	
