@@ -19,9 +19,9 @@
 # GENERIC PRECONDITION TESTS
 # --------------------------
 
-# Precondition Test - Verify that a file exists
+# Precondition Test - Verify that a file/folder exists
 # @param $1 - The location and name of the file
-verify_file_exists()
+verify_exists()
 {
 	file_exists $1
 	
@@ -59,7 +59,7 @@ image_url()
 
 	# If the download page url exists, remove control statements from file
 	# and retrieve CernVM image url from file
-	if test "$?" -eq 0 && verify_file_exists $DOWNLOAD_PAGE ; test "$?" -eq 0
+	if test "$?" -eq 0 && verify_exists $DOWNLOAD_PAGE ; test "$?" -eq 0
 	then
 		# Remove trailing control statments
 		sed -i 's/'"$(printf '\015')"'$//g' $DOWNLOAD_PAGE
@@ -126,30 +126,35 @@ download_extract()
 {
 	RESULT=1
 	# This is specific to the cernvm website which doesn't give the actual location
-	FILENAME=$(filename_from_url http://rbuilder.cern.ch/downloadImage?fileId=1711)
+	FILENAME=$(filename_from_url $1)
 	FILE_LOCATION="$2/${FILENAME}"
 	IMAGE_LOCATION=""
 
 	# Precondition - verify file has not already been downloaded
-	if verify_file_exists ${FILENAME} ; test "$?" -eq 1
+	if verify_exists ${FILE_LOCATION} ; test "$?" -eq 1
 	then
+		
+		# Create the directory if it does not already exist
+		if verify_exists $2 ; test "$?" -eq 1
+		then
+			mkdir -p $2
+		fi
+
 		# Download the image
 		wget --verbose $1 -P $2 > $3 2>&1
 
 		# If download succeeded extract file		
-		if test "$?" -eq 0 && verify_file_exists ${FILENAME} ; test "$?" -eq 0
+		if test "$?" -eq 0 && verify_exists ${FILE_LOCATION} ; test "$?" -eq 0
 		then
-			echo "file downloaded, extracting"
-			# Extract image into a subfolder of the root directory for CernVM images
-			IMAGE_FOLDER=$(extract_file ${FILENAME} $2)
+			# Extract downloaded CernVM image in the directory it is located in
+			extract_file ${FILE_LOCATION}
 			
-			echo ${IMAGE_FOLDER}
-			# Verify extraction succeeded and folder exists
-			if test "$?" -eq 0 && verify_file_exists ${IMAGE_FOLDER} ; test "$?" -eq 0
+			# Verify extraction succeeded and get the location of CernVM image file
+			if test "$?" -eq 0
 			then
-				# Set the global setting for location of the image
-				IMAGE_LOCATION=$(filename_from_ext ${IMAGE_FOLDER} hdd)
-				echo ${IMAGE_LOCATION}
+				# Get the location and name of the extracted CernVM image file
+				# which is either a hdd or vmdk file
+				IMAGE_LOCATION=$(find_file $2 hdd | find_file $2 vmdk)
 				RESULT=0
 			fi
 		fi			
@@ -212,7 +217,7 @@ validate_def_settings()
 
 	# Precondition - verify file exists
 	# Precondition - verify xml file is valid
-	if verify_file_exists $1 ; test "$?" -eq 0 \
+	if verify_exists $1 ; test "$?" -eq 0 \
 	&& validate_def_xml $1 ; test "$?" -eq 0
 	then
 		# Check that mandatory settings are correct
@@ -254,7 +259,7 @@ validate_def_settings()
 
 		# Verify that the virtual machine image file is set and exists
 		IMAGE_FILE=$(egrep -E "^[[:space:]]*<source file='(.*)'" $1 | sed -E "s/.*'([^']+)'.*/\\1/")
-		if verify_file_exists $IMAGE_FILE ; test "$?" -ne 0
+		if verify_exists $IMAGE_FILE ; test "$?" -ne 0
 		then
 			# Image file not set, or doesn't exist
 			return $RESULT
@@ -317,11 +322,10 @@ create_def()
 	DEFINITION_FILE=""
 	
 	# Precondition - Verify that the template file and destination directory exist
-	if verify_file_exists $TEMPLATE_FILE ; test "$?" -eq 0 \
-	&& verify_file_exists $2 ; test "$?" -eq 0
+	if verify_exists $TEMPLATE_FILE ; test "$?" -eq 0 \
+	&& verify_exists $2 ; test "$?" -eq 0
 	then
-		echo "success, creating file"
-		# Copy template file to the directory specied
+		# Copy template file to the directory specified
 		cp -f $TEMPLATE_FILE $2
 		
 		# Set the definition file location

@@ -121,7 +121,6 @@ main_after_hook ()
 
 TEMPLATE_DIR="$(pwd)/templates"
 IMAGES_DIR="/usr/share/images"		# Root directory for cernvm images
-IMAGE_FOLDER="$IMAGES_DIR/vmware" # Image directory for current hypervisor
 SUITENAME="CernVM-VMware-Tests"
 SUITEVERSION="1.00"
 TAPPER_REPORT_SERVER="cernvm-debian6-server"
@@ -133,10 +132,9 @@ HYPERVISOR="vmware"
 IMAGE_VERSION="2.4.0"
 IMAGE_TYPE="desktop"	# Currently only basic and desktop supported
 
-
 OSNAME="Fedora 13"
 VM_XML_DEFINITION=""	# The location and name of the virtual machine definition file
-VM_NAME="cernvm-vmware-2.3.0"
+VM_NAME="cernvm-vmware-2.4.0"
 VM_CPUS="1"
 VM_ARCH="x86"
 VM_MEMORY=""
@@ -144,6 +142,12 @@ CERNVM_IMAGE=""		# The location and name of the CernVM image file
 CHANGESET="0"
 HOSTNAME="fedora13-vmware-host"
 GUESTIP="192.168.1.139"
+
+# Set the location to download the image to based on virtual machine settings
+IMAGE_FOLDER="$IMAGES_DIR/$HYPERVISOR/$IMAGE_VERSION/$VM_ARCH"
+# Set the name of the template for the current hypervisor
+TEMPLATE="cernvm-vmwarews.xml"
+
 
 REPORTGROUP=selftest-`date +%Y-%m-%d | md5sum | cut -d" " -f1`
 BOOT_ERRORS="boot_error.log"
@@ -162,15 +166,12 @@ ok $? "The system is running Linux"
 # Precondition Test - Verify that the download page exists and that there is a 
 #					  valid download url for the CernVM image specified, returns
 #					  the url to download the image
-# @param $1 - The CernVM download page url
-# @param $2 - The image version
-# @param $3 - The hypervisor of the image
-# @param $4	- The architecture of the image
-# @param $5 - The type of image
 IMAGE_URL=$(image_url $DOWNLOAD_PAGE $IMAGE_VERSION $HYPERVISOR $VM_ARCH $IMAGE_TYPE)
 ok $? "Precondition Test - Verify that the download page exists and that there is a \
 valid download url for the CernVM image specified, returns the url to download the image"
 
+echo "For now, overwrite the image url with my own local copy"
+IMAGE_URL="http://arch-server/cernvm-desktop-2.4.0-1.1-1-x86.tar.gz"
 
 # Precondition Test 1  - Download and extract the CernVM image, returns the location 
 #					  	 of the extracted cernvm image file
@@ -181,14 +182,12 @@ ok $? "Precondition Test 1 - Download and extract the CernVM image"
 #				       the template XML definition file and settings provided
 # @param $1	The template file to use
 # @param $2 The directory to save the final xml definition file in 
-VM_XML_DEFINITION=$(create_def cernvm-vmware.xml $IMAGES_DIR)
+VM_XML_DEFINITION=$(create_def $TEMPLATE $IMAGE_FOLDER)
 ok $? "Precondition Test 2 - Create an XML definition file for the virtual machine \
 based on the template XML definition file and settings provided"
 
-
-
 # Precondition Test 1  - Verify that the virtual machine XML definition file exists
-file_exists $VM_XML_DEFINITION
+verify_exists $VM_XML_DEFINITION
 ok $? "Precondition Test 1  - Verify that the virtual machine XML definition file exists"
 
 
