@@ -1,0 +1,289 @@
+\section{OS X Test Client Setup}
+\subsection{Installing the system}
+\label{sec:osxinstall}
+
+In most cases your Apple computer should have already came with the OS X operating system installed, but in case you need to
+install the operating system manually, or perhaps you wish to install the latest operating system, such as Snow Leopard or Lion
+the following instructions are provided. The following instructions outline the procedure for installing OS X on your Apple computer, 
+if your Apple computer already came installed with one of the newer versions of OS X, then simply procede to the next section,
+``Configuring the system''~\ref{sec:osxconfig}.
+
+\begin{enumerate}
+\item	First, begin by booting from the OS X installation CD and simply wait until it boots into the installation environment.
+
+\item	Now that the installation CD has booted, the next procedure is to prepare the hard drive you with to install OS X on 
+		for installation. From the menu at the top of the screen, select \verb|Utilties -> Disk Utility...| then from the left 
+		pane, select the drive that you wish to install OS X on. Now, it is a bit unintuitive, but in order to format and parition 
+		the drive so that it can be accessed by the OS X installer, you must click on the ``Erase'' tab, \emph{It is pretty self 
+		explanatory, but this will erase everything on the hard drive}. Now, for the option ``Volume Format:'' from the drop down menu
+		select ``Mac OS Extended (Journaled)'' \footnote{This is the optimal format to use as journaled file systems are the least likely
+		filesystem to become corrupted}, then for the option ``Name:'' enter a name for the hard drive, \emph{this is not a name for the
+		computer}, so simply enter a name in all capital letters such as \emph{CERNVM}. Finally, click the ``Erase...'' button to format
+		the drive and prepare it for OS X installation.
+		
+\item	Now, go back to the OS X installer and read through and agree to the End User License Agreement, \emph{make sure you read through
+		the EULA and agree to the terms}, then click the ``Agree'' button to continue the installation.
+		
+\item	Next, at the installation stage titled, ``Select a Destination'', click on the hard drive you formatted previously, as well 
+		the name you entered for the drive when it was created should be listed below the hard drive icon, then click ``Continue''.
+		
+\item	At the next stage of the intallation titled, ``Install Summary'', if you wish to make customizations to the packages installed
+		as part of the OS X system, click the ``Customize'' button, otherwise simply click the ``Install'' button to begin the
+		installation of OS X.
+		
+\item	After the system reboots, you will be presented with a welcome screen, select your country from the list and then click
+		``Continue''.
+		
+\item 	At the next installation stage, titled ``Select Your Keyboard'', chose a keyboard layout, it is probably best to just leave
+		it at the default ``U.S.'' keyboard layout.
+		
+\item	At the next installation stage, titled ``Do You Already Own a Mac?'' simply select the option ``Do not transfer my information
+		now'' and click ``Continue''.
+		
+\item	Next, for ``Enter Your Apple ID''\footnote{This is your iTunes and Apple store account, since this is a test client we won't
+		be using iTunes} leave everything blank and simply click ``Continue''.
+		
+\item	Next for the ``Registration Information'', again just click ``Continue'' and if you are prompted by a message about ``Some
+		of your registration information is missing'', just click ``Continue'' again.
+		
+\item	Now, at the next installation stage titled ``Create Your Account'', for the options ``Full Name'' and ``Account Name:''
+		enter a name and account name that is simple and relevant such as \emph{cernvm} and set the password to something you will
+		not forget and is fairly complex with numbers and letters. But, most importantly {\bf keep the username and password entered
+		consistent across all systems created as part of the infrastructure} as it makes administration and everything else much easier. 
+		
+\item	Next for ``Select Time Zone'' click on your location on the map of the world to change the time zone, and then for the option
+		``Closest City:'' select a city near your location.
+		
+\item	Finally, at the last stage of the installation click ``Done''.	
+\end{enumerate}
+
+
+\newpage
+\subsection{Configuring the system}
+\label{sec:osxconfig}
+
+\begin{enumerate}
+\item	After the system has booted, the first thing to configure are the power management settings and other preferences, as this system
+		will be running as a test client, sleep and other automatic energy saving features must be disabled. Begin by navigating to the
+		power options, \verb|Apple logo -> System Preferences -> Energy Saver| for the option ``Computer sleep'' slide the bar to the
+		far right so that it is set to ``Never'' and ensure that the following options are all disabled.
+\begin{itemize}
+\item	Put the hard disk(s) to sleep when possible
+
+\item	Wake for Ethernet network access
+
+\item 	Allow power button to put the computer to sleep
+\end{itemize}
+
+\item	Next, set a hostname for the system from the menu \verb|Apple logo -> System Preferences -> Sharing| beside the ``Computer Name:''
+		option at the top, click the ``Edit...'' button. Then enter a relevant hostname for the system based on the hardware or operating
+		system it is running; the hostname should be relevant and unique to better identify the system. A good naming convention should 
+		refer to the hardware or operating system and call it a host to differentiate from the virtual machine that will be running as 
+		a guest, for example a hostname such as \emph{cernvm-osx-host} could be used, {\bf whatever convention you use make sure it is 
+		consistent}.
+
+\item	Next, enable SSH access to the system by navigating to \verb|Apple logo -> System Preferences -> Sharing| and from the list of 
+		services that can be shared, enable ``Remote Login'', which is SSH.
+		
+\item	Now, to enable VNC access to the system, select from the same list of services that can be shared, ``Remote Management'' and
+		for local access options window that appears, enable all of the options listed such as ``Observe'' and ``Change settings''.
+		Then to enable VNC compatibilty so that the OS X system can be accessed by other non-Apple computers, click the ``Computer
+		Settings...'' button and enable the following options and set a password for the ``VNC viewers...'' option.
+\begin{itemize}
+\item	Show Remote Management status in menu bar
+\item	Anyone may request permission to control screen
+\item	VNC viewers may control screen with password
+\end{itemize}
+
+\item	Now, to ensure that your user logs in automatically, navigate to \verb|Apple logo -> System Preferences -> Accounts| and click
+		``Login Options'', you may have to click on the lock icon and enter your password in order to make changes to the login options. 
+		Then for the option ``Automatic login:'' select your user from the list of accounts to enable automatic login.
+		
+\item 	Finally, to ensure that the settings were configured properly, reboot the machine and ensure that the following work.
+\begin{itemize}
+\item	It automatically boots up into the full desktop environment without having to login
+\item	You have access to the machine using SSH and can login
+\item	You have VNC access to the machine and can control the system using VNC	
+\end{itemize}
+\end{enumerate}
+
+
+
+
+\newpage
+\subsection{Installing libvirt and virsh}
+\label{sec:osxvirsh}
+\begin{enumerate}
+\item	The virtualization API libvirt and the command line tool virsh~\cite{libvirt} are the essential components required 
+		for setting up a test client and must be installed and properly configured before any testing can begin. Ensure that
+		you follow the proceeding directions carefully and validate that virsh is working properly before proceeding to 
+		install and configure the various hypervisors.
+
+\item	First, to build libvirt from source Xcode must be installed, \url{http://developer.apple.com/xcode/}, Xcode 4 requires 
+		either a paid developer membership, or must be purchased from the App Store; but, Xcode 3 is freely available, {\bf this 
+		guide uses Xcode 3 to build libvirt from source}.
+
+\item	Next, review the release news listed on the libvirt website, \url{http://libvirt.org/news.htm} and read 
+		through the release notes for the latest version released to make sure that there are no regressions or deprecated 
+		support for the platforms you wish to support. If you intend to set up a test client which supports VMware then you must 
+		download a version later than \emph{0.8.7} as there was no support for VMware prior to that release.
+
+\item	Next, download the latest source release that is a {\bf tar.gz} file from the libvirt release server, 
+		\url{http://libvirt.org/sources/} based on the latest release which does not have any regressions or deprecations for
+		the virtualization platforms you wish to support. As of this date, the latest release of libvirt is version 0.9.2, this 
+		is the release that will be used for the following instructions and examples.
+		
+\item	Next, download and install the following dependencies which are required by libvirt, some of the newer releases are broken
+		on OS X so the follow versions must be used. Before issuing make, configure each with \emph{--prefix=/usr/local} and for
+		libgcrypt also add \emph{--disable-asm}.
+
+\begin{itemize}
+\item	libgpgerror-1.7	-	ftp://ftp.gnupg.org/gcrypt/libgpg-error/libgpg-error-1.7.tar.gz
+\item	libgcrypt-1.4.5 -	ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-1.4.5.tar.gz
+\item	gnutls-2.8.5 	-	ftp://ftp.gnu.org/pub/gnu/gnutls/gnutls-2.8.5.tar.bz2
+\end{itemize}
+
+\item	Next, configure and install libvirt using the following commands, which builds libvirt with support for VMware and
+		VirtualBox.
+
+\lstset{language=bash,caption=Configure and Install libvirt}
+\begin{lstlisting}
+# Configure libvirt with VMware/VirtualBox support
+./configure --without-xen --without-sasl --without-avahi \
+--without-polkit --without-qemu --without-lxc --without-openvz \
+--without-remote --with-libvirtd --without-uml --with-vmware --with-vbox
+
+# Build/install libvirt
+sudo make
+sudo make install
+\end{lstlisting}	
+
+\item 	Finally, ensure that virsh installed correctly and is running by connecting to the test hypervisor and ensuring 
+		that the test virtual machine, named ``test'' is running.
+
+\lstset{language=bash,caption=Verify virsh was Installed Properly}
+\begin{lstlisting}
+# Verify virsh is working, test should be running
+$ virsh -c test:///default list --all
+\end{lstlisting}
+\end{enumerate}
+
+
+
+
+\newpage
+\subsection{Installing and configuring VirtualBox}
+\label{sec:osxvbox}
+\begin{enumerate}
+\item	First, begin by downloading and installing the latest version of VirtualBox for OS X from the VirtualBox download 
+		page, \url{http://www.virtualbox.org/wiki/Downloads} ensure that you select the appropriate architecture for your 
+		system. The following instructions for this section of the guide uses VirtualBox 4.0.10 for AMD64.
+		
+\item	Next, to verify that VirtualBox has been installed properly and that virsh can connect to the VirtualBox hypervisor, 
+		verify that the following VirtualBox kernel extensions are loaded and that you are able to connect to the virsh console 
+		without any errors.
+		
+\begin{itemize}
+\item	org.virtualbox.kext.VBoxDrv
+\item	org.virtualbox.kext.VBoxUSB
+\item	org.virtualbox.kext.VBoxNetFlt
+\item	org.virtualbox.kext.VBoxNetAdp
+\end{itemize}
+
+\lstset{language=bash,caption=Verify that virsh can Access VirtualBox}
+\begin{lstlisting}
+# Verify that the kernel extentsions are loaded
+$ kextstat | grep -i virtualbox
+
+# Verify that virsh can connect to virtualbox
+$ virsh -c vbox:///session
+\end{lstlisting}
+
+\item	Now, proceed to download and extract the desired VirtualBox virtual machine image onto the system from the \cernvm download 
+		portal, \url{http://cernvm.cern.ch/portal/downloads} it is recommended that you download the VirtualBox Desktop image for your 
+		architecture. For this guide the Desktop image will be downloaded as it is the most practical image for the majority of 
+		users.
+
+%\item  TODO: ADD INSTRUCTIONS ON EXECUTING THE SCRIPT WHICH WILL AUTOMATICALLY GENERATE AN XML DEFINTION FILE FOR THE VIRTUAL MACHINE
+%		WITHOUT HAVING TO MANUALLY (AND TEDIOUSLY) GO THROUGH AND CONFIGURE THE VIRTUAL MACHINE AND CREATE AN XML FILE MANUALLY...
+		
+
+% THIS IS AUTOMATED ANYWAYS AND PART OF THE PRECONDITION TESTS, IT'S STILL GOOD TO MANUALLY MAKE SURE VIRTUAL IMAGE ACTUALLY WORKS
+\item	Now that the virtual machine has been created and configured verify that it is able to boot completely without crashing,
+		\emph{you will be presented with a login screen when it has booted completely}. Then shutdown the virtual machine by clicking 
+		``Actions'' from within the virtual machine and selecting `Shutdown'', after the virtual machine has shutdown close
+		VirtualBox and then connect to the VirtualBox hypervisor and determine that you can view, start, and stop virtual machine.
+
+\lstset{language=bash,caption=Verify VirtualBox Works with Virsh}
+\begin{lstlisting}
+$ virsh --connect vbox:///session
+
+# Verify the virtualbox virtual machine is accessible
+# Name of the virtual machine created should be listed
+$ list --all
+
+# Verify the virtual machine can be turned on/off
+$ start <name of virtual machine>
+# Wait about 2 minutes for the system to boot
+$ shutdown <name of virtual machine>
+\end{lstlisting}
+
+\item	Finally, configure the the virtual machine network to automatically start when the system boots.
+
+\lstset{language=bash,caption=Configure Network}
+\begin{lstlisting}
+# Configure virsh network for VirtualBox
+$ virsh --connect vbox:///session
+$ net-start vboxnet0
+$ net-autostart vboxnet0
+\end{lstlisting}				
+\end{enumerate}
+
+
+
+
+\newpage
+\subsection{Installing and configuring VMware}
+\label{sec:osxvmware}
+\begin{enumerate}
+\item	First, begin by downloading and installing the latest version of VMware Fusion for OS X from the VMware product 
+		page, \url{http://www.vmware.com/products/}, VMware Fusion requires a license, so you will have to purchase it
+		in order to continue.
+		
+% VMWARE FUSION DOES NOT WORK WITH VIRSH, WHEN YOU CONNECT TO THE VIRSH CONSOLE VMWARE WINDOW LOADS IN AND YOU CANNOT
+% EXECUTE ANY COMMANDS FROM WITHIN VIRSH, ONLY WAY TO FIX IT IS FOR ME TO START HACKING THE LIBVIRT CODE AND SUBMIT
+% CHANGES BACK UPSTREAM ON THE MAILING LISTS, WHICH REQUIRES A LOT OF WORK AND READING THROUGH THE DEVELOPERS MANUAL
+\item	Next, to verify that VMware Fusion has been installed properly, verify that the following VMware kernel extensions 
+		are loaded, currently virsh has support to connect to the VMware hypervisor, but does not support interacting with
+		VMware through VMware Fusion.
+		
+\begin{itemize}
+\item	com.vmware.kext.vmx86
+\item	com.vmware.kext.vmci
+\item	com.vmware.kext.vmioplug
+\item	com.vmware.kext.vmnet
+\end{itemize}
+
+\lstset{language=bash,caption=Verify VMware Kernel Extensions Loaded}
+\begin{lstlisting}
+# Verify that the kernel extentsions are loaded
+$ kextstat | grep -i vmware
+\end{lstlisting}
+
+\item	Now, proceed to download and extract the desired VMware virtual machine image onto the system from the \cernvm download 
+		portal, url{http://cernvm.cern.ch/portal/downloads} it is recommended that you download the VMware Desktop image for your 
+		architecture. For this guide the Desktop image will be downloaded as it is the most practical image for the majority of 
+		users.
+
+%\item  TODO: ADD INSTRUCTIONS ON EXECUTING THE SCRIPT WHICH WILL AUTOMATICALLY GENERATE AN XML DEFINTION FILE FOR THE VIRTUAL MACHINE
+%		WITHOUT HAVING TO MANUALLY (AND TEDIOUSLY) GO THROUGH AND CONFIGURE THE VIRTUAL MACHINE AND CREATE AN XML FILE MANUALLY...
+
+\end{enumerate}
+
+
+
+
+\newpage
+\subsection{Installing and configuring the hypervisors}
+\subsection{Configuring the CernVM Image}
+\subsection{Setting up the Tapper Test Suite}
