@@ -176,6 +176,82 @@ web_config_password()
 }
 
 
+# TODO: ENABLE AN ARRAY / LIST OF APPLIANCE GROUPS
+# Configure the CernVM image appliance group settings using the CernVM web interface
+# @param $1 - The hostname or ip address for the web interface
+# @param $2	- The appliance primary group, all capitals, only one group may be specified
+# @param $3 - The name of the logfile
+web_config_group()
+{
+	RESULT=1
+	GROUP_REPOSITORY=""
+	HEADER=('')
+	ADDITIONAL_HEADER=('Accept: application/json' \
+					   'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' \
+					   "Referer: http://$1:8004/cernvm/Config/" \
+					   'Pragma: no-cache' \
+					   'Cache-Control: no-cache')
+
+	# Set the repository based on the primary group specified
+	case "$2" in
+	"ALICE")
+	  GROUP_REPOSITORY="alice"
+	  ;;
+	"ATLAS")
+	  GROUP_REPOSITORY="atlas%2Batlas%2Dcondb%2Cgrid"
+	  ;;
+	"CMS")
+	  GROUP_REPOSITORY="cms%2Bgrid"
+	  ;;
+	"LHCB")
+	  GROUP_REPOSITORY="lhcb%2Bgrid"
+	  ;;
+	"LCD")
+	  GROUP_REPOSITORY="lcd%2Bgrid%2Bsft"
+	  ;;
+	"NA61")
+	  GROUP_REPOSITORY="na61%2Bsft"
+	  ;;
+	"HONE")
+	  GROUP_REPOSITORY="hone%2Bsft%2Bgrid"
+	  ;;
+	"HEPSOFT")
+	  GROUP_REPOSITORY="hepsoft%2Bsft"
+	  ;;
+	"BOSS")
+	  GROUP_REPOSITORY="boss"
+	  ;;
+	"GEANT4")
+	  GROUP_REPOSITORY="geant4%2Bgrid%2Bsft"
+	  ;;
+	*)
+	  # Incorrect primary group specified, return failure
+	  return $RESULT
+	  ;;
+	esac
+
+	generate_header
+	curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" \
+	--data "cernvmOrganisation=$2" --data "cernvmRepositories=$GROUP_REPOSITORY" \
+	--location-trusted http://$1:8004/cernvm/Config/repositoriesUpdate > $3 2>&1
+	
+	# Check that curl didn't have any error return codes, then verify that the
+	# web interface admin password configured through the web interface succeeded
+	if [ "$?" -eq 0 ]
+	then
+		if grep -q -e "HTTP/1.1 403 Forbidden" $3 ; test "$?" -eq 1  && egrep -q \
+		'^\{\"message\"\:[[:space:]]*\"Completed[[:space:]]*Successfully\"\,
+		[[:space:]]*\"errors\"\:[[:space:]]*\[\]\,[[:space:]]*\"page\"\:[[:space:]]*\"\"\,
+		[[:space:]]*\"schedId\"\:[[:space:]]*[[:digit:]]*\}' $3 ; test "$?" -eq 0
+		then
+			RESULT=0
+		fi
+	fi
+
+	return $RESULT
+}
+
+
 # Create a new user using the CernVM web interface
 # @param $1 - The hostname or ip address for the web interface
 # @param $2 - The name of the new user to create
