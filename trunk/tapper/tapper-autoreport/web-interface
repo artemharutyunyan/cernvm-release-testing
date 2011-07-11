@@ -176,6 +176,44 @@ web_config_password()
 }
 
 
+# Configure the CernVM image desktop settings using the CernVM web interface
+# @param $1 - The hostname or ip address for the web interface
+# @param $2	- Configure startx on boot, accepted values are on or off
+# @param $3 - The CernVM image desktop resolution
+# @param $4	- The CernVM image keyboard locale
+# @param $5 - The name of the logfile
+web_config_desktop()
+{
+	RESULT=1
+	HEADER=('')
+	ADDITIONAL_HEADER=('Accept: application/json' \
+					   'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' \
+					   "Referer: http://$1:8004/cernvm/Config/" \
+					   'Pragma: no-cache' \
+					   'Cache-Control: no-cache')
+
+	generate_header
+	curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" --data "cernvmEdition=Desktop" \
+	--data "cernvmScreenRes=$3" --data "cernvmKeyboard=$4" --data "cernvmStartXDM=$2" \
+	--location-trusted http://$1:8004/cernvm/Config/editionUpdate > $5 2>&1
+	
+	# Check that curl didn't have any error return codes, then verify that the
+	# web interface admin password configured through the web interface succeeded
+	if [ "$?" -eq 0 ]
+	then
+		if grep -q -e "HTTP/1.1 403 Forbidden" $5 ; test "$?" -eq 1  && egrep -q \
+		'^\{\"message\"\:[[:space:]]*\"Completed[[:space:]]*Successfully\"\,
+		[[:space:]]*\"errors\"\:[[:space:]]*\[\]\,[[:space:]]*\"page\"\:[[:space:]]*\"\"\,
+		[[:space:]]*\"schedId\"\:[[:space:]]*[[:digit:]]*\}' $5 ; test "$?" -eq 0
+		then
+			RESULT=0
+		fi
+	fi
+
+	return $RESULT
+}
+
+
 # TODO: ENABLE AN ARRAY / LIST OF APPLIANCE GROUPS
 # Configure the CernVM image appliance group settings using the CernVM web interface
 # @param $1 - The hostname or ip address for the web interface
@@ -283,6 +321,36 @@ web_create_user()
 		[[:space:]]*\"errors\"\:[[:space:]]*\[\]\,[[:space:]]*\"page\"\:[[:space:]]*\"\"\,
 		[[:space:]]*\"schedId\"\:[[:space:]]*[[:digit:]]*\}' $5 ; test "$?" -eq 0
 		then	
+			RESULT=0
+		fi
+	fi
+
+	return $RESULT
+}
+
+
+# Apply settings made to the CernVM image using the CernVM web interface, which
+# then reboots the CernVM image once completed
+# @param $1 - The hostname or ip address for the web interface
+# @param $2 - The name of the logfile
+web_apply_settings()
+{
+	RESULT=1
+	HEADER=('')
+	ADDITIONAL_HEADER=('Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' \
+					   'Content-Type: application/x-www-form-urlencoded' \
+					   "Referer: http://$1:8004/cernvm/Config/")
+
+	generate_header
+	curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" --location-trusted \
+	http://$1:8004/cernvm/Config/applyUpdate > $2 2>&1
+
+	# Check that curl didn't have any error return codes, then verify that the
+	# webinterface restart succeeded 
+	if [ "$?" -eq 0 ]
+	then
+		if grep -q -e "HTTP/1.1 403 Forbidden" $2 ; test "$?" -eq 1
+		then
 			RESULT=0
 		fi
 	fi
