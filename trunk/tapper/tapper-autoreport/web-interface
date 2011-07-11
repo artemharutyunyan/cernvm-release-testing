@@ -17,7 +17,7 @@
 HEADER=('')
 # The base template http header used
 TEMPLATE_HEADER=(
-'Host: 192.168.1.139:8004' \
+"Host: 192.168.1.179:8004" \
 'User-Agent: Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.2.17) Gecko/20110428 Fedora/3.6.17-1.fc13 Firefox/3.6.17' \
 'Accept-Language: en-us,en;q=0.5' \
 'Accept-Encoding: gzip,deflate' \
@@ -51,13 +51,14 @@ generate_header()
 # Verify that virtual machine has web interface support
 # @param $1 - The hostname or ip address for the web interface
 # @param $2 - The name of the logfile
-has_web_interface()
+web_check_interface()
 {
+	RESULT=1
+
 	curl -i -v http://$1:8004/login > $2 2>&1
 
 	# Check that curl didn't return any error codes, then verify that the
-	# page is actually the CernVM web interface
-	RESULT=1
+	# page is actually the CernVM web interface	
 	if [ "$?" -eq 0 ]
 	then
 		if grep -q -e "CernVM Software Appliance" $2 ; test "$?" -eq 0 \
@@ -74,10 +75,11 @@ has_web_interface()
 # Verify that it is possible to login on web interface
 # @param $1 - The hostname or ip address for the web interface
 # @param $2 - The web interface username, usually admin
-# @param $3 - The web interface password for the user
+# @param $3 - The web interface password, by default password
 # @param $4 - The name of the logfile
 web_check_login()
 {
+	RESULT=1
 	HEADER=('')
 	ADDITIONAL_HEADER=('Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' \
 					   'Content-Type: application/x-www-form-urlencoded' \
@@ -86,18 +88,85 @@ web_check_login()
 	generate_header
 	curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" --data "user_name=$2" --data "password=$3" \
 	--data "login=Login" --location-trusted http://$1:8004/login > $4 2>&1
-
 	
 	# Check that curl didn't have any error return codes, then verify that it was
 	# was possible to login on the web interface by validating that curl was 
 	# redirected to the status page
-	RESULT=1
 	if [ "$?" -eq 0 ]
 	then
-		if grep -q -e "HTTP/1.1 403 Forbidden" $4 ; test "$?" -eq 1 && grep -q \
-		-e "Location: http://$1:8004/status/Status/" $4 ; test "$?" -eq 0 && grep \
-		-q -e '<title>CernVM Software Appliance - Appliance Status</title>' \
+		if grep -q -e "HTTP/1.1 403 Forbidden" $4 ; test "$?" -eq 1  && egrep \
+		-q '<title>CernVM[[:space:]]*Software[[:space:]]*Appliance.*</title>' \
 		$4 ; test "$?" -eq 0
+		then
+			RESULT=0
+		fi
+	fi
+
+	return $RESULT
+}
+
+
+# Configure the proxy settings using the CernVM web interface
+# @param $1 - The hostname or ip address for the web interface
+# @param $2 - The name of the logfile
+web_config_proxy()
+{
+	RESULT=1
+	HEADER=('')
+	ADDITIONAL_HEADER=('Accept: application/json' \
+					   'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' \
+					   "Referer: http://$1:8004/configure/Proxy/" \
+					   'Pragma: no-cache' \
+					   'Cache-Control: no-cache')
+
+	generate_header
+	curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" --data "httpProxy=" \
+	--data "httpPort=" --data "httpUser=" --data "httpPass=" --data "httpsProxy=" \
+	--data "httpsPort=" --data "httpsUser=" --data "httpsPass=" --location-trusted \
+	http://$1:8004/configure/Proxy/saveProxy > $2 2>&1
+	
+	# Check that curl didn't have any error return codes, then verify that the
+	# proxy settings configured through the web interface succeeded 
+	if [ "$?" -eq 0 ]
+	then
+		if grep -q -e "HTTP/1.1 403 Forbidden" $2 ; test "$?" -eq 1 && egrep -q \
+		'^\{\"message\"\:[[:space:]]*\"Proxy[[:space:]]*configuration[[:space:]]*saved\.\"\}' \
+		$2 ; test "$?" -eq 0
+		then
+			RESULT=0
+		fi
+	fi
+
+	return $RESULT
+}
+
+
+# Configure the web interface administrator password using the CernVM web interface
+# @param $1 - The hostname or ip address for the web interface
+# @param $2	- The new web interface administration password
+# @param $3 - The name of the logfile
+web_config_password()
+{
+	RESULT=1
+	HEADER=('')
+	ADDITIONAL_HEADER=('Accept: application/json' \
+					   'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' \
+					   "Referer: http://$1:8004/changepassword/ChangePassword/" \
+					   'Pragma: no-cache' \
+					   'Cache-Control: no-cache')
+
+	generate_header
+	curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" --data "pwd1=$2" \
+	--data "pwd2=$2" --location-trusted \
+	http://$1:8004/changepassword/ChangePassword/changePassword > $3 2>&1
+	
+	# Check that curl didn't have any error return codes, then verify that the
+	# web interface admin password configured through the web interface succeeded
+	if [ "$?" -eq 0 ]
+	then
+		if grep -q -e "HTTP/1.1 403 Forbidden" $3 ; test "$?" -eq 1  && egrep \
+		-q '^\{\"message\"\:[[:space:]]*\"Password[[:space:]]*changed\"\,
+		[[:space:]]*\"page\"\:[[:space:]]*\"changePassword\"\}' $3 ; test "$?" -eq 0
 		then
 			RESULT=0
 		fi
@@ -111,9 +180,11 @@ web_check_login()
 # @param $1 - The hostname or ip address for the web interface
 # @param $2 - The name of the new user to create
 # @param $3 - The password for the new user
-# @param $4 - The name of the logfile
+# @param $4	- The group for the new user
+# @param $5 - The name of the logfile
 web_create_user()
 {
+	RESULT=1
 	HEADER=('')
 	ADDITIONAL_HEADER=('Accept: application/json' \
 					   'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' \
@@ -123,18 +194,18 @@ web_create_user()
 
 	generate_header
 	curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" --data "cernvmUser=$2" --data \
-	"cernvmUserGroup=alice" --data "cernvmUserShell=%2Fbin%2Fbash" --data "newpass1=$3" \
+	"cernvmUserGroup=$4" --data "cernvmUserShell=%2Fbin%2Fbash" --data "newpass1=$3" \
 	--data "newpass2=$3" --location-trusted http://$1:8004/cernvm/User/userUpdate \
-	> $4 2>&1
+	> $5 2>&1
 	
 	# Check that curl didn't have any error return codes, then verify that the
-	# new user created through the webinterface succeeded 
-	RESULT=1
+	# new user created through the web interface succeeded 
 	if [ "$?" -eq 0 ]
 	then
-		if egrep -q '^\{\"message\"\:[[:space:]]*\"Completed[[:space:]]*Successfully\"\,
+		if grep -q -e "HTTP/1.1 403 Forbidden" $5 ; test "$?" -eq 1 && egrep -q \
+		'^\{\"message\"\:[[:space:]]*\"Completed[[:space:]]*Successfully\"\,
 		[[:space:]]*\"errors\"\:[[:space:]]*\[\]\,[[:space:]]*\"page\"\:[[:space:]]*\"\"\,
-		[[:space:]]*\"schedId\"\:[[:space:]]*[[:digit:]]*\}' $4 ; test "$?" -eq 0
+		[[:space:]]*\"schedId\"\:[[:space:]]*[[:digit:]]*\}' $5 ; test "$?" -eq 0
 		then	
 			RESULT=0
 		fi
@@ -150,6 +221,7 @@ web_create_user()
 # @param $3 - The name of the boot error logfile
 web_restart()
 {
+	RESULT=1
 	HEADER=('')
 	ADDITIONAL_HEADER=('Accept: application/json' \
 					   'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' \
@@ -164,10 +236,10 @@ web_restart()
 
 	# Check that curl didn't have any error return codes, then verify that the
 	# webinterface restart succeeded 
-	RESULT=1
 	if [ "$?" -eq 0 ]
 	then
-		if egrep -q '^\{\"message\"\:[[:space:]]*\"Rebooting[[:space:]]*now\.\"\,
+		if grep -q -e "HTTP/1.1 403 Forbidden" $2 ; test "$?" -eq 1 && egrep -q \
+		'^\{\"message\"\:[[:space:]]*\"Rebooting[[:space:]]*now\.\"\,
 		[[:space:]]*\"errors\"\:[[:space:]]*\[\]\,[[:space:]]*\"schedId\"\:
 		[[:space:]]*[[:digit:]]*\}' $2 ; test "$?" -eq 0
 		then
