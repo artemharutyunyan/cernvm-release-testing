@@ -154,7 +154,7 @@ download_extract()
 			then
 				# Get the location and name of the extracted CernVM image file
 				# which is either a hdd or vmdk file
-				IMAGE_LOCATION=$(find_file $2 hdd | find_file $2 vmdk)
+				IMAGE_LOCATION=$(find_file $2 hdd || find_file $2 vmdk)
 				RESULT=0
 			fi
 		fi			
@@ -232,6 +232,7 @@ validate_def_settings()
 		"vmware")
 		  ;;
 		*)
+		  # Failure, domain type not supported
 		  return $RESULT
 		  ;;
 		esac
@@ -258,8 +259,8 @@ validate_def_settings()
 		fi
 
 		# Verify that the virtual machine image file is set and exists
-		IMAGE_FILE=$(egrep -E "^[[:space:]]*<source file='(.*)'" $1 | sed -E "s/.*'([^']+)'.*/\\1/")
-		if verify_exists $IMAGE_FILE ; test "$?" -ne 0
+		IMAGE_FILE=$(egrep -E "^[[:space:]]*<source file='(.+)'" $1 | sed -E "s/.*'([^']+)'.*/\\1/")
+		if verify_exists ${IMAGE_FILE} ; test "$?" -ne 0
 		then
 			# Image file not set, or doesn't exist
 			return $RESULT
@@ -303,16 +304,16 @@ verify_hypervisor()
 	# If it is possible to connect to the hypervisor through virsh export URI
 	if connect_virsh $URI ; test "$?" -eq 0
 	then
-		export "$URI"
+		export URI
 		RESULT=0
 	fi
 
 	return $RESULT
 }
 
-# Precondition Test 2  - Create an XML definition file for the virtual machine based
-#						 on the template XML definition file and settings defined and
-#						 return the location of the final xml defintion file
+# Precondition Test - Create an XML definition file for the virtual machine based
+#					  on the template XML definition file and settings defined and
+#					  return the location of the final xml defintion file
 # @param $1	- The template file to use
 # @param $2 - The directory to save the final xml definition file in
 create_def()
@@ -333,14 +334,15 @@ create_def()
 
 		# Apply each virtual setting specified to create the final definition file
 		# Set the only mandatory definition setting not specified in template
-		if [ "$CERNVM_IMAGE" ]
+		if [ "${CERNVM_IMAGE}" ]
 		then
 			# Set the location of the cernvm image file
-			# Must use a different delimeter since variable is a path
-			sed -i -E "s|<source file='.*'|<source file='$CERNVM_IMAGE'|" $DEFINITION_FILE
+			# Must use a different delimeter than / for sed since variable is a path
+			sed -i -E "s|<source file='.*'|<source file='${CERNVM_IMAGE}'|" $DEFINITION_FILE
 		fi
 		
 		# Set the following template setting overrides, if specified
+		# Must use a different delimeter than / for sed since xml tags use /
 		if [ "$VM_NAME" ]
 		then
 			# Override the default virtual machine name
@@ -385,6 +387,37 @@ create_def()
 	echo $DEFINITION_FILE
 	return $RESULT
 }
+
+
+
+# WEB INTERFACE RELATED PRECONDITION TESTS
+# ------------------------------------------
+
+# Precondition Test - Setup and configure the initial CernVM image through the
+#					  web interface
+# @param $1 - The hostname or ip address for the web interface
+# @param $2 - The default username to access web interface
+# @param $3 - The default password to access web interface
+# @param $4 - The name of the logfile
+configure_image_web()
+{
+	RESULT=1
+
+	# Precondition - verify virtual machine has web interface support
+	# Precondition - verify that it is possible to login on web interface
+	if web_check_interface $1 web_config_check.log ; test "$?" -eq 0
+	&& web_check_login $1 $2 $3 web_config_login.log ; test "$?" -eq 0
+	then
+
+				
+
+	
+	
+
+}
+
+
+
 
 
 
