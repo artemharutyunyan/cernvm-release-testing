@@ -1,64 +1,4 @@
 \section{OS X Test Client Setup}
-\subsection{Installing the system}
-\label{sec:osxinstall}
-
-In most cases your Apple computer should have already came with the OS X operating system installed, but in case you need to
-install the operating system manually, or perhaps you wish to install the latest operating system, such as Snow Leopard or Lion
-the following instructions are provided. The following instructions outline the procedure for installing OS X on your Apple computer, 
-if your Apple computer already came installed with one of the newer versions of OS X, then simply procede to the next section,
-``Configuring the system''~\ref{sec:osxconfig}.
-
-\begin{enumerate}
-\item	First, begin by booting from the OS X installation CD and simply wait until it boots into the installation environment.
-
-\item	Now that the installation CD has booted, the next procedure is to prepare the hard drive you with to install OS X on 
-		for installation. From the menu at the top of the screen, select \verb|Utilties -> Disk Utility...| then from the left 
-		pane, select the drive that you wish to install OS X on. Now, it is a bit unintuitive, but in order to format and parition 
-		the drive so that it can be accessed by the OS X installer, you must click on the ``Erase'' tab, \emph{It is pretty self 
-		explanatory, but this will erase everything on the hard drive}. Now, for the option ``Volume Format:'' from the drop down menu
-		select ``Mac OS Extended (Journaled)'' \footnote{This is the optimal format to use as journaled file systems are the least likely
-		filesystem to become corrupted}, then for the option ``Name:'' enter a name for the hard drive, \emph{this is not a name for the
-		computer}, so simply enter a name in all capital letters such as \emph{CERNVM}. Finally, click the ``Erase...'' button to format
-		the drive and prepare it for OS X installation.
-		
-\item	Now, go back to the OS X installer and read through and agree to the End User License Agreement, \emph{make sure you read through
-		the EULA and agree to the terms}, then click the ``Agree'' button to continue the installation.
-		
-\item	Next, at the installation stage titled, ``Select a Destination'', click on the hard drive you formatted previously, as well 
-		the name you entered for the drive when it was created should be listed below the hard drive icon, then click ``Continue''.
-		
-\item	At the next stage of the intallation titled, ``Install Summary'', if you wish to make customizations to the packages installed
-		as part of the OS X system, click the ``Customize'' button, otherwise simply click the ``Install'' button to begin the
-		installation of OS X.
-		
-\item	After the system reboots, you will be presented with a welcome screen, select your country from the list and then click
-		``Continue''.
-		
-\item 	At the next installation stage, titled ``Select Your Keyboard'', chose a keyboard layout, it is probably best to just leave
-		it at the default ``U.S.'' keyboard layout.
-		
-\item	At the next installation stage, titled ``Do You Already Own a Mac?'' simply select the option ``Do not transfer my information
-		now'' and click ``Continue''.
-		
-\item	Next, for ``Enter Your Apple ID''\footnote{This is your iTunes and Apple store account, since this is a test client we won't
-		be using iTunes} leave everything blank and simply click ``Continue''.
-		
-\item	Next for the ``Registration Information'', again just click ``Continue'' and if you are prompted by a message about ``Some
-		of your registration information is missing'', just click ``Continue'' again.
-		
-\item	Now, at the next installation stage titled ``Create Your Account'', for the options ``Full Name'' and ``Account Name:''
-		enter a name and account name that is simple and relevant such as \emph{cernvm} and set the password to something you will
-		not forget and is fairly complex with numbers and letters. But, most importantly {\bf keep the username and password entered
-		consistent across all systems created as part of the infrastructure} as it makes administration and everything else much easier. 
-		
-\item	Next for ``Select Time Zone'' click on your location on the map of the world to change the time zone, and then for the option
-		``Closest City:'' select a city near your location.
-		
-\item	Finally, at the last stage of the installation click ``Done''.	
-\end{enumerate}
-
-
-\newpage
 \subsection{Configuring the system}
 \label{sec:osxconfig}
 
@@ -283,7 +223,7 @@ $ kextstat | grep -i vmware
 
 
 
-\newpage
-\subsection{Installing and configuring the hypervisors}
-\subsection{Configuring the CernVM Image}
-\subsection{Setting up the Tapper Test Suite}
+%\newpage
+%\subsection{Installing and configuring the hypervisors}
+%\subsection{Configuring the CernVM Image}
+%\subsection{Setting up the Tapper Test Suite}

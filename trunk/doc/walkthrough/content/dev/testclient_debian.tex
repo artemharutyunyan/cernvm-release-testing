@@ -3,31 +3,9 @@
 \label{sec:debianinstall}
 \flushleft
 \begin{enumerate}
-\item 	First, begin by loading the Debian Squeeze CD and select the first `install' option at the initial boot menu.
+\item 	Install the system as you would for any other Linux distribution, except pay attention to the following instructions on
+		configuring Debian to use ext4 (if available) instead of ext3 as the performance gains are noticeable.
 
-\item	For the first few installation options, such as default language and keyboard layout simply leave the default values
-		and press enter unless you have different requirements than the default options.
-
-\item	When prompted to enter the hostname for the computer, enter a relevant hostname for the machine based on the hardware or 
-		operating system it is running; the hostname should be relevant and unique as \tapper will use this hostname to identify the 
-		system. A good naming convention should refer to the hardware or operating system and call it a host to differentiate from the 
-		virtual machine that will be running as a guest\footnote{This will make more sense later when you have to create and configure 
-		CernVM images}, for example a hostname such as \emph{cernvm-debian6-host} could be used, {\bf whatever convention you use make 
-		sure it is consistent}.
-the following
-\item	Next, you will be prompted to enter a domain name, delete the preset domain name ``local'' and leave it blank, \emph{unless
-		your network environment has specific domain name requirements}.
-
-\item	Next, when prompted to enter the root password, set the root password to something you will not forget and is
-		fairly difficult with numbers and letters. {\bf Again, whatever password you use,  make sure it's consistent as you will 	
-		frequently use this account}.
-
-\item 	Next, when prompted to enter a username for the new user to be created on the system, set the username as something simple and 
-		relevant such as \emph{cernvm} and the password to something you will not forget and is fairly complex with numbers and letters. 
-		But, most importantly {\bf keep this username and password consistent across all systems created as part of the infrastructure} 
-		as it makes administration and everything else much easier.
-
-\item 	When prompted for the timezone simply configure the timezone according to your local time zone, such as CEST
 
 \item	Now, when prompted by the installer to configure the partitioning layout, if there are other operating systems installed on the 
 		system select the ``Guided - use entire disk'' option, and if available select the option ``Use Remaining Free Space''. 
@@ -43,23 +21,12 @@ the following
 #2	PRIMARY	4.0  GB		  f	 SWAP	SWAP
 \end{lstlisting}
 
-\item 	When prompted to scan another CD or DVD, select {\bf No} unless the system does not have access to the internet, as all the 
-		packages will be installed using a network mirror.
-
-\item	When prompted to use a network mirror, select {\bf Yes} and select a mirror near your location and in a country with a reputable 
-		connection/internet infrastructure such as (USA, Netherlands, Germany, France).
-
-\item 	When prompted to choose software to install, select the following
+\item 	Finally, the last important installation setting, when prompted to choose software to install, select the following
 \begin{itemize}
 \item 	Graphical desktop environment
 \item 	SSH Server
 \item	Standard system utilities
 \end{itemize}
-
-\item 	When prompted to install the GRUB boot loader to the master boot record, select {\bf Yes}
-
-\item	After that the system should soon complete the installation, after the installation has finished ensure that you reboot the 
-		system and remove the CD so that the system does not load the CD again when it starts.
 \end{enumerate}
 
 
@@ -393,11 +360,11 @@ $ ssh root@cernvm-image-ipaddress
 \end{enumerate}
 
 
-\newpage
-\subsection{Setting up the Tapper Test Suite}
-\label{sec:debiantestsuite}
-\begin{enumerate}
-\item 	{\bf Before proceeding any further ensure that you have all other test clients set up this far, and then proceed
-		to follow the instructions for setting up and configuring the \tapper~server in the section ``Server Platform Setup''}		
-		~\ref{sec:serversetup}.
-\end{enumerate}
+%\newpage
+%\subsection{Setting up the Tapper Test Suite}
+%\label{sec:debiantestsuite}
+%\begin{enumerate}
+%\item 	{\bf Before proceeding any further ensure that you have all other test clients set up this far, and then proceed
+%		to follow the instructions for setting up and configuring the \tapper~server in the section ``Server Platform Setup''}		
+%		~\ref{sec:serversetup}.
+%\end{enumerate}

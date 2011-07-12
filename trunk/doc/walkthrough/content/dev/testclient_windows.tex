@@ -1,64 +1,4 @@
 \section{Windows 7 Test Client Setup}
-\subsection{Installing the system}
-\label{sec:windows7install}
-\flushleft
-\begin{enumerate}
-\item	First, begin by booting the computer with the Windows 7 installation CD and when it boots to the installation screen leave the default
-		settings as ``English'' and the keyboard as ``US'' and click ``Next'' to continue the installation.
-		
-\item	At the next screen, click the ``Install now'' button to begin the installation, if you prefer to read the pre-installation 
-		instructions click the  ``What to know before installing Windows'' to find out more.
-		
-\item	Next, you must read through and agree to the End User License Agreement, \emph{make sure you read through the EULA and agree to
-		the terms}, then select the option ``I accept the license agreement'' and click ``Next'' to continue the installation.
-		
-\item	At the next stage of the installation, titled ``Which type of installation do you want?'' click the second option
-		``Custom (advanced)'' to begin a custom installation.
-		
-\item	At the next stage of the installation, titled ``Where do you want to install Windows?'', if you only have one drive, which is
-		empty simply click on the drive in the list which you want to install Windows 7 on. Otherwise, if you have more complex
-		configurations, such as other Windows partitions click the option ``Drive options (advanced)'' and select the appropriate
-		partition and drive to install Windows 7 on. \emph{If you have other partitions with Linux or other non-Windows operating
-		systems, you will no longer be able to boot from those partitions}. This is because the Master Boot Record will overwritten
-		by the Windows 7 boot loader and in in most cases this will involve reinstalling GRUB, which is beyond the scope of this 
-		document.
-	  
-\item	The next part of the installation is automatic, Windows 7 will now begin copying the files to the system, rebooting when 
-		necessary, and execute almost the entire Windows 7 installation automatically.
-		
-\item	Now, after most of the installation has completed automatically, you will now be at the final stages of the installation,
-		which begins by asking for a ``user name'' and ``computer name'' for the computer. Enter a user name that is simple
-		and relevant such as \emph{cernvm} and enter a relevant computer name for the machine based on the hardware or operating system 
-		it is running. The computer name should be relevant and unique to better identify the system, a good naming convention should refer
-		to the hardware or operating system and call it a host to differentiate from the virtual machine that will be running as a guest, 
-		for example a hostname such as \emph{cernvm-win7-host} could be used, {\bf whatever convention you use make sure it is consistent}.
-
-\item	Now, at the next stage of the installation, titled ``Set a password for your account'' set the password to something
-		you will not forget and is fairly complex with numbers and letters. But, most importantly {\bf keep the username and password 
-		consistent across all systems created as part of the infrastructure} as it makes administration and everything else 
-		much easier.
-	  
-\item	At the next stage of the installation, titled ``Type your product key for activation'', enter your product key for Windows 7
-		and enable the option ``Automatically activate Windows 7 when I'm online''. Alternatively, if you do not have a license for
-		Windows 7 you may leave the product key blank, and disable the option ``Automatically activate Windows 7 when I'm online'',
-		this will allow for a 30 day trial of Windows 7, {\bf but is not advisable as the system will be not be suitable as a 
-		test client after the trial expires}.
-		
-\item	At the next stage of the installation, titled ``Help protect your computer and improve Windows automatically'', select the option
-		``Ask me later'', \emph{this is important as we will configure the system later for manual control of updates, and to remove
-		security and error reporting prompts, which is necessary for setting up a test client}.
-		 
-\item	Next, at the installation stage titled ``Review your time and date settings'' select the correct time zone from the drop down menu,
-		such as CEST, and enable the option ``Automatically adjust clock for Daylight Saving Time'', and finally, ensure that the date
-		and time are correct for the system.
-		
-
-\item	Finally, at the last stage of the installation titled, ``Select your computer's current location'' select the option ``Work 
-		network'',\emph{this is very important for networking configurations and virtual machine networking}.
-\end{enumerate}
-
-
-\newpage
 \subsection{Configuring the system}
 \label{sec:windows7config}
 \begin{enumerate}
@@ -187,10 +127,10 @@
 \end{enumerate}
 
 
-\newpage
-\subsection{Installing and configuring the hypervisors}
-\subsection{Configuring the CernVM Image}
-\subsection{Installing and configuring Cygwin}
+%\newpage
+%\subsection{Installing and configuring the hypervisors}
+%\subsection{Configuring the CernVM Image}
+%\subsection{Installing and configuring Cygwin}
 %TODO: ADD INSTRUCTIONS FOR SETTING UP CYGWIN ENVIRONMENT, WHICH IS NECESSARY TO RUN TEST SUITE
 %		THE CYGWIN ENVIRONMENT REQUIRES THE FOLLOWING TO RUN TEST SUITES
 %		-> BASH
@@ -199,4 +139,4 @@
 %			RUNNING IN THE CYGWIN ENVIRONMENT
 %
 %TODO:	ADD INSTRUCTIONS FOR SETTING UP SSH ON WINDOWS (THROUGH CYGWIN)
-\subsection{Setting up the Tapper Test Suite}
+%\subsection{Setting up the Tapper Test Suite}

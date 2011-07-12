@@ -1,41 +1,4 @@
 \section{Ubuntu 10.04 Based Server Setup}
-\subsection{Installing the system}
-\label{sec:ubuntuinstall}
-\flushleft
-\begin{enumerate}
-\item 	First, begin by loading the Ubuntu 10.04 LTS CD and select the ``Install Ubuntu 10.04 LTS'' option at the initial boot menu.
-
-\item 	Next, when prompted for the location and time zone, select a region according to where you currently reside and simply configure 
-		the time zone according to your local time zone, such as CEST.
-
-\item	When prompted for the keyboard layout, leave it as the default ``Suggested Option: USA'' and simple click ``Forward'' to proceed
-		with the installation.
-		
-\item	Now, when you are at the next stage of the installation called ``Prepare disk space'', if there are no other operating systems 		
-		installed on the computer, \emph{such as Windows}, select the option ``Erase and use the entire disk'', {\bf this will erase
-		all the data on the hard drive}. Otherwise, if there are other operating systems installed on the system select the option 
-		``Install them side by side, choosing between them each startup''.
-		 
-\item 	When you are at the next stage of the installer called ``Who are you?'' enter a name and username that is simple and 
-		relevant such as \emph{cernvm} and set the password to something you will not forget and is fairly complex with numbers and
-		letters. But, most importantly {\bf keep the username and password entered consistent across all systems created as part of 
-		the infrastructure} as it makes administration and everything else much easier.
-		
-		Then, for the next option, enter a relevant name for the machine based on the hardware or operating system it is running; the
-		hostname should be relevant and unique to better identify the system. A good naming convention should refer to the hardware or 
-		operating system and call it a server to differentiate from the test clients, for example a hostname such as 
-		\emph{cernvm-ubuntu-server} could be used, {\bf whatever convention you use make sure it is consistent}. Then select the option 
-		``Log in automatically'' to have the system login to the desktop environment without entering a password. 
-
-\item	Now, you should be at the last stage of the installation titled ``Ready to install'', simply click the ``Install''
-		button to install Ubuntu 10.04 LTS.
-
-\item	After that the system should soon complete the installation, after the installation has finished ensure that you reboot the 
-		system and remove the CD so that the system does not load the CD again when it starts.
-\end{enumerate}
-
-
-\newpage
 \subsection{Configuring the system}
 \label{sec:ubuntuconfig}
 \begin{enumerate}
