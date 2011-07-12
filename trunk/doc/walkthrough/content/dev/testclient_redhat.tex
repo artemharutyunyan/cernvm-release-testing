@@ -468,51 +468,24 @@ $ arp -an
 \end{lstlisting}
 
 \item 	Now that the system has booted, login in to the system using SSH for the user you created using the CernVM web interface
+		and set the root password
+		
+\lstset{language=bash,caption=Set Root Password}
 \begin{lstlisting}
 $ ssh <user you created>@cernvm-image-ipaddress
-\end{lstlisting}
 
-\item	Now that you are logged into the system through SSH, execute the following instructions to enable virsh console access.
-		
-\lstset{language=bash,caption=Enable Virsh Console Access}
-\begin{lstlisting}
 # Type the following command, and enter a root password you won't forget
 $ sudo passwd root
-# Change to the root account and enable console for root so that you can 
-# login using virsh console
-$ su
-
-# Enable root login on tty
-$ echo “ttyS0″ >> /etc/securetty
-
-# Then add console=ttyS0 to the kernel parameter line in /etc/grub.conf
-$ vi /etc/grub.conf
-
-# Add getty to /etc/inittab file after all the other "tty" lines, 
-# add the following line to /etc/inittab
-s0:2345:respawn:/sbin/agetty -L 38400 ttyS0 vt100
-
 \end{lstlisting}
 
-\item 	Now, reboot and login to the system using virsh console and then simply type ``root'' and enter the password to login as the 
-		root account, \emph{there will most likely not be any console display from the virtual machine until you press 
-		enter after entering the password}, then enable root login through SSH using the following commands. {\bf To 
-		disconnect from the virsh console and return to the host machine console, press CTRL + ]  which is ( \^~] )}
+\item	Now that you are logged into the system through SSH, then enable root login through SSH using 
+		the following commands.
 				
 \lstset{language=bash,caption=Enable SSH Root Login}
 \begin{lstlisting}
-# Reboot the system and the console should now work
-# Wait for it to completely shut off and turn on
-$ virsh shutdown cernvm
-$ virsh start cernvm
-
-# Login as root using password you set with the passwd command
-$ virsh console cernvm
-
 # edit the file /etc/ssh/sshd_config and uncomment the line 
 # PermitRootLogin yes	in order to enable root login
 $ vi /etc/ssh/sshd_config
-
 \end{lstlisting}
 
 \item 	Next from the host machine \emph{ie. the machine you're currently using} enable automatic login as root 
