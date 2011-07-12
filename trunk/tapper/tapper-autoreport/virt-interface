@@ -52,7 +52,7 @@ vm_net_autostart()
 # @param $2 - The name of the virtual machine
 create_vm()
 {
-	virsh --connect $URI create $1
+	virsh --connect $URI define $1
 	virsh --connect $URI list --all | grep -q $2
 	
 	return $?
@@ -80,8 +80,8 @@ destroy_vm()
 start_vm()
 {	
 	virsh --connect $URI start $1
-	# Wait two minutes for virtual machine to start
-	sleep 120
+	# Wait three minutes for virtual machine to start
+	sleep 180
 	virsh --connect $URI list --all | egrep -q "^[[:space:]]*[[:digit:]]*[[:space:]]*$1[[:space:]]*running"
 
 	return $?
