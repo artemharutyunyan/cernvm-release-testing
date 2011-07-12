@@ -1,11 +1,11 @@
 <domain type='vbox'>
   <name>cernvm-vbox</name>
-  <uuid>54bad74c-20e3-4302-bd11-b8c2dc06ac26</uuid>
+  <uuid></uuid>
   <memory>1048576</memory>
   <currentMemory>1048576</currentMemory>
   <vcpu>1</vcpu>
   <os>
-    <type arch='x86_64'>hvm</type>
+    <type arch=''>hvm</type>
     <boot dev='cdrom'/>
     <boot dev='hd'/>
   </os>
@@ -18,7 +18,7 @@
   <on_crash>destroy</on_crash>
   <devices>
     <disk type='file' device='disk'>
-      <source file='/usr/share/images/vbox/cernvm-2.3.0-x86_64/cernvm-2.3.0-x86_64.vmdk'/>
+      <source file=''/>
       <target dev='hda' bus='ide'/>
     </disk>
     <disk type='file' device='cdrom'>

@@ -154,7 +154,7 @@ download_extract()
 			then
 				# Get the location and name of the extracted CernVM image file
 				# which is either a hdd or vmdk file
-				IMAGE_LOCATION=$(find_file $2 hdd || find_file $2 vmdk)
+				IMAGE_LOCATION=$(find_file $2 hdd ; find_file $2 vmdk)
 				RESULT=0
 			fi
 		fi			
@@ -222,7 +222,7 @@ validate_def_settings()
 	then
 		# Check that mandatory settings are correct
 		# Verify domain type from xml file, return failure if not valid type
-		DOMAIN_TYPE=$(egrep -E "^<domain[[:space:]]*type='([a-zA-Z]+)'" $1 | sed -E \
+		DOMAIN_TYPE=$(egrep -E "^<domain[[:space:]]*type='([a-zA-Z]+)'>" $1 | sed -E \
 					"s/.*type='([^']+)'.*/\\1/")
 		case "$DOMAIN_TYPE" in
 		"kvm")
@@ -241,6 +241,15 @@ validate_def_settings()
 		if egrep -q -E "^[[:space:]]*<name>.+</name>" $1 ; test "$?" -ne 0
 		then
 			# No virtual machine name set
+			return $RESULT
+		fi
+		
+		# Verify that a valid uuid for the virtual machine is set
+		if egrep -q -E \
+		"^[[:space:]]*<uuid>[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}</uuid>" \
+		$1 ; test "$?" -ne 0
+		then
+			# No uuid or invalid uuid set
 			return $RESULT
 		fi
 
@@ -286,7 +295,7 @@ verify_hypervisor()
 	if validate_def_settings $1 ; test "$?" -eq 0
 	then
 		# Set the virsh URI for the virtual machine hypervisor
-		DOMAIN_TYPE=$(egrep -E "^<domain[[:space:]]*type='([a-zA-Z]+)'" $1 | sed -E \
+		DOMAIN_TYPE=$(egrep -E "^<domain[[:space:]]*type='([a-zA-Z]+)'>" $1 | sed -E \
 					"s/.*type='([^']+)'.*/\\1/")
 		case "$DOMAIN_TYPE" in
 		"kvm")
@@ -333,14 +342,28 @@ create_def()
 		DEFINITION_FILE="$2/$1"
 
 		# Apply each virtual setting specified to create the final definition file
-		# Set the only mandatory definition setting not specified in template
+		# Set the mandatory definition setting not specified in template
 		if [ "${CERNVM_IMAGE}" ]
 		then
 			# Set the location of the cernvm image file
 			# Must use a different delimeter than / for sed since variable is a path
-			sed -i -E "s|<source file='.*'|<source file='${CERNVM_IMAGE}'|" $DEFINITION_FILE
+			sed -i -E "s|<source file=''/>|<source file='${CERNVM_IMAGE}'/>|" $DEFINITION_FILE
 		fi
 		
+		# Set the mandatory definition setting not specified in template
+		if [ "${VM_UUID}" ]
+		then
+			# Set a unique uuid for the virtual machine
+			sed -i -E "s|<uuid></uuid>|<uuid>${VM_UUID}</uuid>|" $DEFINITION_FILE
+		fi
+
+		# Set the mandatory definition setting not specified in template
+		if [ "$VM_ARCH" ]
+		then
+			# Set the architecture of the CernVM image
+			sed -i -E "s|arch=''>|arch='$VM_ARCH'>|" $DEFINITION_FILE
+		fi
+				
 		# Set the following template setting overrides, if specified
 		# Must use a different delimeter than / for sed since xml tags use /
 		if [ "$VM_NAME" ]
@@ -355,12 +378,6 @@ create_def()
 			sed -i -E "s|<vcpu>.*</vcpu>|<vcpu>$VM_CPUS</vcpu>|" $DEFINITION_FILE
 		fi
 
-		if [ "$VM_ARCH" ]
-		then
-			# Override the default number of cpus
-			sed -i -E "s|arch='.*'|arch='$VM_ARCH'|" $DEFINITION_FILE
-		fi
-
 		if [ "$VM_MEMORY" ]
 		then
 			# Override the default amount of memory
@@ -371,8 +388,8 @@ create_def()
 		if [ "$VM_NET" ]
 		then
 			# Override the default virtual network name
-			sed -i -E "s|<source[[:space:]]*network='.*'\/>|<source network='$VM_NET'\/>|" 
-			\ $DEFINITION_FILE
+			sed -i -E "s|<source[[:space:]]*network='.*'\/>|<source network='$VM_NET'\/>|" \
+			$DEFINITION_FILE
 		fi
 
 		if [ "$VM_VIDEO_MEMORY" ]
@@ -403,21 +420,74 @@ configure_image_web()
 {
 	RESULT=1
 
+	# Generate the template header which is used as a basis for 
+	# creating headers for interacting with CernVM web interface
+	generate_template_header $1
+
+
 	# Precondition - verify virtual machine has web interface support
 	# Precondition - verify that it is possible to login on web interface
-	if web_check_interface $1 web_config_check.log ; test "$?" -eq 0
+	if web_check_interface $1 web_config_check.log ; test "$?" -eq 0 \
 	&& web_check_login $1 $2 $3 web_config_login.log ; test "$?" -eq 0
 	then
 
-				
+		# Configure the proxy settings using the CernVM web interface
+		# at the moment it doesn't specify any proxy settings
+		if web_config_proxy $1 web_config_proxy.log ; test "$?" -ne 0
+		then
+			# Configure proxy settings failed
+			return $RESULT
+		fi
 
+		# Configure the web interface administrator password
+		if web_config_password $1 $ADMIN_PASS web_config_password.log ; test "$?" -ne 0
+		then
+			# Configure the web interface administrator password failed
+			return $RESULT
+		fi
 	
-	
+		# Create a new user using the CernVM web interface
+		if web_create_user $1 $USER_NAME $USER_PASS $USER_GROUP \
+		web_create_new_user.log ; test "$?" -ne 0
+		then
+			# Create new user failed
+			return $RESULT
+		fi
 
+		# Configure the CernVM image desktop settings using the CernVM web interface
+		if web_config_desktop $1 $STARTXONBOOT $RESOLUTION $KEYBOARD_LOCALE \
+		web_config_desktop.log ; test "$?" -ne 0
+		then
+			# Configure CernVM image desktop failed
+			return $RESULT
+		fi
+
+		# Configure the CernVM image appliance group settings using web interface
+		if web_config_group $1 $EXPERIMENT_GROUP web_config_group.log ; test "$?" -ne 0
+		then
+			# Configure experiment group failed
+			return $RESULT
+		fi
+
+		# Apply configuration changes made using the CernVM web interface, which
+		# then reboots the CernVM image once completed
+		if web_apply_settings $1 web_apply_settings.log ; test "$?" -ne 0
+		then
+			# Apply settings failed
+			return $RESULT
+		fi
+		
+		# Setup and configure the initial CernVM image succeeded
+		RESULT=0
+		# TODO:	Implement this using a function that uses curl to get the updates
+		#		from the web server to determine when system has rebooted
+		# Wait 5 minutes for the settings to be applied, updates installed, and
+		# the system to reboot		
+		sleep 300
+	fi
+
+	return $RESULT
 }
-
-
-
 
 
 
