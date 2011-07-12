@@ -222,7 +222,7 @@ validate_def_settings()
 	then
 		# Check that mandatory settings are correct
 		# Verify domain type from xml file, return failure if not valid type
-		DOMAIN_TYPE=$(egrep -E "^<domain[[:space:]]*type='([a-zA-Z]+)'>" $1 | sed -E \
+		DOMAIN_TYPE=$(egrep -E "^<domain[[:space:]]*type='([a-zA-Z]+)'" $1 | sed -E \
 					"s/.*type='([^']+)'.*/\\1/")
 		case "$DOMAIN_TYPE" in
 		"kvm")
@@ -295,7 +295,7 @@ verify_hypervisor()
 	if validate_def_settings $1 ; test "$?" -eq 0
 	then
 		# Set the virsh URI for the virtual machine hypervisor
-		DOMAIN_TYPE=$(egrep -E "^<domain[[:space:]]*type='([a-zA-Z]+)'>" $1 | sed -E \
+		DOMAIN_TYPE=$(egrep -E "^<domain[[:space:]]*type='([a-zA-Z]+)'" $1 | sed -E \
 					"s/.*type='([^']+)'.*/\\1/")
 		case "$DOMAIN_TYPE" in
 		"kvm")
@@ -347,7 +347,7 @@ create_def()
 		then
 			# Set the location of the cernvm image file
 			# Must use a different delimeter than / for sed since variable is a path
-			sed -i -E "s|<source file=''/>|<source file='${CERNVM_IMAGE}'/>|" $DEFINITION_FILE
+			sed -i -E "s|<source file=''|<source file='${CERNVM_IMAGE}'|" $DEFINITION_FILE
 		fi
 		
 		# Set the mandatory definition setting not specified in template
@@ -361,7 +361,7 @@ create_def()
 		if [ "$VM_ARCH" ]
 		then
 			# Set the architecture of the CernVM image
-			sed -i -E "s|arch=''>|arch='$VM_ARCH'>|" $DEFINITION_FILE
+			sed -i -E "s|arch=''|arch='$VM_ARCH'|" $DEFINITION_FILE
 		fi
 				
 		# Set the following template setting overrides, if specified
@@ -388,7 +388,7 @@ create_def()
 		if [ "$VM_NET" ]
 		then
 			# Override the default virtual network name
-			sed -i -E "s|<source[[:space:]]*network='.*'\/>|<source network='$VM_NET'\/>|" \
+			sed -i -E "s|<source[[:space:]]*network='.*'|<source network='$VM_NET'|" \
 			$DEFINITION_FILE
 		fi
 
