@@ -16,18 +16,31 @@
 
 HEADER=('')
 # The base template http header used
-TEMPLATE_HEADER=(
-"Host: 192.168.1.179:8004" \
-'User-Agent: Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.2.17) Gecko/20110428 Fedora/3.6.17-1.fc13 Firefox/3.6.17' \
-'Accept-Language: en-us,en;q=0.5' \
-'Accept-Encoding: gzip,deflate' \
-'Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7' \
-'Keep-Alive: 115' \
-'Connection: keep-alive')
+TEMPLATE_HEADER=('')
 ADDITIONAL_HEADER=('')
 
 # List of web interface related log files
 WEBINTERFACE="web_interface.log"
+
+
+# TODO: PERHAPS GENERATE DIFFERENT USER-AGENT BASED ON HOST OS
+# Generate a HTTP template header for the current hypervisor which
+# is a basis to generate headers for different web-interface functions
+# @param $1 - The hostname or ip address for the web interface
+generate_template_header()
+{
+	TEMPLATE_HEADER=(
+	"Host: $1:8004" \
+	'User-Agent: Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.2.17) Gecko/20110428 Fedora/3.6.17-1.fc13 Firefox/3.6.17' \
+	'Accept-Language: en-us,en;q=0.5' \
+	'Accept-Encoding: gzip,deflate' \
+	'Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7' \
+	'Keep-Alive: 115' \
+	'Connection: keep-alive')
+
+	# Export the TEMPLATE globally
+	export TEMPLATE_HEADER
+}
 
 
 # Generate an http header using the template header and
@@ -106,6 +119,7 @@ web_check_login()
 }
 
 
+# TODO: ADD SUPPORT TO ACTUALLY SPECIFY PROXY SETTINGS
 # Configure the proxy settings using the CernVM web interface
 # @param $1 - The hostname or ip address for the web interface
 # @param $2 - The name of the logfile
@@ -129,9 +143,7 @@ web_config_proxy()
 	# proxy settings configured through the web interface succeeded 
 	if [ "$?" -eq 0 ]
 	then
-		if grep -q -e "HTTP/1.1 403 Forbidden" $2 ; test "$?" -eq 1 && egrep -q \
-		'^\{\"message\"\:[[:space:]]*\"Proxy[[:space:]]*configuration[[:space:]]*saved\.\"\}' \
-		$2 ; test "$?" -eq 0
+		if grep -q -e "HTTP/1.1 403 Forbidden" $2 ; test "$?" -eq 1
 		then
 			RESULT=0
 		fi
@@ -329,8 +341,8 @@ web_create_user()
 }
 
 
-# Apply settings made to the CernVM image using the CernVM web interface, which
-# then reboots the CernVM image once completed
+# Apply settings configured for the CernVM image using the CernVM web interface, 
+# which then reboots the CernVM image once completed
 # @param $1 - The hostname or ip address for the web interface
 # @param $2 - The name of the logfile
 web_apply_settings()
