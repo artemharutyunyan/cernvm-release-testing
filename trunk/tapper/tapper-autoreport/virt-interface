@@ -46,6 +46,37 @@ vm_net_autostart()
 	return $?
 }
 
+# Destroy a virtual machine network, verify it has been removed from virsh
+# NOTE: The network definition files will still exist, network is simply
+# 		no longer accesible until it is re-created 
+# @param $1 - The virtual machine network name
+destroy_vm_net()
+{
+	# First forecably shutdown the network
+	virsh --connect $URI net-destroy $1
+
+	# Remove network from virsh, verify removed
+	virsh --connect $URI net-undefine $1
+	virsh --connect $URI net-list --all | grep -q $1
+	
+	if [ $? -eq 0 ]
+	then
+		return 1
+	else
+		return 0
+	fi
+}
+
+# Create a virtual machine network from an xml file, verify it has been created 
+# @param $1 - The path to the network definition file
+# @param $2 - The virtual machine network name
+create_vm_net()
+{
+	virsh --connect $URI net-define $1
+	virsh --connect $URI net-list --all | grep -q $2
+	
+	return $?
+}
 
 # Create a virtual machine from an xml file, verify it has been created 
 # @param $1 - The path to the virtual machine definition file
@@ -64,6 +95,10 @@ create_vm()
 # @param $1 - The name of the virtual machine
 destroy_vm()
 {
+	# First forecably shutdown the virtual machine
+	virsh --connect $URI destroy $1
+
+	# Remove virtual machine from virsh, verify removed
 	virsh --connect $URI undefine $1
 	virsh --connect $URI list --all | grep -q $1
 	
