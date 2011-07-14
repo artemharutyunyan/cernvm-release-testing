@@ -1,8 +1,8 @@
 <domain type='vmware'>
   <name>cernvm-vmwarews</name>
   <uuid></uuid>
-  <memory>524288</memory>
-  <currentMemory>524288</currentMemory>
+  <memory>1048576</memory>
+  <currentMemory>1048576</currentMemory>
   <vcpu>1</vcpu>
   <os>
     <type arch=''>hvm</type>
@@ -23,6 +23,7 @@
       <source bridge=''/>
       <target dev='/dev/vmnet1'/>
     </interface>
+    <graphics type='vnc' port='5901' autoport='no'/>
     <video>
       <model type='vmvga' vram='4096'/>
     </video>
