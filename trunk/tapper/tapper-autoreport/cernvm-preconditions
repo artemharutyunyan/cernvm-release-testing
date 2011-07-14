@@ -28,12 +28,14 @@ verify_exists()
 	return $?
 }
 
+
 # Precondition Test - Verify the hash of a file
 # @param $1 - The location and name of the file
 verify_hash()
 {
 	return 0
 }
+
 
 # Precondition Test - Verify that the download page exists and that there is a 
 #					  valid download url for the CernVM image specified, returns
@@ -154,7 +156,7 @@ download_extract()
 			then
 				# Get the location and name of the extracted CernVM image file
 				# which is either a hdd or vmdk file
-				IMAGE_LOCATION=$(find_file $2 hdd ; find_file $2 vmdk)
+				IMAGE_LOCATION=$(find_file $2 hdd ; find_file $2 vmdk ; find_file $2 vdi)
 				RESULT=0
 			fi
 		fi			
@@ -163,6 +165,7 @@ download_extract()
 	echo ${IMAGE_LOCATION}
 	return $RESULT
 }
+
 
 
 
@@ -189,6 +192,7 @@ verify_vm_net()
 	return $RESULT
 }
 
+
 # Precondition Test - Verify that the XML definition file provided is valid
 # @param $1 - The virtual machine XML definition file
 validate_def_xml()
@@ -207,7 +211,8 @@ validate_def_xml()
 
 	return $RESULT
 }	
-		
+	
+	
 # Precondition Test - Verify that the mandatory configuration settings for the virtual
 #					  machine XML definition file have been provided and are valid
 # @param $1 - The virtual machine XML definition file
@@ -268,7 +273,7 @@ validate_def_settings()
 		fi
 
 		# Verify that the virtual machine image file is set and exists
-		IMAGE_FILE=$(egrep -E "^[[:space:]]*<source file='(.+)'" $1 | sed -E "s/.*'([^']+)'.*/\\1/")
+		IMAGE_FILE=$(egrep -E "^[[:space:]]*<source file='(.+)'" $1 | sed -E "s|.*'([^']+)'.*|\\1|")
 		if verify_exists ${IMAGE_FILE} ; test "$?" -ne 0
 		then
 			# Image file not set, or doesn't exist
@@ -282,6 +287,58 @@ validate_def_settings()
 
 	return $RESULT
 }
+
+
+# Precondition Test - Verify that the mandatory configuration settings for the
+#					  network XML definition file have been provided and are valid
+# @param $1 - The network XML definition file
+validate_net_settings()
+{
+	RESULT=1
+
+	# Precondition - verify file exists
+	# Precondition - verify xml file is valid
+	if verify_exists $1 ; test "$?" -eq 0 \
+	&& validate_def_xml $1 ; test "$?" -eq 0
+	then
+		# Check that mandatory settings are correct
+		# Verify that a valid uuid for the network is set
+		if egrep -q -E \
+		"^[[:space:]]*<uuid>[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}</uuid>" \
+		$1 ; test "$?" -ne 0
+		then
+			# No uuid or invalid uuid set
+			return $RESULT
+		fi
+
+		# Verify that the name is set
+		if egrep -q -E "^[[:space:]]*<name>.+</name>" $1 ; test "$?" -ne 0
+		then
+			# No network name set
+			return $RESULT
+		fi
+		
+		# Verify that the ip address is set and valid
+		if egrep -q -E \
+		"^[[:space:]]*<ip[[:space:]]*address='[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'" \
+		$1 ; test "$?" -ne 0 && egrep -q -E \
+		"^[[:space:]]*<range[[:space:]]*start='[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'" \
+		$1 ; test "$?" -ne 0 && egrep -q -E \
+		"^[[:space:]]*<range.*end='[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'" \
+		$1 ; test "$?" -ne 0
+		then
+			# No ip address or invalid ip address set
+			return $RESULT
+		fi
+		
+		# All mandatory configuration settings for the virtual machine XML 
+		# definition file have been provided and are valid
+		RESULT=0
+	fi
+
+	return $RESULT
+}
+
 
 # Precondition Test - Verify that the hypervisor for the current virtual machine
 #					  tested is accessible, set the hypervisor URI as a global variable
@@ -322,7 +379,7 @@ verify_hypervisor()
 
 # Precondition Test - Create an XML definition file for the virtual machine based
 #					  on the template XML definition file and settings defined and
-#					  return the location of the final xml defintion file
+#					  return the location of the created xml defintion file
 # @param $1	- The template file to use
 # @param $2 - The directory to save the final xml definition file in
 create_def()
@@ -385,10 +442,11 @@ create_def()
 			$DEFINITION_FILE
 		fi
 
-		if [ "$VM_NET" ]
+		# Virtual machine network name, this is the same as defined in network xml file
+		if [ "$NET_NAME" ]
 		then
 			# Override the default virtual network name
-			sed -i -E "s|<source[[:space:]]*network='.*'|<source network='$VM_NET'|" \
+			sed -i -E "s|<source[[:space:]]*network='.*'|<source network='$NET_NAME'|" \
 			$DEFINITION_FILE
 		fi
 
@@ -402,6 +460,81 @@ create_def()
 	fi
 	
 	echo $DEFINITION_FILE
+	return $RESULT
+}
+
+
+# Precondition Test - Create an XML definition file for the virtual machine network
+#					  based on the template network XML definition file and settings 
+#					  defined and return the location of the created xml defintion file
+# @param $1	- The network template file to use
+# @param $2 - The directory to save the final network xml definition file in
+create_net_def()
+{
+	RESULT=1
+	TEMPLATE_FILE="$TEMPLATE_DIR/$1"
+	DEFINITION_FILE=""
+	
+	# Precondition - Verify that the template file and destination directory exist
+	if verify_exists $TEMPLATE_FILE ; test "$?" -eq 0 \
+	&& verify_exists $2 ; test "$?" -eq 0
+	then
+		# Copy template file to the directory specified
+		cp -f $TEMPLATE_FILE $2
+		
+		# Set the definition file location
+		DEFINITION_FILE="$2/$1"
+
+		# Apply each virtual setting specified to create the final definition file
+		# Set the mandatory definition setting not specified in template
+		if [ "${NET_UUID}" ]
+		then
+			# Set a unique uuid for the virtual machine
+			sed -i -E "s|<uuid></uuid>|<uuid>${NET_UUID}</uuid>|" $DEFINITION_FILE
+		fi
+			
+		# Set the mandatory definition setting not specified in template
+		# Must use a different delimeter than / for sed since xml tags use /
+		if [ "$NET_NAME" ]
+		then
+			# Override the default virtual machine name
+			sed -i -E "s|<name>.*</name>|<name>$NET_NAME</name>|" $DEFINITION_FILE
+		fi
+
+		# Set the mandatory definition setting not specified in template
+		# Must use a different delimeter than / for sed since xml tags use /
+		if [ "$IP_ADDRESS" ]
+		then
+			# Override the default ip address
+			# TODO: IMPLEMENT SUPPORT FOR OVERRIDING THE DEFAULT IP ADDRESS SPECIFIED
+			# 		IN TEMPLATE FILE, INVOLVES SETTING APPROPRIATE NETMASK/RANGE/ETC..
+			echo "todo" > /dev/null
+		fi
+
+		RESULT=0
+	fi
+	
+	echo $DEFINITION_FILE
+	return $RESULT
+}
+
+# Precondition Test - Verify that the virtual machine network has been created 
+#					  from an xml file
+# @param $1	- The path to the network XML definition file
+# @param $2 - The virtual machine network name 
+create_net()
+{
+	RESULT=1
+
+	# Remove previously existing networks with the same name
+	if destroy_vm_net $2 ; test "$?" -eq 0
+	then
+		# Create the network
+		create_vm_net $1 $2
+
+		RESULT=0
+	fi
+
 	return $RESULT
 }
 
