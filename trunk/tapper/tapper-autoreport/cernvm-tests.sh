@@ -73,6 +73,16 @@
 #
 # 	Precondition Test 19 - Setup and configure the initial CernVM image through the
 #					  	   web interface
+#
+# 	Precondition Test 20 - Enable automatic SSH login to the machine for the user
+#					       specified using keys instead of passwords, and verify that it
+#					       is possible to login automatically
+#
+# 	Precondition Test 21 - Set the root password using the CernVM web interface
+#
+# 	Precondition Test 22 - Enable automatic SSH login to the machine for the root
+#					       user using keys instead of passwords, and verify that it
+#					       is possible to login automatically
 #						  
 #
 #
@@ -84,6 +94,8 @@
 # test suite developer manual for more detailed information about each test,
 # including an API reference for each test case
 #
+#
+#	CernVM Test Case 1 - Check login via ssh as user created through web interface
 #
 #	CernVM Test Case 2 - Check login via ssh as root
 #
@@ -184,6 +196,9 @@ USER_NAME="alice"
 USER_PASS="VM4l1f3"
 USER_GROUP="alice"
 
+# CernVM image root account settings, specify password for root account
+ROOT_PASS="VM4l1f3"
+
 # CernVM image desktop settings
 STARTXONBOOT="on"		# Start X on boot, either "on" or "off"
 RESOLUTION="1024x768"	# CernVM image desktop resolution
@@ -220,6 +235,11 @@ VM_MEMORY=""
 ### Optional virtual machine network settings, best to leave as default
 NET_NAME=""
 
+### Optional CernVM Test Case settings, best to leave as default as they do not
+### have any affect on the testing
+USER_NAME2="bob"
+USER_PASS2="R00tM3"
+
 ###
 ###
 ###
@@ -246,6 +266,7 @@ ok $? "The system is running Linux"
 # CernVM Precondition Tests
 # Create/configure, start, and control virtual machines tests
 #
+
 
 # Precondition Test 0 - Verify that the download page exists and that there is a 
 #					  valid download url for the CernVM image specified, returns
@@ -378,6 +399,27 @@ ok $? "Precondition Test 19 - Setup and configure the initial CernVM image throu
 the web interface"
 
 
+# Precondition Test 20 - Enable automatic SSH login to the machine for the user
+#					     specified using keys instead of passwords, and verify that it
+#					     is possible to login automatically
+verify_autologin_ssh ${IP_ADDRESS} $USER_NAME $USER_PASS
+ok $? "Precondition Test 20 - Enable automatic SSH login to the machine for the user
+specified using keys instead of passwords, and verify that it is possible to login automatically"
+
+
+# Precondition Test 21 - Set the root password using the CernVM web interface
+web_root_password ${IP_ADDRESS} $ROOT_PASS $ADMIN_PASS web_root_pass.log
+ok $? "Precondition Test 21 - Set the root password using the CernVM web interface"
+
+
+# Precondition Test 22 - Enable automatic SSH login to the machine for the root
+#					     user using keys instead of passwords, and verify that it
+#					     is possible to login automatically
+verify_autologin_ssh ${IP_ADDRESS} root $ROOT_PASS
+ok $? "Precondition Test 22 - Enable automatic SSH login to the machine for the root \
+user using keys instead of passwords, and verify that it is possible to login automatically"
+
+
 
 
 #
@@ -385,8 +427,13 @@ the web interface"
 # Execute CernVM image specific Test Cases
 #
 
+# CernVM Test Case 1 - Check login via ssh as user created through web interface
+check_ssh ${IP_ADDRESS} $USER_NAME
+ok $? "CernVM Test Case 1 - Check login via ssh as user created through web interface"
+
+
 # CernVM Test Case 2 - Check login via ssh as root
-check_ssh root ${IP_ADDRESS}
+check_ssh ${IP_ADDRESS} root
 ok $? "CernVM Test Case 2 - Check login via ssh as root"
 
 
@@ -402,14 +449,20 @@ ok $? "CernVM Test Case 4 - Check for correct time / running ntpd"
 
 
 # CernVM Test Case 5 - Create a new user using the CernVM web interface
-web_create_user ${IP_ADDRESS} gnuuser VM4l1f3 web_interface_newuser.log
+web_create_user ${IP_ADDRESS} $USER_NAME2 $USER_PASS2 web_interface_newuser.log
 ok $? "CernVM Test Case 5 - Create a new user using the CernVM web interface"
 add_file web_interface_newuser.log
 
 
+# Precondition Test - Enable automatic SSH login to the machine for the user
+#					  specified using keys instead of passwords, and verify that it
+#					  is possible to login automatically
+verify_autologin_ssh ${IP_ADDRESS} $USER_NAME2 $USER_PASS2
+
+
 # CernVM Test Case 6 - Verify that the user is created and can be accessed
 #					   from ssh login
-check_ssh gnuuser ${IP_ADDRESS}
+check_ssh ${IP_ADDRESS} $USER_NAME2
 ok $? "CernVM Test Case 6 - Verify that the user is created and can be accessed \
 from ssh login"
 

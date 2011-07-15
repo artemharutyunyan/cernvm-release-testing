@@ -28,11 +28,11 @@
 
 
 # CernVM Test Case - Check login via ssh
-# @param $1 - The username to login with
-# @param $2 - The IP address of the machine to login via ssh
+# @param $1 - The IP address of the machine to login via ssh
+# @param $2 - The username to login with
 check_ssh()
 {
-	ssh -q -o "BatchMode=yes" $1@$2 "echo 2>&1"
+	verify_ssh_login $1 $2
 
 	return $?
 }

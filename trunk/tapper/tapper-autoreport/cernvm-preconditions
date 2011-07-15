@@ -37,6 +37,42 @@ verify_hash()
 }
 
 
+# Precondition Test - Verify that user is able to login via ssh
+# @param $1 - The IP address of the machine to login via ssh
+# @param $2 - The username to login with
+verify_ssh_login()
+{
+	ssh -q -o "BatchMode=yes" $2@$1 "echo 2>&1"
+
+	return $?
+}
+
+
+# Precondition Test - Enable automatic SSH login to the machine for the user
+#					  specified using keys instead of passwords, and verify that it
+#					  is possible to login automatically
+# @param $1 - The IP address of the machine to login via ssh
+# @param $2 - The username to login with
+# @param $3	- The password to login with
+verify_autologin_ssh()
+{
+	RESULT=1
+
+	# Configure account specifed to automatically login through SSH'
+	if ssh_autologin $1 $2 $3 ; test "$?" -eq 0
+	then
+		# Precondition - Verify that user is able to login via ssh automatically
+		if verify_ssh_login $1 $2 ; test "$?" -eq 0
+		then
+			# SSH autologin configured, working
+			RESULT=0
+		fi
+	fi
+
+	return $RESULT
+}
+
+
 # Precondition Test - Verify that the download page exists and that there is a 
 #					  valid download url for the CernVM image specified, returns
 #					  the url to download the image
