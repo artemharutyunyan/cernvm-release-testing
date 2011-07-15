@@ -188,6 +188,40 @@ web_config_password()
 }
 
 
+# Set the root password using the CernVM web interface
+# @param $1 - The hostname or ip address for the web interface
+# @param $2	- The new root password
+# @param $3	- The current web interface administration password
+# @param $4 - The name of the logfile
+web_root_password()
+{
+	RESULT=1
+	HEADER=('')
+	ADDITIONAL_HEADER=('Accept: application/json' \
+					   'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' \
+					   "Referer: http://$1:8004/configure/RootPw/" \
+					   'Pragma: no-cache' \
+					   'Cache-Control: no-cache')
+
+	generate_header
+	curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" --data "newpw=$2" --data \
+	"newpw2=$2" --data "currentpw=$3" --location-trusted \
+	http://$1:8004/configure/RootPw/changePass > $4 2>&1
+
+	# Check that curl didn't have any error return codes, then verify that the
+	# root password set through the web interface succeeded 
+	if [ "$?" -eq 0 ]
+	then
+		if grep -q -e "HTTP/1.1 403 Forbidden" $4 ; test "$?" -eq 1
+		then	
+			RESULT=0
+		fi
+	fi
+
+	return $RESULT
+}
+
+
 # Configure the CernVM image desktop settings using the CernVM web interface
 # @param $1 - The hostname or ip address for the web interface
 # @param $2	- Configure startx on boot, accepted values are on or off

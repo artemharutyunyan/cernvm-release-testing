@@ -169,3 +169,35 @@ get_ip_address()
 	echo ${IP_ADDRESS}
 	return $RESULT			
 }
+
+
+# A function which configures automatic SSH login using keys instead of passwords
+# @param $1 - The IP address of the machine to login via ssh
+# @param $2 - The username to login with
+# @param $3	- The password to login with
+ssh_autologin()
+{
+	# Use a here-doc to script expect to automate password authentication
+	/usr/bin/expect <<EOF
+	match_max 100000
+	set prompt "*?\$"
+
+	spawn ssh-copy-id $2@$1
+	# Look for connection prompt
+	expect {
+		"\(yes\/no)\?" {
+		send_user "saying yes to connect\r"
+		send "yes\r"
+		exp_continue
+		}
+		"*?assword:*" {
+		# Login
+		send_user "Logging in\r"
+		send "$3\r"
+		exp_continue	
+		}
+	}
+EOF
+
+	return $?
+}
