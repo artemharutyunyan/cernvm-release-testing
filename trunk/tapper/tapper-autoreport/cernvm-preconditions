@@ -57,6 +57,27 @@ verify_ssh_login()
 verify_autologin_ssh()
 {
 	RESULT=1
+	# Remove conflicting key line from known_hosts file to avoid host key mismatch message
+	#OFFENDING_KEY=$(ssh -o "BatchMode=yes" $2@$1 2>&1 | egrep -E "^Offending[[:space:]]*key[[:space:]]*in.*\:[0-9]+" | \
+	#				sed -E "s/.*\:([0-9]+).*/\\1/")
+	
+	#echo "Displaying offending key"
+	#echo $OFFENDING_KEY
+
+	# Check if an offending key was found, if so remove it from known_hosts file
+	#if [[ "${OFFENDING_KEY}" =~ ^[0-9]+$ ]]
+	#then
+ 	  	#exec >&2; echo "error: Not a number"; exit 1
+	#	echo "number found"
+		# Delete the key from known_hosts
+	#	echo ${OFFENDING_KEY}d
+	#	sed -i ${OFFENDING_KEY}d ~/.ssh/known_hosts
+	#fi
+
+	#TODO: Implement support to only remove the offending key line from known_hosts
+	#	   instead of deleting the entire file
+	# Remove known_hosts file to avoid host key mismatch message
+	rm -f ~/.ssh/known_hosts
 
 	# Configure account specifed to automatically login through SSH'
 	if ssh_autologin $1 $2 $3 ; test "$?" -eq 0
