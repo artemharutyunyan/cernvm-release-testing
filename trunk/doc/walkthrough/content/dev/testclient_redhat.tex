@@ -256,7 +256,7 @@ $ su
 $ virtualbox
 \end{lstlisting}
 
-\item	Next, to verify that VirtualBox has been installed properly and that virsh can connect to the VirtualBox hypervisor, 
+\item	Finally, verify that VirtualBox has been installed properly and that virsh can connect to the VirtualBox hypervisor, 
 		verify that the VirtualBox module, \emph{vboxdrv} has been loaded and that you are able to connect to the virsh console 
 		without any errors.
 
@@ -271,158 +271,13 @@ $ lsmod | grep -i vboxdrv
 $ virsh -c vbox:///session
 \end{lstlisting}
 
-\item	Now, proceed to download and extract the desired VirtualBox virtual machine image onto the system from the \cernvm download 
-		portal, url{http://cernvm.cern.ch/portal/downloads} it is recommended that you download the VirtualBox Desktop image for your 
-		architecture. For this guide the Desktop image will be downloaded as it is the most practical image for the majority of 
-		users.
-		
-\lstset{language=bash,caption=Download and Extract CernVM VirtualBox Desktop Image}
-\begin{lstlisting}
-$ wget http://rbuilder.cern.ch/downloadImage?fileId=1711
-$ gunzip cernvm*.gz
-\end{lstlisting}
-
-\item 	Now, to ensure that VirtualBox is properly configured and installed, follow this guide provided on the CernVM website
-		\url{http://cernvm.cern.ch/portal/vbinstallation} which provides step by step instructions.{\bf Again, ensure that you 
-		ALWAYS start VirtualBox as the root account}.
-
-\item	Furthermore the following VirtualBox options must also be applied, as they are specific to configuring a \cernvm test client.
-\begin{itemize}
-\item[a.]	Navigate to \verb|Settings -> System -> Motherboard| for boot order list, floppy disks are redundant nowadays so disable 
-			floppy from the boot order list. Then, disable the option ``Enable absolute pointing device'', which is for tablets.
-			
-\item[b.]	Next, go to the option \verb|System -> Processor|, and ensure that the option ``Enable PAE/NX'' is disabled
-			as it best left disabled for \cernvm images~\footnote{Physical Address Extension (PAE) is useful if you are running a 
-			32-bit processor as this enables a 32-bit operating system to access to more than 4GB of memory}.
-			
-\item[c.] 	Now, go to the next option \verb|System -> Acceleration|, if your system supports VT-x or AMD-V it is {\bf HIGHLY} 
-			recommended that you enable these options ``Enable Nested Paging'' and ``Enable VT-x/AMD-V'' for performance gains. 
-			To verify that your system supports this execute the following command, the output should not be empty. 
-
-\lstset{language=bash}
-\begin{lstlisting}
-egrep '(vmx|svm)' --color=always /proc/cpuinfo
-\end{lstlisting}
-
-\item[d.]	Next go the setting for ``Audio'', audio is mostly redundant and unnecessary for \cernvm, so disable the audio unless
-			you explicitly require audio support.
-			
-\item[e.]	Finally, since virsh only supports console access through a serial port for LXC, Xen, QEMU/KVM, and UML, go to the
-			setting ``Serial Ports'' and simply verify that all of the serial ports as disabled for VirtualBox.
-\end{itemize}
-
-\item	Now that the virtual machine has been created and configured verify that it is able to boot completely without crashing,
-		\emph{you will be presented with a login screen when it has booted completely}. Then shutdown the virtual machine by clicking 
-		``Actions'' from within the virtual machine and selecting `Shutdown'', after the virtual machine has shutdown close
-		VirtualBox and then connect to the VirtualBox hypervisor and determine that you can view, start, and stop virtual machine.
-
-\lstset{language=bash,caption=Verify VirtualBox Works with Virsh}
-\begin{lstlisting}
-$ su
-$ virsh --connect vbox:///session
-
-# Verify the virtualbox virtual machine is accessible
-# Name of the virtual machine created should be listed
-$ list --all
-
-# Verify the virtual machine can be turned on/off
-$ start <name of virtual machine>
-# Wait about 2 minutes for the system to boot
-$ shutdown <name of virtual machine>
-\end{lstlisting}
-
-\item	Finally, configure the the virtual machine network to automatically start when the system boots and then create an
-		XML definition file of the virtual machine, which will be used later by the test scripts. In the following example 
-		save the XML definition file with the same name as the virtual machine that was created, such as 
-		\emph{cernvm-vbox-2.3.0.xml} so that it is easy to differentiate between multiple virtual machines for different
-		hypervisors.
-
-\lstset{language=bash,caption=Create XML Definition File and Configure Network}
-\begin{lstlisting}
-$ su
-
-# Create virtual machine XML definition file
-$ virsh --connect vbox:///session dumpxml <name of virtual machine> \
-> <name of virtual machine>.xml
-
-# Configure virsh network for VirtualBox
-$ virsh --connect vbox:///session
-$ net-start vboxnet0
-$ net-autostart vboxnet0
-\end{lstlisting}				
-\end{enumerate}
-
-
-
-
-\newpage
-\subsection{Configuring the CernVM Image}
-\label{sec:rhcernvmconfig}
-\begin{enumerate}
-\item 	The next steps involve configuring the CernVM image to integrate with virsh as well as the test suite, first
-		start the virtual machine, execute the command to get the IP address of the CernVM image. Then follow this guide
-		provided on the CernVM website on how to configure the CernVM image and create a new user using the web interface 
-		\url{http://cernvm.cern.ch/portal/cvmconfiguration} and reboot the system, \emph{all virsh commands require root 
-		privileges}.
-		
-\begin{lstlisting}
-$ virsh start cernvm
-# Wait about 2 minutes for the system to boot 
-# Then get IP Address using the following command
-$ arp -an
-\end{lstlisting}
-
-\item 	Now that the system has booted, login in to the system using SSH for the user you created using the CernVM web interface
-		and set the root password
-		
-\lstset{language=bash,caption=Set Root Password}
-\begin{lstlisting}
-$ ssh <user you created>@cernvm-image-ipaddress
-
-# Type the following command, and enter a root password you won't forget
-$ sudo passwd root
-\end{lstlisting}
-
-\item	Now that you are logged into the system through SSH, then enable root login through SSH using 
-		the following commands.
-				
-\lstset{language=bash,caption=Enable SSH Root Login}
-\begin{lstlisting}
-# edit the file /etc/ssh/sshd_config and uncomment the line 
-# PermitRootLogin yes	in order to enable root login
-$ vi /etc/ssh/sshd_config
-\end{lstlisting}
-
-\item 	Next from the host machine \emph{ie. the machine you're currently using} enable automatic login as root 
-		through ssh on the KVM guest, first ensure that the guest machine has been started.
-		
-\lstset{language=bash,caption=Enable Automatic SSH Root Login}
-\begin{lstlisting}
-# Restart the virtual machine wait for 
-# it to completely shut off and turn on
-$ virsh shutdown cernvm
-$ virsh start cernvm
-
-# Generate a public key, when prompted press enter for everything
-$ ssh-keygen -t rsa
-
-# Get the ip address of the running cernvm guest, as done previously
-$ arp -an
-
-# Next, run the following command to setup automatic login for ssh
-# without having to type the password. When prompted for the password
-# enter the password you just set previously
-$ ssh-copy-id -i ~/.ssh/id_rsa.pub root@cernvm-image-ipaddress
-		
-# Disconnect, and try and login to the machine using ssh and ensure 
-# that you can login as root without having to type the password
-$ ssh root@cernvm-image-ipaddress
-\end{lstlisting}
-
-\item	If everything so far has worked, then the test client and CernVM image have been installed and configured properly,
+\item	If everything so far has worked, then libvirt, virsh, and the hypervisors have been installed and configured properly,
 		if you have any outstanding issues solve them before proceeding further, or go to the section ``Server Platform 		
-		Setup''~\ref{sec:serversetup} as the \tapper~server does not require virtual machine creation and configuration.
+		Setup''~\ref{sec:serversetup} as the \tapper~server does not require libvirt, virsh, or hypervisor configuration.
+
 \end{enumerate}
+
+
 
 
 \newpage
@@ -436,7 +291,7 @@ $ ssh root@cernvm-image-ipaddress
 \item 	Now that the \tapper~server has been installed and configured and the \tapper web interface and database have proven
 		to be working, the next step is to verify that the test client can actually send a report to the \tapper~server in
 		the form of a TAP file. After sending the TAP report to the server, ensure that the test client is working by viewing 
-		the tapper reports in your browser at the following url: \url{http://localhost/tapper/reports}. You should now see a 
+		the tapper reports in your browser at the following url: \url{http:/<tapper\_server>/tapper/reports}. You should now see a 
 		report from the test client, there should be a report from a system named whatever the ``Tapper-Machine-Name'' in 
 		demo\_report.tap was set as. \emph{For the example demo\_report.tap provided below it would be cernvm-rhtestclient}.
 		\footnote{This is why a consistent hostname convention was emphasized earlier, as reports are often sorted and organized 
@@ -445,13 +300,12 @@ $ ssh root@cernvm-image-ipaddress
 \lstset{language=bash,caption=Send a Basic Report to the \tapper~Server}
 \begin{lstlisting}
 # Save the following in a file named demo_report.tap
-$ vi demo_report.tap
 
 	1..2
 	# Tapper-Suite-Name: Tapper-Deployment
 	# Tapper-Suite-Version: 1.001
 	# Tapper-Machine-Name: cernvm-rhtestclient
-	ok - Hello test world
+	ok - Hello World
 	ok - Just another description
 
 # Send the report to the tapper server using netcat
@@ -459,7 +313,7 @@ $ cat demo_report.tap | nc -w10 cernvm-server 7357
 \end{lstlisting}
 
 \item 	Next, download a copy of tapper-autoreport and the CernVM Test Cases from the Google Code svn repository
-		\cite{GCreleasetesting} and install the tapper-autoreport dependencies.
+		\cite{GCreleasetesting} and install the the following dependencies required by tapper-autoreport.
 		
 \lstset{language=bash,caption=Install \tapper~AutoReport and Dependencies}
 \begin{lstlisting}
@@ -478,24 +332,39 @@ $ yum install perl-CPAN
 $ cpan
 $ install prove
 $ install XML::XPath
+
+# Install test suite dependencies
+$ yum install uuid
+$ yum install spawn
+$ yum install expect
+$ yum install expectk
+$ yum install nmh
+
+# Run install-mh and accept the defaults
+$ install-mh
 \end{lstlisting}
 
-\item	Now that that tapper-autoreport has been installed, configure the following variables in the script
-		``cernvm-tests.sh'' according to your \tapper infrastructure setup.
+\item	Now that that tapper-autoreport has been installed, configure the following mandatory variables in the script
+		``cernvm-tests.sh'' according to your \tapper infrastructure setup. Most settings other than the following
+		mandatory settings listed can be left as the default, refer to the developer manual for a more detailed list of 
+		available configuration settings.
 \begin{itemize}
-\item	OSNAME		- The operating system of the test client, such as ``Red Hat 5''
-\item	VMNAME 		- The domain name of the virtual machine used earlier with virsh
-\item	VM\_XML\_DEFINITION	- The location and name of cernvm virtual machine definition XML file used to create virtual machine
-\item	HOSTNAME	- The hostname of the test client
-\item	GUESTIP		- This is the IP address of the CernVM image
 \item	TAPPER\_REPORT\_SERVER	- The hostname of the \tapper~Report~Server
+\item	TEMPLATE				- The template file in the templates folder for the hypervisor
+\item	NET\_TEMPLATE			- The network template file, only applies to kvm/virtualbox
+\item	HYPERVISOR				- The hypervisor to test, valid hypervisors are vmware,vbox,kvm
+\item	IMAGE\_VERSION			- The CernVM image version to download, currently 2.4.0
+\item	VM\_ARCH					- The valid architectures are x86 and x86\_64
+\item	SUITENAME				- The current test suite, change this for different hypervisor tests
+\item	OSNAME					- The operating system of the current system, change this accordingly
+\item	HOSTNAME				- The system hostname to appear in reports, change this accordingly
 \end{itemize}	
 
 \item	Finally, now that tapper-autoreport has been installed and configured on the test client and the test client and \tapper~Server
 		have proven to be working, the next step is to verify that tapper-autoreport works correctly and can actually send a report to 	
 		the \tapper~server in the form of a TAP file. After the \cernvm Test Cases script, ``cernvm-tests.sh'' has completed and sent
 		a TAP report to the server, ensure that the test client is working by viewing the tapper reports in your browser at the 
-		following url: \url{http://localhost/tapper/reports}. You should now see new report from the test client, there should be a 
+		following url: \url{http:/<tapper\_server>/tapper/reports}. You should now see a new report from the test client, there should be a 
 		report from a system with the same hostname\footnote{This is why a consistent hostname convention was emphasized earlier, as 
 		reports are often sorted and organized based on hostnames}.
 
