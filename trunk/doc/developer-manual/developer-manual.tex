@@ -1,0 +1,111 @@
+\documentclass[final,a4paper,10pt,abstracton]{scrreprt}
+
+\usepackage{verbatim}
+\usepackage{draftwatermark}\SetWatermarkScale{5} %_DRAFT watermark
+\include{atex}
+
+\title{CernVM Release Testing Developer Manual}
+% \subtitle{Technical Report}
+\author{GNU USER}
+
+\providecommand{\cernvmreleasetesting}{{\scshape CernVM Release Testing~}}
+\providecommand{\cernvmtestframework}{{\scshape CernVM Test Suite Framework~}}
+\providecommand{\releasetesting}{{\scshape Release Testing~}}
+\providecommand{\cern}{{\scshape cern~}}
+\providecommand{\cernvm}{{\scshape CernVM~}}
+\providecommand{\tapper}{{\scshape Tapper~}}
+\providecommand{\amdtapper}{{\scshape AMD Tapper~}}
+
+\providecommand{\todo}[1]{\textcolor{red}{#1}}
+\definecolor {light-blue}{rgb}{230,244,255}
+
+
+\usepackage[nottoc]{tocbibind}
+
+\usepackage{makeidx}
+\makeindex
+
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{4}
+
+\begin{document}
+\selectlanguage{english}
+\renewcommand\today{June 2011}
+
+\pagestyle{empty}
+\begin{titlepage}
+	\begin{addmargin}[-\oddsidemargin]{-\evensidemargin}
+  		\newlength{\saveparindent}
+		\setlength{\saveparindent}{\parindent}
+		\setlength{\parindent}{0cm}
+
+  		\sf
+		\center
+		\vspace*{-1cm}
+		\mbox{
+	  		\parbox{4cm}{
+				\resizebox{4cm}{!}{\input{img/IMG_cernlogo}}
+%				
+%				%\begin{tikzpicture}[scale=0.5]
+%				%	\path[fill=black, join=round] (1,1)--(2,2)--(2,5)--(5,5)--(6,6)--(1,6)--(1,1)--(2,0)--(5,0)--(7,2)--(7,5)--(6,6)--(6,1)--cycle;
+%				%	\clip (6,6)--(5,5)--(5,2)--(2,2)--(1,1)--(6,1)--(6,6)--(5,7)--(2,7)--(0,5)--(0,2)--(1,1)--(1,6)--cycle;
+%				%	\shade[inner color=green, outer color=black] (3,4) circle(5.5cm);
+%				%\end{tikzpicture}
+	  		}
+	  		\parbox{9cm}{
+	    			%\LARGE CERN\\
+	    			%\large PH-SFT%\\[0.5cm]
+			}
+		}
+		\vspace*{2.5cm}
+ 
+  		{\large \scshape CernVM Release Testing Developer Manual}\\[0.5cm]
+  		\HRule\\[0.4cm]
+		\huge CernVM Release Testing - Developer Manual\\
+		\HRule\\[1.5cm]
+		
+%        \includegraphics[height=5cm]{marbles}\\[1.5cm]
+        \includegraphics{img/IMG_cernvmlogo}\\[1.5cm] 
+		\large GNU USER\\[0.4cm]
+		%\today
+ 
+		%  \LARGE ---DRAFT---\\[1ex]
+		%  \LARGE www.grgen.net\\[6ex]
+		%  \LARGE Jakob Blomer \qquad Rubino Gei\ss\\[3ex]
+		%  \large \today\\
+ 
+		\large Technical Report\\
+		Version: 0.1 (Draft) \today 
+		%	\large ISSN 1432-7864	
+
+  		\setlength{\parindent}{\saveparindent}
+	\end{addmargin}
+\end{titlepage}
+\cleardoublepage
+\pagenumbering{roman}
+
+
+
+\abstract{
+The \cernvmreleasetesting\ project is a testing infrastructure for CernVM images, the usecase for the project is to provide an automated
+testing environment, which will install and configure CernVM images, run the set of tests and report the results on a web interface.
+}
+
+\tableofcontents
+\clearpage
+\pagenumbering{arabic}
+\pagestyle{headings}
+
+\include{content/overview}
+\include{content/framework}
+\include{content/configfile}
+\include{content/addtests}
+\include{content/apireference}
+
+\pagestyle{plain}
+\bibliographystyle{plain}
+\bibliography{manualRefs}
+
+\printindex
+
+\end{document}
