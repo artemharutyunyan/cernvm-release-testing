@@ -74,13 +74,16 @@
 # 	Precondition Test 19 - Setup and configure the initial CernVM image through the
 #					  	   web interface
 #
-# 	Precondition Test 20 - Enable automatic SSH login to the machine for the user
+# 	Precondition Test 20 - Verify that it is possible to login on web interface using
+#						   the new web interface administrator password
+#
+# 	Precondition Test 21 - Enable automatic SSH login to the machine for the user
 #					       specified using keys instead of passwords, and verify that it
 #					       is possible to login automatically
 #
-# 	Precondition Test 21 - Set the root password using the CernVM web interface
+# 	Precondition Test 22 - Set the root password using the CernVM web interface
 #
-# 	Precondition Test 22 - Enable automatic SSH login to the machine for the root
+# 	Precondition Test 23 - Enable automatic SSH login to the machine for the root
 #					       user using keys instead of passwords, and verify that it
 #					       is possible to login automatically
 #						  
@@ -171,7 +174,7 @@ NOUPLOAD=0
 ### ALL OF THESE SETTINGS MUST BE SET FOR SCRIPT TO FUNCTION
 ###
 
-TAPPER_REPORT_SERVER="" 		# Mandatory, Tapper server hostname/ip to send reports to
+TAPPER_REPORT_SERVER="cernvm-debian6-server" 		# Mandatory, Tapper server hostname/ip to send reports to
 TEMPLATE="cernvm-vbox.xml"		# Mandatory, the template file in the templates folder for the hypervisor
 NET_TEMPLATE="vbox-network.xml"	# Mandatory, the network template file, only applies to kvm/virtualbox
 HYPERVISOR="vbox"				# Mandatory, valid hypervisors are vmware,vbox,kvm
@@ -399,24 +402,32 @@ ok $? "Precondition Test 19 - Setup and configure the initial CernVM image throu
 the web interface"
 
 
-# Precondition Test 20 - Enable automatic SSH login to the machine for the user
+# Precondition Test 20 - Verify that it is possible to login on web interface using
+#						 the new web interface administrator password
+web_check_login ${IP_ADDRESS} $ADMIN_USERNAME $ADMIN_PASS web_interface_login2.log
+ok $? "Precondition Test 20 - Verify that it is possible to login on web interface using \
+the new web interface administrator password"
+add_file web_interface_login2.log
+
+
+# Precondition Test 21 - Enable automatic SSH login to the machine for the user
 #					     specified using keys instead of passwords, and verify that it
 #					     is possible to login automatically
 verify_autologin_ssh ${IP_ADDRESS} $USER_NAME $USER_PASS
-ok $? "Precondition Test 20 - Enable automatic SSH login to the machine for the user
+ok $? "Precondition Test 21 - Enable automatic SSH login to the machine for the user
 specified using keys instead of passwords, and verify that it is possible to login automatically"
 
 
-# Precondition Test 21 - Set the root password using the CernVM web interface
+# Precondition Test 22 - Set the root password using the CernVM web interface
 web_root_password ${IP_ADDRESS} $ROOT_PASS $ADMIN_PASS web_root_pass.log
-ok $? "Precondition Test 21 - Set the root password using the CernVM web interface"
+ok $? "Precondition Test 22 - Set the root password using the CernVM web interface"
 
 
-# Precondition Test 22 - Enable automatic SSH login to the machine for the root
+# Precondition Test 23 - Enable automatic SSH login to the machine for the root
 #					     user using keys instead of passwords, and verify that it
 #					     is possible to login automatically
 verify_autologin_ssh ${IP_ADDRESS} root $ROOT_PASS
-ok $? "Precondition Test 22 - Enable automatic SSH login to the machine for the root \
+ok $? "Precondition Test 23 - Enable automatic SSH login to the machine for the root \
 user using keys instead of passwords, and verify that it is possible to login automatically"
 
 
@@ -449,7 +460,7 @@ ok $? "CernVM Test Case 4 - Check for correct time / running ntpd"
 
 
 # CernVM Test Case 5 - Create a new user using the CernVM web interface
-web_create_user ${IP_ADDRESS} $USER_NAME2 $USER_PASS2 web_interface_newuser.log
+web_create_user ${IP_ADDRESS} $USER_NAME2 $USER_PASS2 $USER_GROUP web_interface_newuser.log
 ok $? "CernVM Test Case 5 - Create a new user using the CernVM web interface"
 add_file web_interface_newuser.log
 
@@ -469,7 +480,7 @@ from ssh login"
 
 # CernVM Test Case 7 - Restart through the web interface and check that there
 #					   are no error messages at boot
-web_restart ${IP_ADDRESS} web_interface_reboot.log web_restart_boot.log
+check_web_restart ${IP_ADDRESS} web_interface_reboot.log web_restart_boot.log
 ok $? "CernVM Test Case 7 - Restart through the web interface and check that \
 there are no error messages at boot"
 add_file web_interface_reboot.log
