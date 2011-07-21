@@ -116,3 +116,182 @@ using only the mandatory settings}.
 				system
 		\end{itemize}
 \end{itemize}
+
+
+\paragraph*{Optional Virtual Machine Settings}~\newline
+
+The following are the optional virtual machine settings which can be specified to override
+the default settings used by the \cernvmtestframework\, these default virtual machine settings
+used by the framework are based on the virtual machine XML template definition files defined
+in the templates directory.
+ 
+\begin{itemize}
+\item	VM\_NAME
+		\begin{itemize}
+		\item	Overrides the default name of the virtual machine set by the 
+				virtual machine template XML defintion file
+		\item	It is recommended that this setting is specified if testing multiple
+				versions of the same \cernvm image, for example a name such as
+				``cernvm-vbox-2.4.0'' would help differentiate between other versions
+		\end{itemize}
+		
+\item	VM\_CPUS
+		\begin{itemize}
+		\item	Overrides the default number of cpus, which is one cpu by default,
+				set by the virtual machine template XML defintion file
+		\item	Valid values are from {\bf 1 - 4}, but the number specified cannot
+				exceed the actual number of cores/cpus on the host system
+		\end{itemize}
+	
+\item	VM\_MEMORY
+		\begin{itemize}
+		\item	Overrides the default default amount of memory set by the virtual machine
+				template XML defintion file
+		\item	It is recommended that you specify this value if thrashing occurs on the
+				\cernvm image when executing tests due to a lack of memory
+		\item	Valid values are in kilobytes and must be based on an amount of memory in
+				kilobytes that is a multiple of a base value of 2. For example, to increase
+				the memory of a system to 1024 MB, set the value as {\bf 1048576}, which is the
+				amount of memory in kilobytes
+		\end{itemize}
+
+\item	NET\_NAME
+		\begin{itemize}
+		\item	Overrides the default virtual network name set by the virtual machine
+				template XML defintion file
+		\item	This is the one optional setting {\bf you should never configure}, unless you have
+	  			manually created a different virtual network for the hypervisor
+		\end{itemize}
+
+\item	VM\_VIDEO\_MEMORY
+		\begin{itemize}
+		\item	Overrides the default amount of video memory set by the virtual machine
+				template XML defintion file
+		\item	It is recommended that you specify this value if display errors occurs on the
+				\cernvm image before or when executing tests due to a lack of video memory
+		\item	Valid values are in kilobytes and must be based on an amount of video memory in
+				kilobytes that is a multiple of a base value of 2. For example, to increase
+				the video memory of a system to 64 MB, set the value as {\bf 65536}, which is the
+				amount of video memory in kilobytes
+		\end{itemize}
+\end{itemize}
+
+
+\paragraph*{Optional Web Interface Settings}~\newline
+
+The following are the optional web interface settings which can be specified to override
+the default settings used by the \cernvmtestframework\, such as the \cernvm image desktop
+resolution and the primary experiment group.
+
+\begin{itemize}
+\item	ADMIN\_USERNAME
+		\begin{itemize}
+		\item	Overrides the default web inteface administration account user name,
+				which is ``admin'' by default. This optional settings should not 
+				have to be modified unless the \cernvm web interface defaults change
+		\end{itemize}
+		
+\item	ADMIN\_DEFAULT\_PASS
+		\begin{itemize}
+		\item	Overrides the default web interface administration account password,
+				which is ``password'' by default. This optional settings should not 
+				have to be modified unless the \cernvm web interface defaults change
+		\end{itemize}
+		
+\item	ADMIN\_PASS
+		\begin{itemize}
+		\item	Overrides the web inteface administration account password set by
+				the test suite scripts with a user defined web interface
+				administration password
+		\item	The password specified {\bf must be six characters or longer}
+		\end{itemize}
+
+\item	USER\_NAME
+		\begin{itemize}
+		\item	Overrides the default account name ``alice'' of the new user created 
+				by the test suite scripts through the web interface
+		\item	The user name specified should only contain alphabetical characters
+		\end{itemize}
+		
+\item	USER\_PASS
+		\begin{itemize}
+		\item	Overrides the default password ``VM4l1f3'' of the new user created 
+				by the test suite scripts through the web interface
+		\item	The password specified {\bf must be six characters or longer}
+		\end{itemize}
+
+%TODO ADD A LIST OF THE VALID GROUPS FOR THE NEW USER
+\item	USER\_GROUP
+		\begin{itemize}
+		\item	Overrides the default group ``alice'' for the new user created 
+				by the test suite scripts through the web interface
+		\item	The group specified must be a valid group available
+				through the web interface, such as ``alice''
+		\end{itemize}
+
+\item	ROOT\_PASS
+		\begin{itemize}
+		\item	Overrides the default password ``VM4l1f3'' of the root account
+				on the \cernvm image set by the test suite scripts through the
+				web interface
+		\item	The password specified {\bf must be six characters or longer}
+		\end{itemize}
+		
+\item	STARTXONBOOT
+		\begin{itemize}
+		\item	Overrides the default \cernvm desktop setting set by the test 
+				suite scripts through the web interface, which configures X to
+				start on boot
+		\item	The valid values, (lower-case) are either ``on'' to start X on boot,
+				\emph{which is the default}, or ``off'' to not start X on boot		
+		\end{itemize}
+				
+%TODO GET A LIST OF THE VALID RESOLUTIONS ACCEPTED BY THE WEB INTERFACE
+\item	RESOLUTION
+		\begin{itemize}
+		\item	Overrides the default \cernvm desktop resolution, {\bf 1024x768} set by
+				the test suite scripts through the web interface
+		\item	The valid values are valid resolutions up to a {\bf maximum resolution
+				of 1680x1050}
+		\end{itemize}
+
+%TODO GET A LIST OF THE VALID KEYBOARD LOCALES
+\item	KEYBOARD\_LOCALE
+		\begin{itemize}
+		\item	Overrides the default \cernvm desktop keyboard locale, which is ``us'' by
+				default, set by the test suite scripts through the web interface
+		\item	The valid values are valid locale settings
+		\end{itemize}
+
+\item	EXPERIMENT\_GROUP
+		\begin{itemize}
+		\item	Overrides the default \cernvm primary experiment group, which is ``ALICE''
+				by default, set by the test suite scripts through the web interface
+		\item	The valid values are one of following group names, {\bf the group name
+				specified must be in UPPERCASE}: ALICE, ATLAS, CMS, LHCB, LCD, NA61, HONE,
+				HEPSOFT, BOSS, GEANT4	
+		\end{itemize}
+\end{itemize}
+
+
+\paragraph*{Optional Test Case Settings}~\newline
+
+The following are the optional test case settings which can be specified to override
+the default settings used by the \cernvmtestframework\ for executing the \cernvmreleasetesting
+test cases.
+
+\begin{itemize}
+\item	USER\_NAME2
+		\begin{itemize}
+		\item	Overrides the default account name ``bob'' of the new user created 
+				through the web interface as part of a \cernvmreleasetesting test case
+		\item	The user name specified should only contain alphabetical characters
+		\end{itemize}
+		
+\item	USER\_PASS2
+		\begin{itemize}
+		\item	Overrides the default password ``R00tM3'' of the new user created 
+				through the web interface as part of a \cernvmreleasetesting test case
+		\item	The password specified {\bf must be six characters or longer}
+		\end{itemize}
+\end{itemize}
