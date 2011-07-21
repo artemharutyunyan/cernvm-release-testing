@@ -1,0 +1,118 @@
+\chapter{Test Suite Configuration File}
+\label{sct:configfile}
+
+The configuration file is essential to setting up the initial \cernvm test suite for testing, while most of the default 
+settings provided in the configuration file are sufficient for most \cernvm image testing environments, there are still
+some mandatory settings which {\bf must be configured before testing can begin}. In addition to the mandatory settings
+that must be specified before tests can be executed, there are also optional configuration settings which provide settings
+that can override the default settings normally taken when the default configuration file is used, these include options
+to override the default virtual machine settings specified in the template files.
+
+
+
+
+\subsection{Mandatory Settings}
+\label{sct:mandatorysettings}
+
+In most testing scenarios only the mandatory configuration settings need to be specified such as the hypervisor and 
+the download page, but optional settings are also provided to override internal default settings used by the 
+\cernvmtestframework\. The following is a list of the mandatory settings that must be configured in order for the
+tests to work, ensure that you enter valid values, \emph{in lower-case}, for the settings indicated.
+
+
+\begin{itemize}
+\item	SUITENAME
+		\begin{itemize}
+		\item	Must ALWAYS be set, only define once at the top of the configuration file, 
+	  		  	usually the default suite name given in the test suite configuration file is fine
+		\end{itemize}
+	  		  
+\item	SUITEVERSION
+		\begin{itemize}
+		\item	Must ALWAYS be set, only define once at the top of the configuration file,
+	  		  	reflects the release version number of the test suite framework, the default 
+      		  	suite version given in the test suite configuration should only be changed if 
+     		  	you make modifications to the test suite framework which differentiate it from
+      		  	the version released on Google Code.
+		\end{itemize}
+
+\item	REPORT\_SERVER
+		\begin{itemize}
+		\item	Must ALWAYS be set, only define once at the top of the configuration file,
+      			this is the ip address or hostname of the Tapper report server which the reports
+      			from the test results are sent to
+		\end{itemize}
+		
+\item	DOWNLOAD\_PAGE
+		\begin{itemize}
+		\item	Must ALWAYS be set, normally the default url provided in the configuration file is
+				accurate, but in the event that the internal \cernvm image release page is relocated
+				then this url must be changed.
+		\end{itemize}
+
+\item	HYPERVISOR
+		\begin{itemize}
+		\item	Must ALWAYS be set, MUST be the first setting before the rest of the mandatory
+	  			and optional settings specific to the hypervisor are set
+	  	\item	Valid values (case sensitive) are {\bf kvm,vbox,vmware}
+		\end{itemize}
+		
+\item	IMAGE\_TYPE
+		\begin{itemize}
+		\item	Must ALWAYS be set,  MUST be defined for each HYPERVISOR entry in the configuration
+				file, specifies the type of CernVM image, such as desktop, basic, head node, etc
+		\item	Valid image types supported, (case sensitive) are {\bf basic and desktop}
+		\end{itemize}
+		
+\item	ARCH
+		\begin{itemize}
+		\item	Must ALWAYS be set, MUST be defined for each HYPERVISOR entry in the configuration
+				file, specifies the architecture of the \cernvm image
+		\item	Valid architectures (case sensitive) are {\bf x86 and x86\_64}
+		\end{itemize}
+\end{itemize}
+
+
+
+
+\subsection{Optional Settings}
+\label{sct:optionalsettings}
+
+In most testing scenarios only the mandatory configuration settings need to be specified such as the hypervisor and 
+the download page, but optional settings are also provided to override internal default settings used by the 
+\cernvmtestframework\. The following is a list of the optional settings that may be specified to override the default
+settings, the optional settings must be configured for each of the HYPERVISOR settings defined in the configuration file.
+The optional settings are separated primarily into four categories, host settings, virtual machine settings, web interface
+settings, and test case settings. 
+
+Again, only the mandatory settings are required to be specified in order for the tests to work, the optional settings 
+can be ignored completely and the test suite scripts should still execute correctly. Therefore, optional settings should
+only be specified by advanced users as improper optional settings can cause precondition tests to return failures,
+\emph{it is only recommended that you start configuring optional settings after verifying the results of the scripts 
+using only the mandatory settings}.
+
+
+\paragraph*{Optional Host Settings}
+\begin{itemize}
+\item	IMAGES\_DIR
+		\begin{itemize}
+		\item	The root directory for the location of the \cernvm images and all
+				configuration files and settings, by default /usr/share/images on
+				Linux/OS X systems and \verb|C:\users\default\application data\images|
+				on Windows systems
+		\end{itemize}
+		
+\item	OSNAME
+		\begin{itemize}
+		\item	The name of the host operating system, such as Red Hat 5, OS X
+				Snow Leopard, or Windows 7, configure accordingly
+		\item	\emph{Support may be added eventually to automatically configure OSNAME}
+		\end{itemize}
+		
+\item	HOSTNAME
+		\begin{itemize}
+		\item	The hostname of the system, determined automatically by the script,
+				only set this if you wish to override the default hostname of the
+				system
+		\end{itemize}
+\end{itemize}
