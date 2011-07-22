@@ -1,0 +1,36 @@
+#! /bin/bash
+
+# =============================================================================
+#
+# testsuite-config
+# --------------------
+#
+# This script contains functions which configure the environment before
+# and after executing any tests such as validating and parsing the 
+# configuration file and removing cookies and virtual machines after
+# testing has completed. The functions have a simple interface 
+# and each function has a return code of either (0 or 1) to indicate
+# a success or failure.
+#
+# =============================================================================
+
+
+# Check that the default configuration file exists or that the the
+# configuration file provided by the user exists
+# @param $1 - The location and name of the configuration file
+config_exists()
+{
+	RESULT=1
+
+	# If the configuration file exists return success status
+	if file_exists $1 ; test "$?" -eq 0
+	then
+			RESULT=0
+	else
+		# Alert the user that the file does not exist, return failure
+		echo -e "ERROR: The configuration file does not exist, try specifying the\n \
+name and location of the file using the --config option" 1>&2
+	fi 
+
+	return $RESULT
+}
