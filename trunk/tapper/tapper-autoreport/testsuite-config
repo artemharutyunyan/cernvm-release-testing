@@ -66,6 +66,127 @@ number_hypervisors()
 }
 
 
+# Configure the mandatory general settings for the test suite based on the 
+# settings provided in the configuration file 
+# @param $1 - The location and name of the configuration file
+configure_mandatory()
+{	
+	# Parse the configuration file and set the mandatory general settings
+	# based on the values provided by the user
+	while read line
+	do
+		# Trim any new line characters
+	    TRIMMED=$(echo $line | sed ':a;N;$!ba;s/\n//g')
+		
+		# Retrieve the name of the setting	    
+		CONFIG_SETTING=$(echo ${TRIMMED} | sed -E "s|^[[:space:]]*(.+)\=.*|\\1|")
+		
+		if test "$?" -eq 0 && test "${CONFIG_SETTING}"
+		then
+			# Retrieve the value specified and configure the test suite accordingly
+			VALUE=$(echo ${TRIMMED} | sed -E "s|^.*\=(.*)|\\1|")
+
+			# Configure the internal variables used by test suite
+			case "$CONFIG_SETTING" in
+			"SUITENAME")
+			  SUITENAME=${VALUE}
+			  ;;
+			"SUITEVERSION")
+			  SUITEVERSION=${VALUE}
+			  ;;
+			"REPORT_SERVER")
+			  TAPPER_REPORT_SERVER=${VALUE}
+			  ;;
+			"DOWNLOAD_PAGE")
+			  DOWNLOAD_PAGE=${VALUE}
+			  ;;
+			*)
+			  ;;
+			esac
+		fi
+	done < $1
+}
+
+
+# Configure the mandatory and optional settings for the hypervisor entry specified
+# @param $1 - The location and name of the configuration file
+# @param $2 - The number of the hypervisor entry, such as 2 for second hypervisor entry
+configure_hypervisor()
+{	
+	RESULTS=1
+	HYPERVISOR_COUNTER=0
+
+	# Parse the configuration file and set the mandatory and optional settings
+	# for the hypervisor entry specified
+	while read line
+	do
+		# Trim any new line characters
+	    TRIMMED=$(echo $line | sed ':a;N;$!ba;s/\n//g')
+
+		# If the hypervisor setting specified retrieve the value, increment counter
+		echo $line | egrep -q -E "^[[:space:]]*HYPERVISOR\=.+"
+    	if test "$?" -eq 0
+		then
+			# Increment the hypervisor entry counter
+			HYPERVISOR_COUNTER=$(($HYPERVISOR_COUNTER + 1))
+			
+			# If the hypervisor counter is over the entry number, at the next
+			# hypervisor entry, exit loop and return			
+			if test "$HYPERVISOR_COUNTER" -gt "$2"
+			then
+				# exit loop, return
+				break
+			# If the current hypervisor is the entry specified, set hypervisor value
+			elif test "$HYPERVISOR_COUNTER" -eq "$2"
+			then
+				# Configure the internal hypervisor variable used by test suite
+				VALUE=$(echo ${TRIMMED} | sed -E "s|^.*\=(.*)|\\1|")
+				HYPERVISOR=${VALUE}
+				continue
+			else
+				continue
+		fi
+				
+		# If the current hypervisor is the entry specified, then set the mandatory
+		# and optional settings specific to the hypervisor
+		if test "$HYPERVISOR_COUNTER" -eq "$2"
+		then
+			# Retrieve the name of the setting	    
+			CONFIG_SETTING=$(echo ${TRIMMED} | sed -E "s|^[[:space:]]*(.+)\=.*|\\1|")			
+			
+			if test "$?" -eq 0 && test "${CONFIG_SETTING}"
+			then
+				# Retrieve the value specified and configure the test suite accordingly
+				VALUE=$(echo ${TRIMMED} | sed -E "s|^.*\=(.*)|\\1|")
+
+				# Configure the internal variables used by test suite
+				case "$CONFIG_SETTING" in
+				"IMAGE_TYPE")
+				  IMAGE_TYPE=${VALUE}
+				  ;;
+				"VM_NAME")
+				  VM_NAME=${VALUE}
+				  ;;
+				"VM_CPUS")
+				  VM_CPUS=${VALUE}
+				  ;;
+				"VM_MEMORY")
+				  VM_MEMORY=${VALUE}
+				  ;;
+				"VM_VIDEO_MEMORY")
+				  VM_VIDEO_MEMORY=${VALUE}
+				  ;;
+				"NET_NAME")
+				  NET_NAME=${VALUE}
+				  ;;
+				*)
+				  ;;
+				esac
+			fi
+	done < $1
+}
+
+
 # Check that the mandatory general settings provided in the configuration file 
 # exist and are valid as the tests cannot execute without it
 # @param $1 - The location and name of the configuration file
