@@ -110,3 +110,167 @@ validate_mandatory_config()
 	RESULT=0
 	return $RESULT
 }
+
+
+# Check that the mandatory hypervisor settings provided in the configuration file 
+# exist and are valid as the tests cannot execute without it
+# @param $1 - The location and name of the configuration file
+validate_hypervisor_config()
+{
+	RESULT=1
+	HYPERVISOR_COUNT=0
+	HYP_SETTING_COUNT=0
+
+	# Check that mandatory setting, HYPERVISOR has been at least specified
+	if egrep -q -E "HYPERVISOR\=.+" $1 ; test "$?" -ne 0
+	then
+		# No HYPERVISOR set
+		echo "ERROR: Mandatory configuration setting, HYPERVISOR not specified" 1>&2
+		return $RESULT
+	fi
+
+	# Check that mandatory setting, IMAGE_TYPE has been at least specified
+	if egrep -q -E "IMAGE_TYPE\=.+" $1 ; test "$?" -ne 0
+	then
+		# No IMAGE_TYPE set
+		echo "ERROR: Mandatory configuration setting, IMAGE_TYPE not specified" 1>&2
+		return $RESULT
+	fi
+
+	# Check that mandatory setting, ARCH has been at least specified
+	if egrep -q -E "ARCH\=.+" $1 ; test "$?" -ne 0
+	then
+		# No ARCH set
+		echo "ERROR: Mandatory configuration setting, ARCH not specified" 1>&2
+		return $RESULT
+	fi
+
+
+	# Validate that the mandatory hypervisor settings are defined for each hypervisor
+	while read line
+	do
+		# If a hypervisor setting has not been specified yet, validate the value
+		echo $line | egrep -q -E "^[[:space:]]*HYPERVISOR\=.+"
+    	if test "$?" -eq 0 && test "$HYPERVISOR_COUNT" -eq 0
+		then
+			# Retrieve the value specified
+	    	TRIMMED=$(echo $line | sed ':a;N;$!ba;s/\n//g')
+	    	HYP_VALUE=$(echo ${TRIMMED} | sed -r "s|.*HYPERVISOR\=(.+)|\\1|")
+		
+			# Verify that the hypervisor specified is valid
+			case "$HYP_VALUE" in
+			"kvm")
+			  ;;
+			"vbox")
+			  ;;
+			"vmware")
+			  ;;
+			*)
+			  # Failure, invalid hypervisor specified
+			  echo "ERROR: Invalid setting for HYPERVISOR, accepted values are kvm,vbox,vmware" 1>&2
+			  return $RESULT
+			  ;;
+			esac
+
+			# Valid hypervisor value specified
+			HYPERVISOR_COUNT=$(($HYPERVISOR_COUNT + 1))
+			echo " Valid hypervisor value specified $HYPERVISOR_COUNT"
+			continue
+		fi
+
+		# If an image type setting specified, validate the value
+		echo $line | egrep -q -E "^[[:space:]]*IMAGE_TYPE\=.+"
+    	if test "$?" -eq 0
+		then
+			# Retrieve the value specified
+	    	TRIMMED=$(echo $line | sed ':a;N;$!ba;s/\n//g')
+	    	IMAGE_VALUE=$(echo ${TRIMMED} | sed -r "s|.*IMAGE_TYPE\=(.+)|\\1|")
+		
+			# Verify that the image type specified is valid
+			case "$IMAGE_VALUE" in
+			"basic")
+			  ;;
+			"desktop")
+			  ;;
+			*)
+			  # Failure, invalid image type specified
+			  echo "ERROR: Invalid setting for IMAGE_TYPE, accepted values are basic and desktop" 1>&2
+			  return $RESULT
+			  ;;
+			esac
+
+			# Valid image type value specified
+			HYP_SETTING_COUNT=$(($HYP_SETTING_COUNT + 1))
+			echo "Valid image type value specified $HYP_SETTING_COUNT"
+			continue
+		fi
+
+		# If the arhcitecture setting specified, validate the value
+		echo $line | egrep -q -E "^[[:space:]]*ARCH\=.+"
+    	if test "$?" -eq 0
+		then
+			# Retrieve the value specified
+	    	TRIMMED=$(echo $line | sed ':a;N;$!ba;s/\n//g')
+	    	ARCH_VALUE=$(echo ${TRIMMED} | sed -r "s|.*ARCH\=(.+)|\\1|")
+		
+			# Verify that the image type specified is valid
+			case "$ARCH_VALUE" in
+			"x86")
+			  ;;
+			"x86_64")
+			  ;;
+			*)
+			  # Failure, invalid architecture specified
+			  echo "ERROR: Invalid setting for ARCH, accepted values are x86 and x86_64" 1>&2
+			  return $RESULT
+			  ;;
+			esac
+
+			# Valid architecture value specified
+			HYP_SETTING_COUNT=$(($HYP_SETTING_COUNT + 1))
+			echo "Valid architecture value specified $HYP_SETTING_COUNT"
+			continue
+		fi
+
+		# If a hypervisor setting has been specified, validate that the mandatory
+		# settings for the previous hypervisor definition have been specified
+		echo $line | egrep -q -E "^[[:space:]]*HYPERVISOR\=.+"
+    	if test "$?" -eq 0 && test "$HYPERVISOR_COUNT" -ne 0
+		then
+			if test "$HYP_SETTING_COUNT" -eq $(($HYPERVISOR_COUNT * 2))
+			then
+				# Retrieve the value specified
+		    	TRIMMED=$(echo $line | sed ':a;N;$!ba;s/\n//g')
+		    	HYP_VALUE=$(echo ${TRIMMED} | sed -r "s|.*HYPERVISOR\=(.+)|\\1|")
+			
+				# Verify that the hypervisor specified is valid
+				case "$HYP_VALUE" in
+				"kvm")
+				  ;;
+				"vbox")
+				  ;;
+				"vmware")
+				  ;;
+				*)
+				  # Failure, invalid hypervisor specified
+				  echo "ERROR: Invalid setting for HYPERVISOR, accepted values are kvm,vbox,vmware" 1>&2
+				  return $RESULT
+				  ;;
+				esac
+
+				# Valid hypervisor value specified, and previous hypervisor defined
+				HYPERVISOR_COUNT=$(($HYPERVISOR_COUNT + 1))
+				echo "Valid hypervisor value specified, and previous hypervisor defined" $HYPERVISOR_COUNT
+				continue
+			else
+				echo "ERROR: Mandatory configuration setting, IMAGE_TYPE and ARCH not specified" 1>&2
+				return $RESULT
+			fi
+		fi
+
+	done < $1
+
+	# All mandatory hypervisor settings have been provided for each hypervisor and are valid 
+	RESULT=0
+	return $RESULT
+}
