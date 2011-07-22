@@ -34,3 +34,79 @@ name and location of the file using the --config option" 1>&2
 
 	return $RESULT
 }
+
+
+# Determines the number of hypervisors entries provided in the configuration file 
+# @param $1 - The location and name of the configuration file
+number_hypervisors()
+{
+	RESULT=1
+	HYPERVISOR_COUNT=0
+
+	# Get the total number of hypervisor entries defined
+	while read line
+	do
+		# If a hypervisor setting has been specified increment counter
+		echo $line | egrep -q -E "^[[:space:]]*HYPERVISOR\=.+"
+    	if test "$?" -eq 0
+		then
+			HYPERVISOR_COUNT=$(($HYPERVISOR_COUNT + 1))
+			continue
+		fi
+	done < $1
+
+	if test "$HYPERVISOR_COUNT" -gt 0
+	then
+		# Output the number of hypervisor entries
+		RESULT=0
+		echo $HYPERVISOR_COUNT
+	fi
+	
+	return $RESULT
+}
+
+
+# Check that the mandatory general settings provided in the configuration file 
+# exist and are valid as the tests cannot execute without it
+# @param $1 - The location and name of the configuration file
+validate_mandatory_config()
+{
+	RESULT=1
+	
+	# Begin by validating the mandatory configuration settings
+	# Check that mandatory setting, SUITENAME has been specified
+	if egrep -q -E "SUITENAME\=.+" $1 ; test "$?" -ne 0
+	then
+		# No SUITENAME set
+		echo "ERROR: Mandatory configuration setting, SUITENAME not specified" 1>&2
+		return $RESULT
+	fi
+
+	# Check that mandatory setting, SUITEVERSION has been specified
+	if egrep -q -E "SUITEVERSION\=.+" $1 ; test "$?" -ne 0
+	then
+		# No SUITEVERSION set
+		echo "ERROR: Mandatory configuration setting, SUITEVERSION not specified" 1>&2
+		return $RESULT
+	fi
+
+	# Check that mandatory setting, REPORT_SERVER has been specified
+	if egrep -q -E "REPORT_SERVER\=.+" $1 ; test "$?" -ne 0
+	then
+		# No REPORT_SERVER set
+		echo "ERROR: Mandatory configuration setting, REPORT_SERVER not specified" 1>&2
+		return $RESULT
+	fi
+	
+	# Check that mandatory setting, DOWNLOAD_PAGE has been specified
+	if egrep -q -E "DOWNLOAD_PAGE\=.+" $1 ; test "$?" -ne 0
+	then
+		# No DOWNLOAD_PAGE set
+		echo "ERROR: Mandatory configuration setting, DOWNLOAD_PAGE not specified" 1>&2
+		return $RESULT
+	fi
+
+	# All mandatory general configuration settings have been provided, are valid 
+	RESULT=0
+	return $RESULT
+}
