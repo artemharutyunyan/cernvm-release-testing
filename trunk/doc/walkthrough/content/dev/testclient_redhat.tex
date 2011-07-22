@@ -16,8 +16,8 @@
 \item	any others you think are unnecessary based on your own discretion
 \end{itemize}
 
-\item	Next enable and configure the remote desktop from the menu \verb|System -> Preferences -> Remote Desktop| and ensure
-		that the following options are configured	
+\item	Next enable and configure the remote desktop from the menu \verb|System -> Preferences| \verb| -> Remote Desktop| 
+		and ensure that the following options are configured	
 \begin{itemize}
 \item	Enable the option ``Allow others to view your desktop''
 \item	Enable the option ``Allow other users to control your desktop''
@@ -77,7 +77,8 @@ TimedLoginDelay=0
 \end{enumerate}
 
 
-\newpage
+
+
 \subsection{Installing libvirt and virsh}
 \label{sec:rhvirsh}
 \begin{enumerate}
@@ -178,7 +179,8 @@ $ virsh -c test:///default list --all
 \end{enumerate}
 
 
-\newpage
+
+
 \subsection{Installing and configuring KVM}
 \label{sec:rhkvm}
 \begin{enumerate}
@@ -216,7 +218,6 @@ $ virsh -c qemu:///system
 
 
 
-\newpage
 \subsection{Installing and configuring VirtualBox}
 \label{sec:rhvbox}
 \begin{enumerate}
@@ -280,7 +281,6 @@ $ virsh -c vbox:///session
 
 
 
-\newpage
 \subsection{Setting up the Tapper Test Suite}
 \label{sec:rhtestsuite}
 \begin{enumerate}
@@ -354,7 +354,7 @@ $ install-mh
 \item	NET\_TEMPLATE			- The network template file, only applies to kvm/virtualbox
 \item	HYPERVISOR				- The hypervisor to test, valid hypervisors are vmware,vbox,kvm
 \item	IMAGE\_VERSION			- The CernVM image version to download, currently 2.4.0
-\item	VM\_ARCH					- The valid architectures are x86 and x86\_64
+\item	VM\_ARCH				- The valid architectures are x86 and x86\_64
 \item	SUITENAME				- The current test suite, change this for different hypervisor tests
 \item	OSNAME					- The operating system of the current system, change this accordingly
 \item	HOSTNAME				- The system hostname to appear in reports, change this accordingly

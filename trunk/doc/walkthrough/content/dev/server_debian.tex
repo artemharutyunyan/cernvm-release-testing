@@ -1,16 +1,15 @@
 \section{Debian Based Server Setup}
-\subsection{Installing the system}
-\subsection{Configuring the system}
+\label{sec:debianserver}
 \flushleft
-\begin{enumerate}
-\item 	For installing a Debian based server, follow the instructions outlined in the sections ``Installing the 
-		system''~\ref{sec:debianinstall} and ``Configuring the system''~\ref{sec:debianconfig} for installation and configuration 
-		instructions with the only exception being that the hostname should be something unique such as \emph{cernvm-debian6-server}, to 
-		indicate that it is running the \tapper server, {\bf again keep the hostname convention consistent}.
-\end{enumerate}
+
+For installing and configuring a Debian based server, follow the instructions outlined in the sections ``Configuring the
+system''~\ref{sec:debianconfig} for installation and configuration instructions with the only exception being that the
+hostname should be something unique such as \emph{cernvm-debian6-server}, to indicate that it is running the \tapper server,
+{\bf again keep the hostname convention consistent}.
 
 
-\newpage
+
+
 \subsection{Installing the Tapper Server}
 \begin{enumerate}
 \item 	Next, execute the following commands to install necessary dependencies, \emph{from now on all commands require root privileges}.
@@ -59,7 +58,8 @@ $ make localsetup 2>&1 | tee install.log
 \end{enumerate}
 
 
-\newpage
+
+
 \subsection{Setting up Tapper Web Interface and Database}
 \begin{enumerate}
 \item 	Next you need to set a password for the root account of the mysql database\footnote{This will eventually be implemented in the 

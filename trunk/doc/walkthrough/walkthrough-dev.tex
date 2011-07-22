@@ -1,7 +1,6 @@
 \documentclass[final,a4paper,10pt,abstracton]{scrreprt}
 
 \usepackage{verbatim}
-\usepackage{draftwatermark}\SetWatermarkScale{5} %_DRAFT watermark
 \include{atex}
 
 \title{CernVM Release Testing Walkthrough - Developer Manual}
@@ -60,7 +59,7 @@
  
   		{\large \scshape CernVM Release Testing Walkthrough}\\[0.5cm]
   		\HRule\\[0.4cm]
-		\huge CernVM Release Testing - Developer Manual\\
+		\huge CernVM Release Testing Walkthrough \\Developer Manual\\
 		\HRule\\[1.5cm]
 		
 %        \includegraphics[height=5cm]{marbles}\\[1.5cm]
@@ -68,13 +67,8 @@
 		\large GNU USER\\[0.4cm]
 		%\today
  
-		%  \LARGE ---DRAFT---\\[1ex]
-		%  \LARGE www.grgen.net\\[6ex]
-		%  \LARGE Jakob Blomer \qquad Rubino Gei\ss\\[3ex]
-		%  \large \today\\
- 
 		\large Technical Report\\
-		Version: 1.6 (Draft) \today 
+		Version: 1.0 \today 
 		%	\large ISSN 1432-7864	
 
   		\setlength{\parindent}{\saveparindent}
@@ -97,14 +91,11 @@ testing environment, which will install and configure CernVM images, run the set
 
 \include{content/overview}
 \include{content/testclient}
-\include{content/dev/testclient_windows}
 \include{content/dev/testclient_redhat}
 \include{content/dev/testclient_debian}
 \include{content/dev/testclient_osx}
 \include{content/server}
-\include{content/dev/server_redhat}
 \include{content/dev/server_debian}
-\include{content/dev/server_ubuntu}
 
 \pagestyle{plain}
 \bibliographystyle{plain}
