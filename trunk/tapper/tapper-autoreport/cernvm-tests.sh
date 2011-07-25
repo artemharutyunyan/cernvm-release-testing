@@ -143,21 +143,111 @@ TAPDATA[4]="cpu_family: $(get_cpu_family)"
 append_tapdata "number_of_tap_reports: $(get_tap_counter)"
 
 
-######## DEFAULT CONFIGURATIONS ##########
+######## INTERNAL MANDATORY CONFIGURATIONS ##########
 ###
-### MOST OF THESE SETTINGS SHOULD NOT BE CHANGED UNLESS SPECIFIED
+### ALL OF THESE SETTINGS ARE MANDATORY AND MUST BE
+### SET IN THE CONFIGURATION FILE FOR SCRIPT TO WORK
 ###
 
+######### Mandatory Test Suite Settings ##########
+SUITENAME="${TS_SUITENAME}"				# Mandatory, the suite name for the tests
+SUITEVERSION="${TS_SUITEVERSION}"	# Mandatory, the suite version, use default value
+REPORT_SERVER="${TS_REPORT_SERVER}" 	# Mandatory, Tapper server hostname/ip to send reports to
+DOWNLOAD_PAGE="${TS_DOWNLOAD_PAGE}"		# Mandatory, a default url is provided in the configuration file
+
+######### Mandatory CernVM Image Settings ##########
+HYPERVISOR="${VM_HYPERVISOR}"			# Mandatory, valid hypervisors are vmware,vbox,kvm
+TEMPLATE="${VM_TEMPLATE}"				# Mandatory, the hypervisor template file in the templates folder
+NET_TEMPLATE="${VM_NET_TEMPLATE}"		# Mandatory, the network template file, only applies to kvm/virtualbox
+IMAGE_TYPE="${VM_IMAGE_TYPE}"			# Mandatory, currently only basic and desktop supported
+IMAGE_VERSION="${VM_IMAGE_VERSION}"		# Mandatory, version to download
+ARCH="${VM_ARCH}"						# Mandatory, valid architectures are x86 and x86_64
+
+###
+###
+###
+######## INTERNAL MANDATORY CONFIGURATIONS ##########
+
+
+
+
+######## INTERNAL OPTIONAL CONFIGURATIONS ###########
+###
+### ALL OF THESE ARE OPTIONAL CONFIGURATION SETTINGS
+### THAT WILL USE INTERNAL DEFAULTS IF NOT SPECIFIED 
+###
+
+######### Optional Host Settings ##########
+IMAGES_DIR="${TS_IMAGES_DIR:-/usr/share/images}"	# Optional, root directory for cernvm images
+OSNAME="${TS_OSNAME:-$(cat /etc/redhat-release)}"	# Optional, configure this accordingly
+HOSTNAME="${TS_HOSTNAME:-$(hostname)}"				# Optional, set this to override the system hostname
+
+
+######### Optional CernVM Image Settings ##########
+NAME="${VM_NAME:-cernvm-${HYPERVISOR}-${IMAGE_VERSION}}" # Optional, default name based on hypervisor and version
+CPUS="${VM_CPUS}"					# Optional, default in template used unless overriden
+MEMORY="${VM_MEMORY}"				# Optional, default in template used unless overriden
+VIDEO_MEMORY="${VM_VIDEO_MEMORY}"	# Optional, default in template used unless overriden
+NET_NAME="${VM_NET_NAME}"			# Optional, default in template used unless overriden
+
+
+######### Optional Web Interface Settings ##########
+ADMIN_USERNAME="${WEB_ADMIN_USERNAME:-admin}"
+ADMIN_DEFAULT_PASS="${WEB_ADMIN_DEFAULT_PASS:-password}"
+ADMIN_PASS="${WEB_ADMIN_PASS:-VM4l1f3}"
+
+# CernVM image user settings, specify the settings for new account
+USER_NAME="${WEB_USER_NAME:-alice}"
+USER_PASS="${WEB_USER_PASS:-VM4l1f3}"
+USER_GROUP="${WEB_USER_GROUP:-alice}"
+
+# CernVM image root account settings, specify password for root account
+ROOT_PASS="${WEB_ROOT_PASS:-VM4l1f3}"
+
+# CernVM image desktop settings
+STARTXONBOOT="${WEB_STARTXONBOOT:-on}"		 # Start X on boot, either "on" or "off"
+RESOLUTION="${WEB_RESOLUTION:-1024x768}"	 # CernVM image desktop resolution
+KEYBOARD_LOCALE="${WEB_KEYBOARD_LOCALE:-us}" # CernVM image keyboard locale
+
+# CernVM image primary group (experiment) settings
+EXPERIMENT_GROUP="${WEB_EXPERIMENT_GROUP:-ALICE}" # Group name, should be all capitals
+
+
+######### Optional Test Case Settings ##########
+USER_NAME2="${TC_USER_NAME:-bob}"	# Best to leave as default as it does affect testing
+USER_PASS2="${TC_USER_PASS:-R00tM3}" # Best to leave as default as it does affect testing
+
+###
+###
+###
+######## INTERNAL OPTIONAL CONFIGURATIONS ###########
+
+
+
+
+######## DEFAULT INTERNAL CONFIGURATIONS ############
+###
+### ALL OF THESE ARE CONFIGURATION SETTINGS INTERNAL
+### TO THE SCRIPTS AND SHOULD NOT BE ALTERED BY USER 
+###
+
+######### Path Settings ##########
 TEMPLATE_DIR="$(pwd)/templates"
-IMAGES_DIR="/usr/share/images"		# Root directory for cernvm images
-SUITEVERSION="1.00"
-DOWNLOAD_PAGE="http://cernvm.cern.ch/releases/releases.cgi"
+IMAGE_FOLDER="$IMAGES_DIR/$HYPERVISOR/$IMAGE_VERSION/$ARCH"	# Unique image download location
+
+
+######### CernVM Image Settings ##########
 IMAGE_URL=""						# Leave blank, url to download CernVM image
-IMAGE_TYPE="desktop"				# Currently only basic and desktop supported
 CERNVM_IMAGE=""						# Leave blank, location of the CernVM image file
 VM_XML_DEFINITION=""				# Leave blank, the virtual machine definition file
 NET_XML_DEFINITION=""				# Leave blank, the network definition file
 IP_ADDRESS="" 						# DO NOT TOUCH, SPECIFYING CUSTOM IP ADDRESSES IS NOT SUPPORTED YET
+VM_UUID=$(uuid)						# Must be set as a valid uuid
+NET_UUID=$(uuid)					# Must be set as a valid uuid
+
+
+######### Auto-Tapper Report Settings ##########
+CHANGESET="0"
 REPORTGROUP=selftest-`date +%Y-%m-%d | md5sum | cut -d" " -f1`
 NOSEND=0
 NOUPLOAD=0
@@ -165,88 +255,8 @@ NOUPLOAD=0
 ###
 ###
 ###
-######## DEFAULT CONFIGURATIONS ##########
+######## DEFAULT INTERNAL CONFIGURATIONS ############
 
-
-
-######## MANDATORY CONFIGURATIONS ##########
-###
-### ALL OF THESE SETTINGS MUST BE SET FOR SCRIPT TO FUNCTION
-###
-
-TAPPER_REPORT_SERVER="cernvm-debian6-server" 		# Mandatory, Tapper server hostname/ip to send reports to
-TEMPLATE="cernvm-vbox.xml"		# Mandatory, the template file in the templates folder for the hypervisor
-NET_TEMPLATE="vbox-network.xml"	# Mandatory, the network template file, only applies to kvm/virtualbox
-HYPERVISOR="vbox"				# Mandatory, valid hypervisors are vmware,vbox,kvm
-IMAGE_VERSION="2.4.0"			# Mandatory, version to download
-VM_UUID=$(uuid)					# Mandatory, must be set as valid uuid
-NET_UUID=$(uuid)				# Mandatory, must be set as valid uuid
-VM_ARCH="x86_64"				# Mandatory, valid architectures are x86 and x86_64
-
-### Web interface and initial CernVM image configuration settings
-###
-###	ALL OF THE FOLLOWING MUST BE SET
-###
-#
-# The web inteface administration account settings, which should 
-# not have to be modified unless web-interface defaults change
-ADMIN_USERNAME="admin"
-ADMIN_DEFAULT_PASS="password"
-ADMIN_PASS="VM4l1f3"
-
-# CernVM image user settings, specify the settings for new account
-USER_NAME="alice"
-USER_PASS="VM4l1f3"
-USER_GROUP="alice"
-
-# CernVM image root account settings, specify password for root account
-ROOT_PASS="VM4l1f3"
-
-# CernVM image desktop settings
-STARTXONBOOT="on"		# Start X on boot, either "on" or "off"
-RESOLUTION="1024x768"	# CernVM image desktop resolution
-KEYBOARD_LOCALE="us"	# CernVM image keyboard locale
-
-# CernVM image primary group (experiment) settings
-EXPERIMENT_GROUP="ALICE" # Group name, should be all capitals
-
-###
-###
-###
-######## MANDATORY CONFIGURATIONS ##########
-
-
-
-######## OPTIONAL CONFIGURATIONS ##########
-###
-### 
-###
-
-SUITENAME="CernVM-VirtualBox-Tests"	# Change this for different hypervisor tests
-OSNAME="Fedora 13"					# Change this accordingly
-CHANGESET="0"
-HOSTNAME="fedora13-vbox-host"
-
-# Set the image download location based on virtual machine settings
-IMAGE_FOLDER="$IMAGES_DIR/$HYPERVISOR/$IMAGE_VERSION/$VM_ARCH"
-
-### Optional virtual machine settings, best to leave as default
-VM_NAME="cernvm-vbox-2.4.0"			# Virtual machine name, optional
-VM_CPUS="1"
-VM_MEMORY=""
-
-### Optional virtual machine network settings, best to leave as default
-NET_NAME=""
-
-### Optional CernVM Test Case settings, best to leave as default as they do not
-### have any affect on the testing
-USER_NAME2="bob"
-USER_PASS2="R00tM3"
-
-###
-###
-###
-######## OPTIONAL CONFIGURATIONS ##########
 
 
 
@@ -274,7 +284,7 @@ ok $? "The system is running Linux"
 # Precondition Test 0 - Verify that the download page exists and that there is a 
 #					  valid download url for the CernVM image specified, returns
 #					  the url to download the image
-IMAGE_URL=$(image_url $DOWNLOAD_PAGE $IMAGE_VERSION $HYPERVISOR $VM_ARCH $IMAGE_TYPE)
+IMAGE_URL=$(image_url $DOWNLOAD_PAGE $IMAGE_VERSION $HYPERVISOR $ARCH $IMAGE_TYPE)
 ok $? "Precondition Test 0 - Verify that the download page exists and that there is a \
 valid download url for the CernVM image specified, returns the url to download the image"
 
@@ -361,25 +371,25 @@ set to autostart"
 
 # Precondition Test 13 - Verify that virtual machine domain has been created 
 #						from an xml file
-create_vm ${VM_XML_DEFINITION} $VM_NAME
+create_vm ${VM_XML_DEFINITION} $NAME
 ok $? "Precondition Test 13 - Verify that virtual machine domain $VMNAME has been \
 created from an xml file"
 
 
 # Precondition Test 14 - Verify that virtual machine can be started
-start_vm $VM_NAME
+start_vm $NAME
 ok $? "Precondition Test 14 - Verify that virtual machine $VMNAME has been started"
 
 
 # Precondition Test 15 - Verify that virtual machine $VMNAME has been stopped
-stop_vm $VM_NAME
+stop_vm $NAME
 ok $? "Precondition Test 15 - Verify that virtual machine $VMNAME has been stopped"
 
 
 # Precondition Test 16 - Verify that the virtual machine has console support
 # Start the virtual machine and verify that it has console support
-start_vm $VM_NAME
-has_console_support $VM_NAME
+start_vm $NAME
+has_console_support $NAME
 ok $? "Precondition Test 16 - Verify that virtual machine $VMNAME has console support"
 
 

@@ -198,7 +198,7 @@ append_tapdata () {
 append_comment () {
     tapline="# ${1:-''}"
     TAP=( "${TAP[@]}" "$tapline" )
-    COMMENTCOUNTER=$((COMMENTCOUNTER + 1))
+    COMMENTCOUNTER=$(($COMMENTCOUNTER + 1))
 }
 
 # Add a file to the list of additional files to be uploaded
@@ -453,7 +453,7 @@ fi
 
 # ===== utility functions ==================
 
-TAPPER_REPORT_SERVER=${TAPPER_REPORT_SERVER:-${ARTEMIS_REPORT_SERVER:-tapper.amd.com}}
+REPORT_SERVER=${REPORT_SERVER:-${ARTEMIS_REPORT_SERVER:-tapper.amd.com}}
 TAPPER_REPORT_PORT=${TAPPER_REPORT_PORT:-${ARTEMIS_REPORT_PORT:-7357}}
 TAPPER_API_PORT=${TAPPER_API_PORT:-${ARTEMIS_API_PORT:-7358}}
 
@@ -474,7 +474,7 @@ append_files()
 }
 
 upload_files() {
-    MYNETCAT="$NETCAT $TAPPER_REPORT_SERVER $TAPPER_API_PORT"
+    MYNETCAT="$NETCAT $REPORT_SERVER $TAPPER_API_PORT"
     # echo "# Uploading:  $MYNETCAT ..." 1>&2
     for f in $(eval echo {0..$(($FILECOUNT - 1))}) ; do
         file="${FILES[f]}"
@@ -598,18 +598,18 @@ else
 fi
 
 #echo "# NETCAT: $NETCAT"
-if [ -n "$TAPPER_REPORT_SERVER" ] ; then
+if [ -n "$REPORT_SERVER" ] ; then
     if [ ! "x1" = "x$NOSEND" ] ; then
-        MYNETCAT="$NETCAT $TAPPER_REPORT_SERVER $TAPPER_REPORT_PORT"
+        MYNETCAT="$NETCAT $REPORT_SERVER $TAPPER_REPORT_PORT"
         # echo    "# Reporting:  $MYNETCAT ..." 1>&2
         output=$( (autoreport_main | $MYNETCAT ; if [ "x1" = "x$NOSEND" ] ; then echo $NOSEND ; fi ) | tail -1 )
         reportid=$(echo $output | sed -e 's/^.*::Reports::Receiver. Protocol is TAP. Your report id: //')
         if [ ! "x1" = "x$NOSEND" ] ; then
-            echo -n "# http://$TAPPER_REPORT_SERVER" 1>&2
-            if echo $TAPPER_REPORT_SERVER | grep -q "bascha" ; then
+            echo -n "# http://$REPORT_SERVER" 1>&2
+            if echo $REPORT_SERVER | grep -q "bascha" ; then
                 echo -n ":3000"
             fi
-            if echo $TAPPER_REPORT_SERVER | grep -q "artemis" ; then
+            if echo $REPORT_SERVER | grep -q "artemis" ; then
                 echo "/artemis/reports/id/$reportid" 1>&2
             else
                 echo "/tapper/reports/id/$reportid" 1>&2

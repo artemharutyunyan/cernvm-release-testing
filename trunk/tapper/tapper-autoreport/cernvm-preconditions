@@ -472,30 +472,30 @@ create_def()
 		fi
 
 		# Set the mandatory definition setting not specified in template
-		if [ "$VM_ARCH" ]
+		if [ "$ARCH" ]
 		then
 			# Set the architecture of the CernVM image
-			sed -i -E "s|arch=''|arch='$VM_ARCH'|" $DEFINITION_FILE
+			sed -i -E "s|arch=''|arch='$ARCH'|" $DEFINITION_FILE
 		fi
 				
 		# Set the following template setting overrides, if specified
 		# Must use a different delimeter than / for sed since xml tags use /
-		if [ "$VM_NAME" ]
+		if [ "$NAME" ]
 		then
 			# Override the default virtual machine name
-			sed -i -E "s|<name>.*</name>|<name>$VM_NAME</name>|" $DEFINITION_FILE
+			sed -i -E "s|<name>.*</name>|<name>$NAME</name>|" $DEFINITION_FILE
 		fi
 
-		if [ "$VM_CPUS" ]
+		if [ "$CPUS" ]
 		then
 			# Override the default number of cpus
-			sed -i -E "s|<vcpu>.*</vcpu>|<vcpu>$VM_CPUS</vcpu>|" $DEFINITION_FILE
+			sed -i -E "s|<vcpu>.*</vcpu>|<vcpu>$CPUS</vcpu>|" $DEFINITION_FILE
 		fi
 
-		if [ "$VM_MEMORY" ]
+		if [ "$MEMORY" ]
 		then
 			# Override the default amount of memory
-			sed -i -E "s|<memory>.*</memory>|<memory>$VM_MEMORY</memory>|" \
+			sed -i -E "s|<memory>.*</memory>|<memory>$MEMORY</memory>|" \
 			$DEFINITION_FILE
 		fi
 
@@ -507,10 +507,10 @@ create_def()
 			$DEFINITION_FILE
 		fi
 
-		if [ "$VM_VIDEO_MEMORY" ]
+		if [ "$VIDEO_MEMORY" ]
 		then
 			# Override the default amount of video memory
-			sed -i -E "s|vram='.*'|vram='$VM_VIDEO_MEMORY'|" $DEFINITION_FILE
+			sed -i -E "s|vram='.*'|vram='$VIDEO_MEMORY'|" $DEFINITION_FILE
 		fi
 
 		RESULT=0
