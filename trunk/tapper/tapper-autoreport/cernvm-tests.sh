@@ -150,18 +150,18 @@ append_tapdata "number_of_tap_reports: $(get_tap_counter)"
 ###
 
 ######### Mandatory Test Suite Settings ##########
-SUITENAME="${TS_SUITENAME}"				# Mandatory, the suite name for the tests
-SUITEVERSION="${TS_SUITEVERSION}"	# Mandatory, the suite version, use default value
-REPORT_SERVER="${TS_REPORT_SERVER}" 	# Mandatory, Tapper server hostname/ip to send reports to
-DOWNLOAD_PAGE="${TS_DOWNLOAD_PAGE}"		# Mandatory, a default url is provided in the configuration file
+SUITENAME="${CVM_TS_SUITENAME}"				# Mandatory, the suite name for the tests
+SUITEVERSION="${CVM_TS_SUITEVERSION}"	# Mandatory, the suite version, use default value
+REPORT_SERVER="${CVM_TS_REPORT_SERVER}" 	# Mandatory, Tapper server hostname/ip to send reports to
+DOWNLOAD_PAGE="${CVM_TS_DOWNLOAD_PAGE}"		# Mandatory, a default url is provided in the configuration file
 
 ######### Mandatory CernVM Image Settings ##########
-HYPERVISOR="${VM_HYPERVISOR}"			# Mandatory, valid hypervisors are vmware,vbox,kvm
-TEMPLATE="${VM_TEMPLATE}"				# Mandatory, the hypervisor template file in the templates folder
-NET_TEMPLATE="${VM_NET_TEMPLATE}"		# Mandatory, the network template file, only applies to kvm/virtualbox
-IMAGE_TYPE="${VM_IMAGE_TYPE}"			# Mandatory, currently only basic and desktop supported
-IMAGE_VERSION="${VM_IMAGE_VERSION}"		# Mandatory, version to download
-ARCH="${VM_ARCH}"						# Mandatory, valid architectures are x86 and x86_64
+HYPERVISOR="${CVM_VM_HYPERVISOR}"			# Mandatory, valid hypervisors are vmware,vbox,kvm
+TEMPLATE="${CVM_VM_TEMPLATE}"				# Mandatory, the hypervisor template file in the templates folder
+NET_TEMPLATE="${CVM_VM_NET_TEMPLATE}"		# Mandatory, the network template file, only applies to kvm/virtualbox
+IMAGE_TYPE="${CVM_VM_IMAGE_TYPE}"			# Mandatory, currently only basic and desktop supported
+IMAGE_VERSION="${CVM_VM_IMAGE_VERSION}"		# Mandatory, version to download
+ARCH="${CVM_VM_ARCH}"						# Mandatory, valid architectures are x86 and x86_64
 
 ###
 ###
@@ -178,44 +178,44 @@ ARCH="${VM_ARCH}"						# Mandatory, valid architectures are x86 and x86_64
 ###
 
 ######### Optional Host Settings ##########
-IMAGES_DIR="${TS_IMAGES_DIR:-/usr/share/images}"	# Optional, root directory for cernvm images
-OSNAME="${TS_OSNAME:-$(cat /etc/redhat-release)}"	# Optional, configure this accordingly
-HOSTNAME="${TS_HOSTNAME:-$(hostname)}"				# Optional, set this to override the system hostname
+IMAGES_DIR="${CVM_TS_IMAGES_DIR:-/usr/share/images}"	# Optional, root directory for cernvm images
+OSNAME="${CVM_TS_OSNAME:-$(cat /etc/redhat-release)}"	# Optional, configure this accordingly
+HOSTNAME="${CVM_TS_HOSTNAME:-$(hostname)}"				# Optional, set this to override the system hostname
 
 
 ######### Optional CernVM Image Settings ##########
-NAME="${VM_NAME:-cernvm-${HYPERVISOR}-${IMAGE_VERSION}}" # Optional, default name based on hypervisor and version
-CPUS="${VM_CPUS}"					# Optional, default in template used unless overriden
-MEMORY="${VM_MEMORY}"				# Optional, default in template used unless overriden
-VIDEO_MEMORY="${VM_VIDEO_MEMORY}"	# Optional, default in template used unless overriden
-NET_NAME="${VM_NET_NAME}"			# Optional, default in template used unless overriden
+NAME="${CVM_VM_NAME:-cernvm-${HYPERVISOR}-${IMAGE_VERSION}}" # Optional, default name based on hypervisor & version
+CPUS="${CVM_VM_CPUS}"					# Optional, default in template used unless overriden
+MEMORY="${CVM_VM_MEMORY}"				# Optional, default in template used unless overriden
+VIDEO_MEMORY="${CVM_VM_VIDEO_MEMORY}"	# Optional, default in template used unless overriden
+NET_NAME="${CVM_VM_NET_NAME}"			# Optional, default in template used unless overriden
 
 
 ######### Optional Web Interface Settings ##########
-ADMIN_USERNAME="${WEB_ADMIN_USERNAME:-admin}"
-ADMIN_DEFAULT_PASS="${WEB_ADMIN_DEFAULT_PASS:-password}"
-ADMIN_PASS="${WEB_ADMIN_PASS:-VM4l1f3}"
+ADMIN_USERNAME="${CVM_WEB_ADMIN_USERNAME:-admin}"
+ADMIN_DEFAULT_PASS="${CVM_WEB_ADMIN_DEFAULT_PASS:-password}"
+ADMIN_PASS="${CVM_WEB_ADMIN_PASS:-VM4l1f3}"
 
 # CernVM image user settings, specify the settings for new account
-USER_NAME="${WEB_USER_NAME:-alice}"
-USER_PASS="${WEB_USER_PASS:-VM4l1f3}"
-USER_GROUP="${WEB_USER_GROUP:-alice}"
+USER_NAME="${CVM_WEB_USER_NAME:-alice}"
+USER_PASS="${CVM_WEB_USER_PASS:-VM4l1f3}"
+USER_GROUP="${CVM_WEB_USER_GROUP:-alice}"
 
 # CernVM image root account settings, specify password for root account
-ROOT_PASS="${WEB_ROOT_PASS:-VM4l1f3}"
+ROOT_PASS="${CVM_WEB_ROOT_PASS:-VM4l1f3}"
 
 # CernVM image desktop settings
-STARTXONBOOT="${WEB_STARTXONBOOT:-on}"		 # Start X on boot, either "on" or "off"
-RESOLUTION="${WEB_RESOLUTION:-1024x768}"	 # CernVM image desktop resolution
-KEYBOARD_LOCALE="${WEB_KEYBOARD_LOCALE:-us}" # CernVM image keyboard locale
+STARTXONBOOT="${CVM_WEB_STARTXONBOOT:-on}"		 # Start X on boot, either "on" or "off"
+RESOLUTION="${CVM_WEB_RESOLUTION:-1024x768}"	 # CernVM image desktop resolution
+KEYBOARD_LOCALE="${CVM_WEB_KEYBOARD_LOCALE:-us}" # CernVM image keyboard locale
 
 # CernVM image primary group (experiment) settings
-EXPERIMENT_GROUP="${WEB_EXPERIMENT_GROUP:-ALICE}" # Group name, should be all capitals
+EXPERIMENT_GROUP="${CVM_WEB_EXPERIMENT_GROUP:-ALICE}" # Group name, should be all capitals
 
 
 ######### Optional Test Case Settings ##########
-USER_NAME2="${TC_USER_NAME:-bob}"	# Best to leave as default as it does affect testing
-USER_PASS2="${TC_USER_PASS:-R00tM3}" # Best to leave as default as it does affect testing
+USER_NAME2="${CVM_TC_USER_NAME:-bob}"	# Best to leave as default as it does affect testing
+USER_PASS2="${CVM_TC_USER_PASS:-R00tM3}" # Best to leave as default as it does affect testing
 
 ###
 ###
@@ -498,3 +498,5 @@ add_file web_restart_boot.log
 
 
 . ./tapper-autoreport
+
+exit 0
