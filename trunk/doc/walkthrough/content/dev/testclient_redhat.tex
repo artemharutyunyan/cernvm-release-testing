@@ -348,39 +348,40 @@ $ install-mh
 		hypervisors you want to test and according to your \tapper infrastructure setup. All of the settings provided in
 		the configuration files by default are the {\bf mandatory, minimum configuration options} and in most cases the
 		defaults should be sufficient for testing, the only mandatory settings that are not provided by default {\bf and
-		must be configured manually are TS\_REPORT\_SERVER and VM\_IMAGE\_VERSION }. Please refer to the developer manual
+		must be configured manually are CVM\_TS\_REPORT\_SERVER and CVM\_VM\_IMAGE\_VERSION }. Please refer to the developer manual
 		for a more complete detailed list of the mandatory and optional configuration settings.
 
 \begin{description}
-\item[TS\_SUITENAME]	Must ALWAYS be set, the default suite name in the configuration file should be suitable
+\item[CVM\_TS\_SUITENAME]	Must ALWAYS be set, the default suite name in the configuration file should be suitable
 
 	  		  
-\item[TS\_SUITEVERSION] 	Must ALWAYS be set, reflects the release version number of the test suite framework, the  default
-							version given in the configuration should only be changed if you customize/update the scripts
+\item[CVM\_TS\_SUITEVERSION] 	Must ALWAYS be set, reflects the release version number of the test suite framework, the  default
+								version given in the configuration should only be changed if you customize/update the scripts
 
-\item[TS\_REPORT\_SERVER]	Must ALWAYS be set, this is the ip address or hostname of the Tapper report server which the reports
-      						from the test results are sent to
+\item[CVM\_TS\_REPORT\_SERVER]	Must ALWAYS be set, this is the ip address or hostname of the Tapper report server which the reports
+      							from the test results are sent to
 		
-\item[TS\_DOWNLOAD\_PAGE]	Must ALWAYS be set, normally the default url provided in the configuration file is accurate, but in the
-							event that the internal \cernvm image release page is relocated then this url must be changed.
+\item[CVM\_TS\_DOWNLOAD\_PAGE]	Must ALWAYS be set, normally the default url provided in the configuration file is accurate, but in the
+								event that the internal \cernvm image release page is relocated then this url must be changed.
 
-\item[VM\_HYPERVISOR]	Must ALWAYS be set, should not have to change the defaul hypervisor in the configuration files, valid values 
-						(case sensitive) are {\bf kvm,vbox,vmware}
+\item[CVM\_VM\_HYPERVISOR]	Must ALWAYS be set, should not have to change the defaul hypervisor in the configuration files, valid values 
+							(case sensitive) are {\bf kvm,vbox,vmware}
 
-\item[VM\_TEMPLATE]		Must ALWAYS be set, normally the default template provided in the configuration file should not be changed, only 		
-						change this to use a custom template file. The custom template file \emph{must be placed within the templates folder}
+\item[CVM\_VM\_TEMPLATE]		Must ALWAYS be set, normally the default template provided in the configuration file should not be changed,
+								only change this to use a custom template file. The custom template file \emph{must be placed within the
+								templates folder}
 
-\item[VM\_NET\_TEMPLATE]	Must ALWAYS be set, normally the default network template provided in the configuration file should not be
-	 						changed, only change this to use a custom network template file for the \cernvm image,  {\bf only applies to kvm
-	 						and virtualbox}. The custom network template file \emph{must be placed within the templates folder}
+\item[CVM\_VM\_NET\_TEMPLATE]	Must ALWAYS be set, normally the default network template provided in the configuration file should not be
+	 							changed, only change this to use a custom network template file for the \cernvm image,  {\bf only applies to kvm
+	 							and virtualbox}. The custom network template file \emph{must be placed within the templates folder}
 
-\item[VM\_IMAGE\_VERSION]	Must ALWAYS be set, specifies the version of the CernVM image to use from the release page
+\item[CVM\_VM\_IMAGE\_VERSION]	Must ALWAYS be set, specifies the version of the CernVM image to use from the release page
 	
-\item[VM\_IMAGE\_TYPE]		Must ALWAYS be set,  specifies the type of CernVM image, valid image types supported, (case sensitive) are 
-							{\bf basic and desktop}
+\item[CVM\_VM\_IMAGE\_TYPE]		Must ALWAYS be set,  specifies the type of CernVM image, valid image types supported, (case sensitive) are 
+								{\bf basic and desktop}
 
-\item[VM\_ARCH]		Must ALWAYS be set, specifies the architecture of the \cernvm image, valid architectures (case sensitive) are {\bf 
-					x86 and x86\_64}
+\item[CVM\_VM\_ARCH]		Must ALWAYS be set, specifies the architecture of the \cernvm image, valid architectures (case sensitive) are {\bf 
+							x86 and x86\_64}
 \end{description}	
 
 \item	Finally, now that tapper-autoreport has been installed and configured on the test client and the test client and \tapper~Server
@@ -394,7 +395,7 @@ $ install-mh
 \lstset{language=bash,caption=Run \tapper-AutoReport for CernVM Test Cases}
 \begin{lstlisting}
 # Simply source the configuration file, and execute the script
-. ./config/<configuration_file>
-./cernvm-tests.sh
+$ . ./config/<configuration_file>
+$ ./cernvm-tests.sh
 \end{lstlisting}
 \end{enumerate}
