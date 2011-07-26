@@ -8,10 +8,10 @@ that must be specified before tests can be executed, there are also optional con
 that can override the default settings normally taken when the default configuration file is used, these include options
 to override the default virtual machine settings specified in the template files.
 
-Each group of settings has a unique prefix depending on the category of setting, there are four categories of options
-for both the mandatory and optional settings that can be provided. The four setting prefixes are {\bf TS, VM, WEB, TC}
-these denote options that are specific to a category of configuration options. The following is brief summary of each
-configuration setting prefix, and what category of configurations each prefix applies to.
+Each group of settings starts with {\bf CVM}, which is short for \cernvm~, but then has a unique prefix depending on the 
+category of setting, there are four categories of options for both the mandatory and optional settings that can be provided. 
+The four setting prefixes are {\bf TS, VM, WEB, TC} these denote options that are specific to a category of configuration options. 
+The following is brief summary of each configuration setting prefix, and what category of configurations each prefix applies to.
 
 \begin{description}
 \item[{\bf TS}]		Options which have this prefix are associated with configuration settings specific to the
@@ -40,13 +40,13 @@ tests to work, ensure that you enter valid values, \emph{in lower-case}, for the
 
 
 \begin{itemize}
-\item	TS\_SUITENAME
+\item	CVM\_TS\_SUITENAME
 		\begin{itemize}
 		\item	Must ALWAYS be set, only define once at the top of the configuration file, 
 	  		  	usually the default suite name given in the test suite configuration file is fine
 		\end{itemize}
 	  		  
-\item	TS\_SUITEVERSION
+\item	CVM\_TS\_SUITEVERSION
 		\begin{itemize}
 		\item	Must ALWAYS be set, only define once at the top of the configuration file,
 	  		  	reflects the release version number of the test suite framework, the default 
@@ -55,28 +55,28 @@ tests to work, ensure that you enter valid values, \emph{in lower-case}, for the
       		  	the version released on Google Code.
 		\end{itemize}
 
-\item	TS\_REPORT\_SERVER
+\item	CVM\_TS\_REPORT\_SERVER
 		\begin{itemize}
 		\item	Must ALWAYS be set, only define once at the top of the configuration file,
       			this is the ip address or hostname of the Tapper report server which the reports
       			from the test results are sent to
 		\end{itemize}
 		
-\item	TS\_DOWNLOAD\_PAGE
+\item	CVM\_TS\_DOWNLOAD\_PAGE
 		\begin{itemize}
 		\item	Must ALWAYS be set, normally the default url provided in the configuration file is
 				accurate, but in the event that the internal \cernvm image release page is relocated
 				then this url must be changed.
 		\end{itemize}
 
-\item	VM\_HYPERVISOR
+\item	CVM\_VM\_HYPERVISOR
 		\begin{itemize}
 		\item	Must ALWAYS be set, MUST be the first setting before the rest of the mandatory
 	  			and optional settings specific to the hypervisor are set
 	  	\item	Valid values (case sensitive) are {\bf kvm,vbox,vmware}
 		\end{itemize}
 
-\item	VM\_TEMPLATE
+\item	CVM\_VM\_TEMPLATE
 		\begin{itemize}
 		\item	Must ALWAYS be set, normally the default template provided in the configuration file
 				should not be changed, only change this to use a custom template file for the \cernvm 
@@ -84,7 +84,7 @@ tests to work, ensure that you enter valid values, \emph{in lower-case}, for the
 		\item	The custom template file \emph{must be placed within the templates folder}
 		\end{itemize}
 
-\item	VM\_NET\_TEMPLATE
+\item	CVM\_VM\_NET\_TEMPLATE
 		\begin{itemize}
 		\item	Must ALWAYS be set, normally the default network template provided in the configuration file
 				should not be changed, only change this to use a custom network template file for the \cernvm 
@@ -93,20 +93,20 @@ tests to work, ensure that you enter valid values, \emph{in lower-case}, for the
 		\item 	The network template file, {\bf only applies to kvm and virtualbox}
 		\end{itemize}
 
-\item	VM\_IMAGE\_VERSION
+\item	CVM\_VM\_IMAGE\_VERSION
 		\begin{itemize}
 		\item	Must ALWAYS be set,  MUST be defined for the HYPERVISOR entry in the configuration
 				file, specifies the version of the CernVM image to use from the release page
 		\end{itemize}
 	
-\item	VM\_IMAGE\_TYPE
+\item	CVM\_VM\_IMAGE\_TYPE
 		\begin{itemize}
 		\item	Must ALWAYS be set,  MUST be defined for the HYPERVISOR entry in the configuration
 				file, specifies the type of CernVM image, such as desktop, basic, head node, etc
 		\item	Valid image types supported, (case sensitive) are {\bf basic and desktop}
 		\end{itemize}
 		
-\item	VM\_ARCH
+\item	CVM\_VM\_ARCH
 		\begin{itemize}
 		\item	Must ALWAYS be set, MUST be defined for the HYPERVISOR entry in the configuration
 				file, specifies the architecture of the \cernvm image
@@ -142,7 +142,7 @@ using only the mandatory settings}.
 
 \paragraph*{Optional Host Settings}
 \begin{itemize}
-\item	TS\_IMAGES\_DIR
+\item	CVM\_TS\_IMAGES\_DIR
 		\begin{itemize}
 		\item	The root directory for the location of the \cernvm images and all
 				configuration files and settings, by default /usr/share/images on
@@ -150,14 +150,14 @@ using only the mandatory settings}.
 				on Windows systems
 		\end{itemize}
 		
-\item	TS\_OSNAME
+\item	CVM\_TS\_OSNAME
 		\begin{itemize}
 		\item	The name of the host operating system, such as Red Hat 5, OS X
 				Snow Leopard, or Windows 7, configure accordingly
 		\item	\emph{Support may be added eventually to automatically configure OSNAME}
 		\end{itemize}
 		
-\item	TS\_HOSTNAME
+\item	CVM\_TS\_HOSTNAME
 		\begin{itemize}
 		\item	The hostname of the system, determined automatically by the script,
 				only set this if you wish to override the default hostname of the
@@ -174,7 +174,7 @@ used by the framework are based on the virtual machine XML template definition f
 in the templates directory.
  
 \begin{itemize}
-\item	VM\_NAME
+\item	CVM\_VM\_NAME
 		\begin{itemize}
 		\item	Overrides the default name of the virtual machine set by the 
 				virtual machine template XML defintion file
@@ -183,7 +183,7 @@ in the templates directory.
 				``cernvm-vbox-2.4.0'' would help differentiate between other versions
 		\end{itemize}
 		
-\item	VM\_CPUS
+\item	CVM\_VM\_CPUS
 		\begin{itemize}
 		\item	Overrides the default number of cpus, which is one cpu by default,
 				set by the virtual machine template XML defintion file
@@ -191,7 +191,7 @@ in the templates directory.
 				exceed the actual number of cores/cpus on the host system
 		\end{itemize}
 	
-\item	VM\_MEMORY
+\item	CVM\_VM\_MEMORY
 		\begin{itemize}
 		\item	Overrides the default default amount of memory set by the virtual machine
 				template XML defintion file
@@ -203,7 +203,7 @@ in the templates directory.
 				amount of memory in kilobytes
 		\end{itemize}
 		
-\item	VM\_VIDEO\_MEMORY
+\item	CVM\_VM\_VIDEO\_MEMORY
 		\begin{itemize}
 		\item	Overrides the default amount of video memory set by the virtual machine
 				template XML defintion file
@@ -215,7 +215,7 @@ in the templates directory.
 				amount of video memory in kilobytes
 		\end{itemize}
 		
-\item	VM\_NET\_NAME
+\item	CVM\_VM\_NET\_NAME
 		\begin{itemize}
 		\item	Overrides the default virtual network name set by the virtual machine
 				template XML defintion file
@@ -234,21 +234,21 @@ the default settings used by the \cernvmtestframework\, such as the \cernvm imag
 resolution and the primary experiment group.
 
 \begin{itemize}
-\item	WEB\_ADMIN\_USERNAME
+\item	CVM\_WEB\_ADMIN\_USERNAME
 		\begin{itemize}
 		\item	Overrides the default web inteface administration account user name,
 				which is ``admin'' by default. This optional settings should not 
 				have to be modified unless the \cernvm web interface defaults change
 		\end{itemize}
 		
-\item	WEB\_ADMIN\_DEFAULT\_PASS
+\item	CVM\_WEB\_ADMIN\_DEFAULT\_PASS
 		\begin{itemize}
 		\item	Overrides the default web interface administration account password,
 				which is ``password'' by default. This optional settings should not 
 				have to be modified unless the \cernvm web interface defaults change
 		\end{itemize}
 		
-\item	WEB\_ADMIN\_PASS
+\item	CVM\_WEB\_ADMIN\_PASS
 		\begin{itemize}
 		\item	Overrides the web inteface administration account password set by
 				the test suite scripts with a user defined web interface
@@ -256,14 +256,14 @@ resolution and the primary experiment group.
 		\item	The password specified {\bf must be six characters or longer}
 		\end{itemize}
 
-\item	WEB\_USER\_NAME
+\item	CVM\_WEB\_USER\_NAME
 		\begin{itemize}
 		\item	Overrides the default account name ``alice'' of the new user created 
 				by the test suite scripts through the web interface
 		\item	The user name specified should only contain alphabetical characters
 		\end{itemize}
 		
-\item	WEB\_USER\_PASS
+\item	CVM\_WEB\_USER\_PASS
 		\begin{itemize}
 		\item	Overrides the default password ``VM4l1f3'' of the new user created 
 				by the test suite scripts through the web interface
@@ -271,7 +271,7 @@ resolution and the primary experiment group.
 		\end{itemize}
 
 %TODO ADD A LIST OF THE VALID GROUPS FOR THE NEW USER
-\item	WEB\_USER\_GROUP
+\item	CVM\_WEB\_USER\_GROUP
 		\begin{itemize}
 		\item	Overrides the default group ``alice'' for the new user created 
 				by the test suite scripts through the web interface
@@ -279,7 +279,7 @@ resolution and the primary experiment group.
 				through the web interface, such as ``alice''
 		\end{itemize}
 
-\item	WEB\_ROOT\_PASS
+\item	CVM\_WEB\_ROOT\_PASS
 		\begin{itemize}
 		\item	Overrides the default password ``VM4l1f3'' of the root account
 				on the \cernvm image set by the test suite scripts through the
@@ -287,7 +287,7 @@ resolution and the primary experiment group.
 		\item	The password specified {\bf must be six characters or longer}
 		\end{itemize}
 		
-\item	WEB\_STARTXONBOOT
+\item	CVM\_WEB\_STARTXONBOOT
 		\begin{itemize}
 		\item	Overrides the default \cernvm desktop setting set by the test 
 				suite scripts through the web interface, which configures X to
@@ -297,7 +297,7 @@ resolution and the primary experiment group.
 		\end{itemize}
 				
 %TODO GET A LIST OF THE VALID RESOLUTIONS ACCEPTED BY THE WEB INTERFACE
-\item	WEB\_RESOLUTION
+\item	CVM\_WEB\_RESOLUTION
 		\begin{itemize}
 		\item	Overrides the default \cernvm desktop resolution, {\bf 1024x768} set by
 				the test suite scripts through the web interface
@@ -306,14 +306,14 @@ resolution and the primary experiment group.
 		\end{itemize}
 
 %TODO GET A LIST OF THE VALID KEYBOARD LOCALES
-\item	WEB\_KEYBOARD\_LOCALE
+\item	CVM\_WEB\_KEYBOARD\_LOCALE
 		\begin{itemize}
 		\item	Overrides the default \cernvm desktop keyboard locale, which is ``us'' by
 				default, set by the test suite scripts through the web interface
 		\item	The valid values are valid locale settings
 		\end{itemize}
 
-\item	WEB\_EXPERIMENT\_GROUP
+\item	CVM\_WEB\_EXPERIMENT\_GROUP
 		\begin{itemize}
 		\item	Overrides the default \cernvm primary experiment group, which is ``ALICE''
 				by default, set by the test suite scripts through the web interface
@@ -331,14 +331,14 @@ the default settings used by the \cernvmtestframework\ for executing the \cernvm
 test cases.
 
 \begin{itemize}
-\item	TC\_USER\_NAME
+\item	CVM\_TC\_USER\_NAME
 		\begin{itemize}
 		\item	Overrides the default account name ``bob'' of the new user created 
 				through the web interface as part of a \cernvmreleasetesting test case
 		\item	The user name specified should only contain alphabetical characters
 		\end{itemize}
 		
-\item	TC\_USER\_PASS
+\item	CVM\_TC\_USER\_PASS
 		\begin{itemize}
 		\item	Overrides the default password ``R00tM3'' of the new user created 
 				through the web interface as part of a \cernvmreleasetesting test case
