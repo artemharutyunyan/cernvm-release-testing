@@ -136,6 +136,9 @@ image_url()
 		"kvm")
 		  HYP_KEYWORD="(QEMU,KVM)"
 		  ;;
+		"qemu")
+		  HYP_KEYWORD="(QEMU,KVM)"
+		  ;;
 		"vbox")
 		  HYP_KEYWORD="VirtualBox Image"
 		  ;;
@@ -289,6 +292,8 @@ validate_def_settings()
 		case "$DOMAIN_TYPE" in
 		"kvm")
 		  ;;
+		"qemu")
+		  ;;
 		"vbox")
 		  ;;
 		"vmware")
@@ -413,6 +418,9 @@ verify_hypervisor()
 					"s/.*type='([^']+)'.*/\\1/")
 		case "$DOMAIN_TYPE" in
 		"kvm")
+		  URI="qemu:///system"
+		  ;;
+		"qemu")
 		  URI="qemu:///system"
 		  ;;
 		"vbox")
@@ -671,9 +679,9 @@ configure_image_web()
 		RESULT=0
 		# TODO:	Implement this using a function that uses curl to get the updates
 		#		from the web server to determine when system has rebooted
-		# Wait 5 minutes for the settings to be applied, updates installed, and
+		# Wait 7 minutes for the settings to be applied, updates installed, and
 		# the system to reboot		
-		sleep 300
+		sleep 720
 	fi
 
 	return $RESULT
