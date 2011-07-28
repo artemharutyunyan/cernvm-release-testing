@@ -174,6 +174,16 @@ used by the framework are based on the virtual machine XML template definition f
 in the templates directory.
  
 \begin{itemize}
+\item	CVM\_VM\_IMAGE\_RELEASE\_ID
+		\begin{itemize}
+		\item	Overrides the default configuration setting, which uses the most recent
+				release id of a \cernvm image, with the specific release id of the 
+				\cernvm image to download
+		\item	The release id is used to help better identifying the image, as for each new
+				release added that is the same version, the release id will have incremented
+				to indicate that it is a newer release of the same image version
+		\end{itemize}
+		
 \item	CVM\_VM\_NAME
 		\begin{itemize}
 		\item	Overrides the default name of the virtual machine set by the 
