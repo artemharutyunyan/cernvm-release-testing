@@ -184,6 +184,7 @@ HOSTNAME="${CVM_TS_HOSTNAME:-$(hostname)}"				# Optional, set this to override t
 
 
 ######### Optional CernVM Image Settings ##########
+IMAGE_RELEASE_ID="${CVM_VM_IMAGE_RELEASE_ID}" # Optional, used to narrow down testing of the same release version 
 NAME="${CVM_VM_NAME:-cernvm-${HYPERVISOR}-${IMAGE_VERSION}}" # Optional, default name based on hypervisor & version
 CPUS="${CVM_VM_CPUS}"					# Optional, default in template used unless overriden
 MEMORY="${CVM_VM_MEMORY}"				# Optional, default in template used unless overriden

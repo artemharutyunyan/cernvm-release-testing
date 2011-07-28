@@ -109,6 +109,7 @@ image_url()
 	URL=""
 	# Setting search keywords to be more readable variables
 	VERSION="$2"
+	RELEASE_ID="${IMAGE_RELEASE_ID}"
 	ARCH="" 		# The architecture keyword, 32 or 64
 	TYPE="$5"
 	HYP_KEYWORD=""	# Keyword to identify hypervisor
@@ -123,6 +124,13 @@ image_url()
 		# Remove trailing control statments
 		sed -i 's/'"$(printf '\015')"'$//g' $DOWNLOAD_PAGE
 		
+		# Set the release id as latest release if not defined
+		if [ ! "$RELEASE_ID" ]
+		then
+			# Release id not specified, use latest release
+			RELEASE_ID='[[:digit:]]+'
+		fi
+
 		# Set the architecture keyword as 32 or 64
 		if [ "$4" == "x86_64" ]
 		then
@@ -157,7 +165,7 @@ image_url()
 		while read line
 		do
         	echo $line |  tr -d '\n' | grep -q -E \
-			"^[[:digit:]]+;$VERSION;[[:digit:]]+;$ARCH;(http.*.-$TYPE-.*\.gz).*$HYP_KEYWORD.*"
+			"^$RELEASE_ID;$VERSION;[[:digit:]]+;$ARCH;(http.*.-$TYPE-.*\.gz).*$HYP_KEYWORD.*"
 
         	# If theres a match extract the url using sed
         	if test "$?" -eq 0
@@ -167,7 +175,7 @@ image_url()
 				
 				# Retrieve the URL
             	URL=$(echo ${TRIMMED} | sed -E \
-			    "s|^[[:digit:]]+;$VERSION;[[:digit:]]+;$ARCH;(http.*.-$TYPE-.*\.gz).*$HYP_KEYWORD.*|\\1|")
+			    "s|^$RELEASE_ID;$VERSION;[[:digit:]]+;$ARCH;(http.*.-$TYPE-.*\.gz).*$HYP_KEYWORD.*|\\1|")
 				RESULT=0
 				break
 			fi
