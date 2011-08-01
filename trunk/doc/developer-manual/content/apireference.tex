@@ -1,0 +1,1687 @@
+% Document: ./content/apireference
+% Source: ./../../tapper/tapper-autoreport/
+% Generated with ROBODoc Version 4.99.38 (May  3 2009)
+\newpage
+\section{test-suite/cernvm-preconditions}
+\textsl{[ Generics ]}
+
+\label{ch:robo28}
+\label{ch:test_suite_cernvm_preconditions}
+\index{unsorted!cernvm-preconditions}\index{Generics!cernvm-preconditions}
+\textbf{NAME}
+\begin{verbatim}
+   cernvm-preconditions
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   This script contains each of the CernVM Release Testing precondition
+   tests, which are required preconditions that must pass for the results 
+   of test cases to be accurate. The precondition tests have a simple
+   interface to execute each test and each test returns either a success or 
+   failure, (0 or 1)
+
+   More complex precondition tests can be created by combining other 
+   precondition tests as prerequisites for a precondition test
+\end{verbatim}
+\textbf{TODO}
+\begin{verbatim}
+   CLEAN UP THE FOLLOWING PRECONDITON TESTS AND PLACE THEM IN THIS FILE
+       Precondition Test 2 - Verify that virtual machine domain has been created 
+                         from an xml file
+
+       Precondition Test 3 - Verify that virtual machine can be started
+
+       Precondition Test 4 - Verify that virtual machine has been stopped
+
+       Precondition Test 5 - Verify that the virtual has console support
+
+       Precondition Test 6 - Verify that virtual machine has web interface support
+
+       Precondition Test 7 - Verify that it is possible to login on web interface
+\end{verbatim}
+\newpage
+\subsection{cernvm-preconditions/configure\_image\_web}
+\textsl{[ cernvm-preconditions ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo0}
+\label{ch:cernvm_preconditions_configure_image_web}
+\index{unsorted!configure\_image\_web}\index{Functions!configure\_image\_web}
+\textbf{NAME}
+\begin{verbatim}
+   configure_image_web
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Precondition Test - Setup and configure the initial CernVM image through the
+   web interface
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The hostname or ip address for the web interface
+   $2 - The default username to access web interface
+   $3 - The default password to access web interface
+   $4 - The name of the logfile
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   configure_image_web 192.168.1.125 admin password config-image.log
+\end{verbatim}
+\textbf{TODO}
+\begin{verbatim}
+   Implement a function that uses curl to get the updates from the web server 
+   to determine when the system has rebooted
+\end{verbatim}
+\newpage
+\subsection{cernvm-preconditions/create\_def}
+\textsl{[ cernvm-preconditions ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo1}
+\label{ch:cernvm_preconditions_create_def}
+\index{unsorted!create\_def}\index{Functions!create\_def}
+\textbf{NAME}
+\begin{verbatim}
+   create_def
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Precondition Test - Create an XML definition file for the virtual machine based
+   on the template XML definition file and settings defined and return the
+   location of the xml defintion file created
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The template file to use
+   $2 - The directory to save the final xml definition file in
+\end{verbatim}
+\textbf{RETURN VALUE}
+\begin{verbatim}
+   definitionfile - The location of the xml defintion file created
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   create_def vm-template.xml /root
+\end{verbatim}
+\newpage
+\subsection{cernvm-preconditions/create\_net}
+\textsl{[ cernvm-preconditions ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo2}
+\label{ch:cernvm_preconditions_create_net}
+\index{unsorted!create\_net}\index{Functions!create\_net}
+\textbf{NAME}
+\begin{verbatim}
+   create_net
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Precondition Test - Verify that the virtual machine network has been created 
+   from an xml file
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The path to the network XML definition file
+   $2 - The virtual machine network name 
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   create_net ./network-definition.xml default
+\end{verbatim}
+\newpage
+\subsection{cernvm-preconditions/create\_net\_def}
+\textsl{[ cernvm-preconditions ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo3}
+\label{ch:cernvm_preconditions_create_net_def}
+\index{unsorted!create\_net\_def}\index{Functions!create\_net\_def}
+\textbf{NAME}
+\begin{verbatim}
+   create_net_def
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Precondition Test - Create an XML definition file for the virtual machine network
+   based on the template network XML definition file and settings defined and 
+   return the location of the created xml defintion file
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The network template file to use
+   $2 - The directory to save the final network xml definition file in
+\end{verbatim}
+\textbf{RETURN VALUE}
+\begin{verbatim}
+   netdefinitionfile - The location of the network xml defintion file created
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   create_net_def network-template.xml /root
+\end{verbatim}
+\newpage
+\subsection{cernvm-preconditions/download\_extract}
+\textsl{[ cernvm-preconditions ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo4}
+\label{ch:cernvm_preconditions_download_extract}
+\index{unsorted!download\_extract}\index{Functions!download\_extract}
+\textbf{NAME}
+\begin{verbatim}
+   download_extract
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Precondition Test - Download and extract the CernVM image, returns the location 
+   of the extracted cernvm image file
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The CernVM image download url
+   $2 - The directory to place the downloaded image in
+   $3 - The name of the log file
+\end{verbatim}
+\textbf{RETURN VALUE}
+\begin{verbatim}
+   imagelocation - The location of the extracted CernVM image file
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   IMAGE_LOCATION=$(download_extract http://someurl/file.vmdk.gz /root dl-extract.log)
+\end{verbatim}
+\newpage
+\subsection{cernvm-preconditions/image\_url}
+\textsl{[ cernvm-preconditions ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo5}
+\label{ch:cernvm_preconditions_image_url}
+\index{unsorted!image\_url}\index{Functions!image\_url}
+\textbf{NAME}
+\begin{verbatim}
+   image_url
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Precondition Test - Verify that the download page exists and that there is a 
+   valid download url for the CernVM image specified, returns the url to 
+   download the image
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The CernVM download page url
+   $2 - The image version
+   $3 - The hypervisor of the image
+   $4 - The architecture of the image
+   $5 - The type of image
+\end{verbatim}
+\textbf{RETURN VALUE}
+\begin{verbatim}
+   imageurl - The url to download the image
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   IMAGE_URL=$(image_url http://downloadpage.com 2.4.0 kvm x86 desktop)
+\end{verbatim}
+\newpage
+\subsection{cernvm-preconditions/validate\_def\_settings}
+\textsl{[ cernvm-preconditions ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo6}
+\label{ch:cernvm_preconditions_validate_def_settings}
+\index{unsorted!validate\_def\_settings}\index{Functions!validate\_def\_settings}
+\textbf{NAME}
+\begin{verbatim}
+   validate_def_settings
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Precondition Test - Verify that the mandatory configuration settings for the
+   virtual machine XML definition file have been provided and are valid
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The virtual machine XML definition file
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   validate_def_settings ./vm-definition.xml
+\end{verbatim}
+\newpage
+\subsection{cernvm-preconditions/validate\_def\_xml}
+\textsl{[ cernvm-preconditions ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo7}
+\label{ch:cernvm_preconditions_validate_def_xml}
+\index{unsorted!validate\_def\_xml}\index{Functions!validate\_def\_xml}
+\textbf{NAME}
+\begin{verbatim}
+   validate_def_xml
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Precondition Test - Verify that the XML definition file provided is valid
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The virtual machine XML definition file
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   validate_def_xml ./vm-definition.xml
+\end{verbatim}
+\newpage
+\subsection{cernvm-preconditions/validate\_net\_settings}
+\textsl{[ cernvm-preconditions ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo8}
+\label{ch:cernvm_preconditions_validate_net_settings}
+\index{unsorted!validate\_net\_settings}\index{Functions!validate\_net\_settings}
+\textbf{NAME}
+\begin{verbatim}
+   validate_net_settings
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Precondition Test - Verify that the mandatory configuration settings for the
+   network XML definition file have been provided and are valid
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The network XML definition file
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   validate_net_settings ./network-definition.xml
+\end{verbatim}
+\newpage
+\subsection{cernvm-preconditions/verify\_autologin\_ssh}
+\textsl{[ cernvm-preconditions ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo9}
+\label{ch:cernvm_preconditions_verify_autologin_ssh}
+\index{unsorted!verify\_autologin\_ssh}\index{Functions!verify\_autologin\_ssh}
+\textbf{NAME}
+\begin{verbatim}
+   verify_autologin_ssh
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Precondition Test - Enable automatic SSH login to the machine for the user
+   specified using keys instead of passwords, and verify that it is possible 
+   to login automatically
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The IP address of the machine to login via ssh
+   $2 - The username to login with
+   $3 - The password to login with
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   verify_autologin_ssh 192.168.1.125 root password
+\end{verbatim}
+\textbf{TODO}
+\begin{verbatim}
+   Implement support to only remove the offending key line from known_hosts
+   instead of deleting the entire file
+\end{verbatim}
+\newpage
+\subsection{cernvm-preconditions/verify\_exists}
+\textsl{[ cernvm-preconditions ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo10}
+\label{ch:cernvm_preconditions_verify_exists}
+\index{unsorted!verify\_exists}\index{Functions!verify\_exists}
+\textbf{NAME}
+\begin{verbatim}
+   verify_exists
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Precondition Test - Verify that a file/folder exists
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The location and name of the file
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   verify_exists /root/file.tar.gz
+\end{verbatim}
+\newpage
+\subsection{cernvm-preconditions/verify\_hash}
+\textsl{[ cernvm-preconditions ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo11}
+\label{ch:cernvm_preconditions_verify_hash}
+\index{unsorted!verify\_hash}\index{Functions!verify\_hash}
+\textbf{NAME}
+\begin{verbatim}
+   verify_hash
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Precondition Test - Verify the hash of a file
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The location and name of the file
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   verify_hash /root/file.tar.gz
+\end{verbatim}
+\textbf{TODO}
+\begin{verbatim}
+   Implement the verify_hash function later as it is not important at the moment
+\end{verbatim}
+\newpage
+\subsection{cernvm-preconditions/verify\_hypervisor}
+\textsl{[ cernvm-preconditions ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo12}
+\label{ch:cernvm_preconditions_verify_hypervisor}
+\index{unsorted!verify\_hypervisor}\index{Functions!verify\_hypervisor}
+\textbf{NAME}
+\begin{verbatim}
+   verify_hypervisor
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Precondition Test - Verify that the hypervisor for the current virtual machine
+   tested is accessible, set the hypervisor URI as a global variable
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The virtual machine XML definition file
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   verify_hypervisor vm-definition.xml
+\end{verbatim}
+\newpage
+\subsection{cernvm-preconditions/verify\_ssh\_login}
+\textsl{[ cernvm-preconditions ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo13}
+\label{ch:cernvm_preconditions_verify_ssh_login}
+\index{unsorted!verify\_ssh\_login}\index{Functions!verify\_ssh\_login}
+\textbf{NAME}
+\begin{verbatim}
+   verify_ssh_login
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Precondition Test - Verify that user is able to login via ssh
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The IP address of the machine to login via ssh
+   $2 - The username to login with
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   verify_ssh_login 192.168.1.125 root
+\end{verbatim}
+\newpage
+\subsection{cernvm-preconditions/verify\_vm\_net}
+\textsl{[ cernvm-preconditions ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo14}
+\label{ch:cernvm_preconditions_verify_vm_net}
+\index{unsorted!verify\_vm\_net}\index{Functions!verify\_vm\_net}
+\textbf{NAME}
+\begin{verbatim}
+   verify_vm_net
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Precondition Test - Verify that virtual machine NAT network is active and 
+   set to autostart
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The virtual machine network name
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   verify_vm_net default
+\end{verbatim}
+\newpage
+\section{test-suite/cernvm-testcases}
+\textsl{[ Generics ]}
+
+\label{ch:robo29}
+\label{ch:test_suite_cernvm_testcases}
+\index{unsorted!cernvm-testcases}\index{Generics!cernvm-testcases}
+\textbf{NAME}
+\begin{verbatim}
+   cernvm-testcases
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   This script contains each of the CernVM Release Testing
+   test cases and provides a simple interface to execute each test
+   and returns either a success or failure, (0 or 1) which can be 
+   used to generate a TAP report.
+
+   More complex test cases can be created by combining other test cases
+   as prerequisites for the test case
+\end{verbatim}
+\textbf{NOTES}
+\begin{verbatim}
+   Nearly all of the test cases require the root account on the CernVM image as 
+   many of the files and commands can only be accessed by an account with root 
+   privileges
+\end{verbatim}
+\textbf{TODO}
+\begin{verbatim}
+   MAKE MANY OF THE TEST CASES HAVE OTHER TEST CASES AS
+   PREREQUISITES AND THEN IF THEY FAIL REPORT THAT THE TEST CASE
+   FAILED BECAUSE A PREREQUISITE FAILED, AND WHY THAT PREREQUISITE
+   FAILED. THIS IS MUCH BETTER THAN HAVING A TEST CASE FAIL DUE
+   TO ANOTHER DEPENDENCY AND MAKES THE TEST CASES ORDER-INDEPENDENT
+   IE. FOR check_time(), CALL check_ssh() AND VERIFY THAT SSH IS
+   FIRST POSSIBLE, THIS GIVES MORE EXPLANATION TO FAILURES RATHER
+   THAN A FAILURE FOR THE NTPD TIME BEING INCORRECT, WHEN IN REALITY
+   check_time() COULDN'T SSH TO THE MACHINE
+   *** THIS IS ESSENTIALLY TAPPER'S YAML STRUCTURE ANYWAYS...
+\end{verbatim}
+\newpage
+\subsection{cernvm-testcases/check\_boot\_error}
+\textsl{[ cernvm-testcases ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo15}
+\label{ch:cernvm_testcases_check_boot_error}
+\index{unsorted!check\_boot\_error}\index{Functions!check\_boot\_error}
+\textbf{NAME}
+\begin{verbatim}
+   check_boot_error
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   CernVM Test Case - Check for error messages at boot
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The IP address of the machine to login via ssh
+   $2 - The name of the boot errors log file
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   check_boot_error 192.168.1.125 boot-error.log
+\end{verbatim}
+\newpage
+\subsection{cernvm-testcases/check\_ssh}
+\textsl{[ cernvm-testcases ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo16}
+\label{ch:cernvm_testcases_check_ssh}
+\index{unsorted!check\_ssh}\index{Functions!check\_ssh}
+\textbf{NAME}
+\begin{verbatim}
+   check_ssh
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   CernVM Test Case - Check login via ssh
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The IP address of the machine to login via ssh
+   $2 - The username to login with
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   check_ssh 192.168.1.125 root
+\end{verbatim}
+\newpage
+\subsection{cernvm-testcases/check\_time}
+\textsl{[ cernvm-testcases ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo17}
+\label{ch:cernvm_testcases_check_time}
+\index{unsorted!check\_time}\index{Functions!check\_time}
+\textbf{NAME}
+\begin{verbatim}
+   check_time
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   CernVM Test Case - Check for correct time / running ntpd
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The IP address of the machine to login via ssh
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   check_time 192.168.1.125
+\end{verbatim}
+\newpage
+\subsection{cernvm-testcases/check\_web\_restart}
+\textsl{[ cernvm-testcases ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo18}
+\label{ch:cernvm_testcases_check_web_restart}
+\index{unsorted!check\_web\_restart}\index{Functions!check\_web\_restart}
+\textbf{NAME}
+\begin{verbatim}
+   check_web_restart
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   CernVM Test Case - Restart through the web interface and check that there
+                      are no error messages at boot
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+    $1 - The hostname or ip address for the web interface
+    $2 - The name of the web reboot logfile
+    $3 - The name of the boot error logfile
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   check_web_restart 192.168.1.125 web-reboot.log boot-error.log
+\end{verbatim}
+\newpage
+\section{test-suite/general-interface}
+\textsl{[ Generics ]}
+
+\label{ch:robo30}
+\label{ch:test_suite_general_interface}
+\index{unsorted!general-interface}\index{Generics!general-interface}
+\textbf{NAME}
+\begin{verbatim}
+   general-interface
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   This script contains general interface functions that interface with 
+   the host system and provide generic functionality such as checking the
+   host architecture, getting the host operating system, checking if a file
+   exists, etc.
+
+   These functions can be utilized to create precondition tests and test 
+   cases which require generic functionality that is not part of the
+   virt or web interface functions
+\end{verbatim}
+\newpage
+\subsection{general-interface/extract\_file}
+\textsl{[ general-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo19}
+\label{ch:general_interface_extract_file}
+\index{unsorted!extract\_file}\index{Functions!extract\_file}
+\textbf{NAME}
+\begin{verbatim}
+   extract_file
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Extracts a file based on extension within the directory it is located in
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The location and name of the file
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   extract_file /root/file.tar.gz
+\end{verbatim}
+\newpage
+\subsection{general-interface/file\_exists}
+\textsl{[ general-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo20}
+\label{ch:general_interface_file_exists}
+\index{unsorted!file\_exists}\index{Functions!file\_exists}
+\textbf{NAME}
+\begin{verbatim}
+   file_exists
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Simple function that checks if a file/folder exists
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The location and name of the file
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   file_exists ./template.xml
+\end{verbatim}
+\newpage
+\subsection{general-interface/filename\_from\_header}
+\textsl{[ general-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo21}
+\label{ch:general_interface_filename_from_header}
+\index{unsorted!filename\_from\_header}\index{Functions!filename\_from\_header}
+\textbf{NAME}
+\begin{verbatim}
+   filename_from_header
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Function that returns the name of a file to be downloaded given a url by
+   looking at the "Location:" specified in HTTP header
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The download url of the file
+\end{verbatim}
+\textbf{RETURN VALUE}
+\begin{verbatim}
+   filename - The name of a file to be downloaded
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   FILE_NAME=$(filename_from_header http://someurl/file.tar.gz)
+\end{verbatim}
+\newpage
+\subsection{general-interface/filename\_from\_url}
+\textsl{[ general-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo22}
+\label{ch:general_interface_filename_from_url}
+\index{unsorted!filename\_from\_url}\index{Functions!filename\_from\_url}
+\textbf{NAME}
+\begin{verbatim}
+   filename_from_url
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Function that returns the name of a file to be downloaded given a url
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The download url of the file
+\end{verbatim}
+\textbf{RETURN VALUE}
+\begin{verbatim}
+   filename - The name of a file to be downloaded
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   FILE_NAME=$(filename_from_url http://someurl/file.tar.gz)
+\end{verbatim}
+\newpage
+\subsection{general-interface/find\_file}
+\textsl{[ general-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo23}
+\label{ch:general_interface_find_file}
+\index{unsorted!find\_file}\index{Functions!find\_file}
+\textbf{NAME}
+\begin{verbatim}
+   find_file
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Function that finds a file and returns the name and path of a file given the 
+   root directory and the extension of the file
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The root directory to search for the file
+   $2 - The extension of the file to look for
+\end{verbatim}
+\textbf{RETURN VALUE}
+\begin{verbatim}
+   filelocation - The name and path of a file
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   FILE_LOCATION=$(find_file /usr/share/images vmdk)
+\end{verbatim}
+\newpage
+\subsection{general-interface/get\_hash}
+\textsl{[ general-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo24}
+\label{ch:general_interface_get_hash}
+\index{unsorted!get\_hash}\index{Functions!get\_hash}
+\textbf{NAME}
+\begin{verbatim}
+   get_hash
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Simple function that returns the hash of a file
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The location and name of the file
+   $2 - The type of hash, currently supported hashes are: 
+        crc32, md5, sha, sha1, sha224, sha256, sha384, sha512
+\end{verbatim}
+\textbf{RETURN VALUE}
+\begin{verbatim}
+   hash - The hash of the file
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   HASH=$(get_hash /root/file.tar.gz md5)
+\end{verbatim}
+\newpage
+\subsection{general-interface/get\_ip\_address}
+\textsl{[ general-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo25}
+\label{ch:general_interface_get_ip_address}
+\index{unsorted!get\_ip\_address}\index{Functions!get\_ip\_address}
+\textbf{NAME}
+\begin{verbatim}
+   get_ip_address
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Simple function that returns the ip address from the xml network definition file
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The network XML definition file
+\end{verbatim}
+\textbf{RETURN VALUE}
+\begin{verbatim}
+   ipaddress - The ip address defined in the xml network definition file
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   IP_ADDRESS=$(get_ip_address ./network-definition.xml)
+\end{verbatim}
+\newpage
+\subsection{general-interface/get\_net\_name}
+\textsl{[ general-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo26}
+\label{ch:general_interface_get_net_name}
+\index{unsorted!get\_net\_name}\index{Functions!get\_net\_name}
+\textbf{NAME}
+\begin{verbatim}
+   get_net_name
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Simple function that returns the network name from xml network definition file
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The network XML definition file
+\end{verbatim}
+\textbf{RETURN VALUE}
+\begin{verbatim}
+   networkname - The network name defined in the xml network definition file
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   NET_NAME=$(get_net_name ./network-definition.xml)
+\end{verbatim}
+\newpage
+\subsection{general-interface/ssh\_autologin}
+\textsl{[ general-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo27}
+\label{ch:general_interface_ssh_autologin}
+\index{unsorted!ssh\_autologin}\index{Functions!ssh\_autologin}
+\textbf{NAME}
+\begin{verbatim}
+   ssh_autologin
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   A function which configures automatic SSH login using keys instead of passwords
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The IP address of the machine to login via ssh
+   $2 - The username to login with
+   $3 - The password to login with
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   ssh_autologin 192.168.1.125 root password
+\end{verbatim}
+\newpage
+\section{test-suite/virt-interface}
+\textsl{[ Generics ]}
+
+\label{ch:robo31}
+\label{ch:test_suite_virt_interface}
+\index{unsorted!virt-interface}\index{Generics!virt-interface}
+\textbf{NAME}
+\begin{verbatim}
+   virt-interface
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   This script contains several virtualization functions that
+   interface with libvirsh and return a success or failure, 
+   which can be used to generate a TAP report.
+
+   These functions are well suited for precondition tests to ensure
+   that virtual machines can be created and controlled before 
+   executing any more tests.
+\end{verbatim}
+\newpage
+\subsection{virt-interface/connect\_virsh}
+\textsl{[ virt-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo33}
+\label{ch:virt_interface_connect_virsh}
+\index{unsorted!connect\_virsh}\index{Functions!connect\_virsh}
+\textbf{NAME}
+\begin{verbatim}
+   connect_virsh
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Connect to virsh for the current virtual machine hypervisor URI and display URI
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The URI of the hypervisor
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   connect_virsh qemu:///system
+\end{verbatim}
+\newpage
+\subsection{virt-interface/create\_vm}
+\textsl{[ virt-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo34}
+\label{ch:virt_interface_create_vm}
+\index{unsorted!create\_vm}\index{Functions!create\_vm}
+\textbf{NAME}
+\begin{verbatim}
+   create_vm
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Create a virtual machine from an xml file, verify it has been created 
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The path to the virtual machine definition file
+   $2 - The name of the virtual machine
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   create_vm ./vm-definition.xml virt-machine
+\end{verbatim}
+\newpage
+\subsection{virt-interface/create\_vm\_net}
+\textsl{[ virt-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo35}
+\label{ch:virt_interface_create_vm_net}
+\index{unsorted!create\_vm\_net}\index{Functions!create\_vm\_net}
+\textbf{NAME}
+\begin{verbatim}
+   create_vm_net
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Create a virtual machine network from an xml file, verify it has been created 
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The path to the network definition file
+   $2 - The virtual machine network name
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   create_vm_net ./network-definition.xml default
+\end{verbatim}
+\newpage
+\subsection{virt-interface/destroy\_vm}
+\textsl{[ virt-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo36}
+\label{ch:virt_interface_destroy_vm}
+\index{unsorted!destroy\_vm}\index{Functions!destroy\_vm}
+\textbf{NAME}
+\begin{verbatim}
+   destroy_vm
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Destroy a virtual machine, verify it has been removed from virsh
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The name of the virtual machine
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   destroy_vm virt-machine
+\end{verbatim}
+\textbf{NOTES}
+\begin{verbatim}
+   The files will still exist, the virtual machine is simply no longer 
+   accesible until it is re-created 
+\end{verbatim}
+\newpage
+\subsection{virt-interface/destroy\_vm\_net}
+\textsl{[ virt-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo37}
+\label{ch:virt_interface_destroy_vm_net}
+\index{unsorted!destroy\_vm\_net}\index{Functions!destroy\_vm\_net}
+\textbf{NAME}
+\begin{verbatim}
+   destroy_vm_net
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Destroy a virtual machine network, verify it has been removed from virsh
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The virtual machine network name
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   destroy_vm_net default
+\end{verbatim}
+\textbf{NOTES}
+\begin{verbatim}
+   The network definition files will still exist, network is simply no longer 
+   accesible until it is re-created 
+\end{verbatim}
+\newpage
+\subsection{virt-interface/has\_console\_support}
+\textsl{[ virt-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo38}
+\label{ch:virt_interface_has_console_support}
+\index{unsorted!has\_console\_support}\index{Functions!has\_console\_support}
+\textbf{NAME}
+\begin{verbatim}
+   has_console_support
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Verify that the virtual machine has console support requires that the virtual
+   machine has been first started
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The name of the virtual machine
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   has_console_support virt-machine
+\end{verbatim}
+\textbf{WARNINGS}
+\begin{verbatim}
+   Support for this function has been deprecated and its use is strongly
+   discouraged as console support is unnecessary and only supported for KVM
+\end{verbatim}
+\newpage
+\subsection{virt-interface/start\_vm}
+\textsl{[ virt-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo39}
+\label{ch:virt_interface_start_vm}
+\index{unsorted!start\_vm}\index{Functions!start\_vm}
+\textbf{NAME}
+\begin{verbatim}
+   start_vm
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Start the virtual machine and verify it started
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The name of the virtual machine
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   start_vm virt-machine
+\end{verbatim}
+\newpage
+\subsection{virt-interface/stop\_vm}
+\textsl{[ virt-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo40}
+\label{ch:virt_interface_stop_vm}
+\index{unsorted!stop\_vm}\index{Functions!stop\_vm}
+\textbf{NAME}
+\begin{verbatim}
+   stop_vm
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Stop the virtual machine and verify it has shutdown
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The name of the virtual machine
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   stop_vm virt-machine
+\end{verbatim}
+\newpage
+\subsection{virt-interface/vm\_net\_active}
+\textsl{[ virt-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo41}
+\label{ch:virt_interface_vm_net_active}
+\index{unsorted!vm\_net\_active}\index{Functions!vm\_net\_active}
+\textbf{NAME}
+\begin{verbatim}
+   vm_net_active
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Set the default network as active and verify it is active
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The virtual machine network name
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   vm_net_active default
+\end{verbatim}
+\newpage
+\subsection{virt-interface/vm\_net\_autostart}
+\textsl{[ virt-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo42}
+\label{ch:virt_interface_vm_net_autostart}
+\index{unsorted!vm\_net\_autostart}\index{Functions!vm\_net\_autostart}
+\textbf{NAME}
+\begin{verbatim}
+   vm_net_autostart
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Set the default network to autostart and verify that it is set to autostart
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The virtual machine network name
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   vm_net_autostart default
+\end{verbatim}
+\newpage
+\section{test-suite/web-interface}
+\textsl{[ Generics ]}
+
+\label{ch:robo32}
+\label{ch:test_suite_web_interface}
+\index{unsorted!web-interface}\index{Generics!web-interface}
+\textbf{NAME}
+\begin{verbatim}
+   web-interface
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   This script contains several  functions that provide an interface to
+   the CernVM virtual machine web interface and return a success or failure, 
+   which can be used to generate a TAP report.
+
+   These functions can be utilized to create test cases in cernvm-testcases or 
+   can be executed individually as precondition tests
+\end{verbatim}
+\newpage
+\subsection{web-interface/generate\_header}
+\textsl{[ web-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo43}
+\label{ch:web_interface_generate_header}
+\index{unsorted!generate\_header}\index{Functions!generate\_header}
+\textbf{NAME}
+\begin{verbatim}
+   generate_header
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Generate an http header using the template header and any additional 
+   header values defined
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   generate_header
+\end{verbatim}
+\textbf{NOTES}
+\begin{verbatim}
+   This function should only be called within the scope of a web-interface
+   function after the TEMPLATE_HEADER has been generated and the 
+   ADDITIONAL_HEADER information unique to the function has been set
+\end{verbatim}
+\newpage
+\subsection{web-interface/generate\_template\_header}
+\textsl{[ web-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo44}
+\label{ch:web_interface_generate_template_header}
+\index{unsorted!generate\_template\_header}\index{Functions!generate\_template\_header}
+\textbf{NAME}
+\begin{verbatim}
+   generate_template_header
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Generate a HTTP template header for the current hypervisor which is a basis
+   to generate headers for different web-interface functions
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The hostname or ip address for the web interface
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   TEMPLATE_HEADER - Exports the generated HTTP template header globally
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   generate_template_header 192.168.1.125
+\end{verbatim}
+\textbf{TODO}
+\begin{verbatim}
+   PERHAPS GENERATE DIFFERENT USER-AGENT BASED ON HOST OS
+\end{verbatim}
+\newpage
+\subsection{web-interface/web\_apply\_settings}
+\textsl{[ web-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo45}
+\label{ch:web_interface_web_apply_settings}
+\index{unsorted!web\_apply\_settings}\index{Functions!web\_apply\_settings}
+\textbf{NAME}
+\begin{verbatim}
+   web_apply_settings
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Apply settings configured for the CernVM image using the CernVM web interface, 
+   which then reboots the CernVM image once completed
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The hostname or ip address for the web interface
+   $2 - The name of the logfile
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   web_apply_settings 192.168.1.125 apply-settings.log
+\end{verbatim}
+\newpage
+\subsection{web-interface/web\_check\_interface}
+\textsl{[ web-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo46}
+\label{ch:web_interface_web_check_interface}
+\index{unsorted!web\_check\_interface}\index{Functions!web\_check\_interface}
+\textbf{NAME}
+\begin{verbatim}
+   web_check_interface
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Verify that virtual machine has web interface support
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The hostname or ip address for the web interface
+   $2 - The name of the logfile
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   web_check_interface 192.168.1.125 check-interface.log
+\end{verbatim}
+\newpage
+\subsection{web-interface/web\_check\_login}
+\textsl{[ web-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo47}
+\label{ch:web_interface_web_check_login}
+\index{unsorted!web\_check\_login}\index{Functions!web\_check\_login}
+\textbf{NAME}
+\begin{verbatim}
+   web_check_login
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Verify that it is possible to login on web interface
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The hostname or ip address for the web interface
+   $2 - The web interface username, usually admin
+   $3 - The web interface password, by default password
+   $4 - The name of the logfile
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   web_check_login 192.168.1.125 admin password check-login.log
+\end{verbatim}
+\newpage
+\subsection{web-interface/web\_config\_desktop}
+\textsl{[ web-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo48}
+\label{ch:web_interface_web_config_desktop}
+\index{unsorted!web\_config\_desktop}\index{Functions!web\_config\_desktop}
+\textbf{NAME}
+\begin{verbatim}
+   web_config_desktop
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Configure the CernVM image desktop settings using the CernVM web interface
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The hostname or ip address for the web interface
+   $2 - Configure startx on boot, accepted values are on or off
+   $3 - The CernVM image desktop resolution
+   $4 - The CernVM image keyboard locale
+   $5 - The name of the logfile
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   web_config_desktop 192.168.1.125 on 1024x768 us config-desktop.log
+\end{verbatim}
+\newpage
+\subsection{web-interface/web\_config\_group}
+\textsl{[ web-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo49}
+\label{ch:web_interface_web_config_group}
+\index{unsorted!web\_config\_group}\index{Functions!web\_config\_group}
+\textbf{NAME}
+\begin{verbatim}
+   web_config_group
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Configure the CernVM image appliance group settings using the CernVM web interface
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The hostname or ip address for the web interface
+   $2 - The appliance primary group, all capitals, only one group may be specified
+   $3 - The name of the logfile
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   web_config_group 192.168.1.125 ALICE config-group.log
+\end{verbatim}
+\textbf{TODO}
+\begin{verbatim}
+   ENABLE AN ARRAY / LIST OF APPLIANCE GROUPS
+\end{verbatim}
+\newpage
+\subsection{web-interface/web\_config\_password}
+\textsl{[ web-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo50}
+\label{ch:web_interface_web_config_password}
+\index{unsorted!web\_config\_password}\index{Functions!web\_config\_password}
+\textbf{NAME}
+\begin{verbatim}
+   web_config_password
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Configure the web interface administrator password using the CernVM web interface
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The hostname or ip address for the web interface
+   $2 - The new web interface administration password
+   $3 - The name of the logfile
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   web_config_password 192.168.1.125 newpassword config-password.log
+\end{verbatim}
+\newpage
+\subsection{web-interface/web\_config\_proxy}
+\textsl{[ web-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo51}
+\label{ch:web_interface_web_config_proxy}
+\index{unsorted!web\_config\_proxy}\index{Functions!web\_config\_proxy}
+\textbf{NAME}
+\begin{verbatim}
+   web_config_proxy
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Configure the proxy settings using the CernVM web interface
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The hostname or ip address for the web interface
+   $2 - The name of the logfile
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   web_config_proxy 192.168.1.125 config-proxy.log
+\end{verbatim}
+\textbf{TODO}
+\begin{verbatim}
+   ADD SUPPORT TO ACTUALLY SPECIFY PROXY SETTINGS
+\end{verbatim}
+\newpage
+\subsection{web-interface/web\_create\_user}
+\textsl{[ web-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo52}
+\label{ch:web_interface_web_create_user}
+\index{unsorted!web\_create\_user}\index{Functions!web\_create\_user}
+\textbf{NAME}
+\begin{verbatim}
+   web_create_user
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Create a new user using the CernVM web interface
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The hostname or ip address for the web interface
+   $2 - The name of the new user to create
+   $3 - The password for the new user
+   $4 - The group for the new user, lowercase
+   $5 - The name of the logfile
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   web_create_user 192.168.1.125 newuser password alice create-user.log
+\end{verbatim}
+\textbf{TODO}
+\begin{verbatim}
+   Add documentation to developer-manual which lists available user groups,
+   as well, perhaps account for invalid user group and return error
+\end{verbatim}
+\newpage
+\subsection{web-interface/web\_restart}
+\textsl{[ web-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo53}
+\label{ch:web_interface_web_restart}
+\index{unsorted!web\_restart}\index{Functions!web\_restart}
+\textbf{NAME}
+\begin{verbatim}
+   web_restart
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Restart through the web interface
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The hostname or ip address for the web interface
+   $2 - The name of the web reboot logfile
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   web_restart 192.168.1.125 web-restart.log
+\end{verbatim}
+\newpage
+\subsection{web-interface/web\_root\_password}
+\textsl{[ web-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo54}
+\label{ch:web_interface_web_root_password}
+\index{unsorted!web\_root\_password}\index{Functions!web\_root\_password}
+\textbf{NAME}
+\begin{verbatim}
+   web_root_password
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Set the root password using the CernVM web interface
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The hostname or ip address for the web interface
+   $2 - The new root password
+   $3 - The current web interface administration password
+   $4 - The name of the logfile
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+ web_root_password 192.168.1.125 newpass currentpass root-password.log
+\end{verbatim}
+\printindex
