@@ -2,34 +2,53 @@
 
 # =============================================================================
 #
-# cernvm-testcases
-# -----------------
+#****** test-suite/cernvm-testcases
+# NAME
+#   cernvm-testcases
 #
-# This script contains each of the CernVM Release Testing
-# test cases and provides a simple interface to execute each test
-# and returns either a success or failure, (0 or 1) which can be 
-# used to generate a TAP report.
+# DESCRIPTION
+#   This script contains each of the CernVM Release Testing
+#   test cases and provides a simple interface to execute each test
+#   and returns either a success or failure, (0 or 1) which can be 
+#   used to generate a TAP report.
 #
-# More complex test cases can be created by combining other test cases
-# as prerequisites for the test case
+#   More complex test cases can be created by combining other test cases
+#   as prerequisites for the test case
 #
-# TODO: MAKE MANY OF THE TEST CASES HAVE OTHER TEST CASES AS
-# 		PREREQUISITES AND THEN IF THEY FAIL REPORT THAT THE TEST CASE
-#		FAILED BECAUSE A PREREQUISITE FAILED, AND WHY THAT PREREQUISITE
-#		FAILED. THIS IS MUCH BETTER THAN HAVING A TEST CASE FAIL DUE
-# 		TO ANOTHER DEPENDENCY AND MAKES THE TEST CASES ORDER-INDEPENDENT
-#		IE. FOR check_time(), CALL check_ssh() AND VERIFY THAT SSH IS
-#		FIRST POSSIBLE, THIS GIVES MORE EXPLANATION TO FAILURES RATHER
-#		THAN A FAILURE FOR THE NTPD TIME BEING INCORRECT, WHEN IN REALITY
-#		check_time() COULDN'T SSH TO THE MACHINE
-#		*** THIS IS ESSENTIALLY TAPPER'S YAML STRUCTURE ANYWAYS...
+# NOTES
+#   Nearly all of the test cases require the root account on the CernVM image as 
+#   many of the files and commands can only be accessed by an account with root 
+#   privileges
+#
+# TODO
+#   MAKE MANY OF THE TEST CASES HAVE OTHER TEST CASES AS
+#   PREREQUISITES AND THEN IF THEY FAIL REPORT THAT THE TEST CASE
+#   FAILED BECAUSE A PREREQUISITE FAILED, AND WHY THAT PREREQUISITE
+#   FAILED. THIS IS MUCH BETTER THAN HAVING A TEST CASE FAIL DUE
+#   TO ANOTHER DEPENDENCY AND MAKES THE TEST CASES ORDER-INDEPENDENT
+#   IE. FOR check_time(), CALL check_ssh() AND VERIFY THAT SSH IS
+#   FIRST POSSIBLE, THIS GIVES MORE EXPLANATION TO FAILURES RATHER
+#   THAN A FAILURE FOR THE NTPD TIME BEING INCORRECT, WHEN IN REALITY
+#   check_time() COULDN'T SSH TO THE MACHINE
+#   *** THIS IS ESSENTIALLY TAPPER'S YAML STRUCTURE ANYWAYS...
+#***
 #
 # =============================================================================
 
 
-# CernVM Test Case - Check login via ssh
-# @param $1 - The IP address of the machine to login via ssh
-# @param $2 - The username to login with
+#****f* cernvm-testcases/check_ssh
+# NAME
+#   check_ssh
+# DESCRIPTION
+#   CernVM Test Case - Check login via ssh
+# ARGUMENTS
+#   $1 - The IP address of the machine to login via ssh
+#   $2 - The username to login with
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   check_ssh 192.168.1.125 root
+#***
 check_ssh()
 {
 	verify_ssh_login $1 $2
@@ -38,9 +57,19 @@ check_ssh()
 }
 
 
-# CernVM Test Case - Check for error messages at boot
-# @param $1 - The IP address of the machine to login via ssh
-# @param $2 - The name of the boot errors log file
+#****f* cernvm-testcases/check_boot_error
+# NAME
+#   check_boot_error
+# DESCRIPTION
+#   CernVM Test Case - Check for error messages at boot
+# ARGUMENTS
+#   $1 - The IP address of the machine to login via ssh
+#   $2 - The name of the boot errors log file
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   check_boot_error 192.168.1.125 boot-error.log
+#***
 check_boot_error()
 {
 	RESULT=0
@@ -69,8 +98,19 @@ check_boot_error()
 	return $RESULT
 }
 
-# CernVM Test Case - Check for correct time / running ntpd
-# @param $1 - The IP address of the machine to login via ssh
+
+#****f* cernvm-testcases/check_time
+# NAME
+#   check_time
+# DESCRIPTION
+#   CernVM Test Case - Check for correct time / running ntpd
+# ARGUMENTS
+#   $1 - The IP address of the machine to login via ssh
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   check_time 192.168.1.125
+#***
 check_time()
 {
 	ssh -q -o "BatchMode=yes" root@$1 ps -eaf | grep -q ntpd
@@ -79,11 +119,21 @@ check_time()
 }
 
 
-# CernVM Test Case - Restart through the web interface and check that there
-#					 are no error messages at boot
-# @param $1 - The hostname or ip address for the web interface
-# @param $2 - The name of the web reboot logfile
-# @param $3 - The name of the boot error logfile
+#****f* cernvm-testcases/check_web_restart
+# NAME
+#   check_web_restart
+# DESCRIPTION
+#   CernVM Test Case - Restart through the web interface and check that there
+#                      are no error messages at boot
+# ARGUMENTS
+#    $1 - The hostname or ip address for the web interface
+#    $2 - The name of the web reboot logfile
+#    $3 - The name of the boot error logfile
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   check_web_restart 192.168.1.125 web-reboot.log boot-error.log
+#***
 check_web_restart()
 {
 	RESULT=1

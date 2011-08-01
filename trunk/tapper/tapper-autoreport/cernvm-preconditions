@@ -2,25 +2,53 @@
 
 # =============================================================================
 #
-# cernvm-preconditions
-# --------------------
+#****** test-suite/cernvm-preconditions
+# NAME
+#   cernvm-preconditions
 #
-# This script contains each of the CernVM Release Testing precondition
-# tests, which are required preconditions that must pass for the results 
-# of test cases to be accurate. The precondition tests have a simple
-# interface to execute each test and each test returns either a success or 
-# failure, (0 or 1)
+# DESCRIPTION
+#   This script contains each of the CernVM Release Testing precondition
+#   tests, which are required preconditions that must pass for the results 
+#   of test cases to be accurate. The precondition tests have a simple
+#   interface to execute each test and each test returns either a success or 
+#   failure, (0 or 1)
 #
-# More complex precondition tests can be created by combining other 
-# precondition tests as prerequisites for a precondition test
+#   More complex precondition tests can be created by combining other 
+#   precondition tests as prerequisites for a precondition test
+#
+# TODO
+#   CLEAN UP THE FOLLOWING PRECONDITON TESTS AND PLACE THEM IN THIS FILE
+#	Precondition Test 2 - Verify that virtual machine domain has been created 
+#                         from an xml file
+#
+#	Precondition Test 3 - Verify that virtual machine can be started
+#
+#	Precondition Test 4 - Verify that virtual machine has been stopped
+#
+#	Precondition Test 5 - Verify that the virtual has console support
+#
+#	Precondition Test 6 - Verify that virtual machine has web interface support
+#
+#	Precondition Test 7 - Verify that it is possible to login on web interface
+#***
 #
 # =============================================================================
 
 # GENERIC PRECONDITION TESTS
 # --------------------------
 
-# Precondition Test - Verify that a file/folder exists
-# @param $1 - The location and name of the file
+#****f* cernvm-preconditions/verify_exists
+# NAME
+#   verify_exists
+# DESCRIPTION
+#   Precondition Test - Verify that a file/folder exists
+# ARGUMENTS
+#   $1 - The location and name of the file
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   verify_exists /root/file.tar.gz
+#***
 verify_exists()
 {
 	file_exists $1
@@ -29,17 +57,39 @@ verify_exists()
 }
 
 
-# Precondition Test - Verify the hash of a file
-# @param $1 - The location and name of the file
+#****f* cernvm-preconditions/verify_hash
+# NAME
+#   verify_hash
+# DESCRIPTION
+#   Precondition Test - Verify the hash of a file
+# ARGUMENTS
+#   $1 - The location and name of the file
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   verify_hash /root/file.tar.gz
+# TODO
+#   Implement the verify_hash function later as it is not important at the moment
+#***
 verify_hash()
 {
 	return 0
 }
 
 
-# Precondition Test - Verify that user is able to login via ssh
-# @param $1 - The IP address of the machine to login via ssh
-# @param $2 - The username to login with
+#****f* cernvm-preconditions/verify_ssh_login
+# NAME
+#   verify_ssh_login
+# DESCRIPTION
+#   Precondition Test - Verify that user is able to login via ssh
+# ARGUMENTS
+#   $1 - The IP address of the machine to login via ssh
+#   $2 - The username to login with
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   verify_ssh_login 192.168.1.125 root
+#***
 verify_ssh_login()
 {
 	ssh -q -o "BatchMode=yes" $2@$1 "echo 2>&1"
@@ -48,12 +98,25 @@ verify_ssh_login()
 }
 
 
-# Precondition Test - Enable automatic SSH login to the machine for the user
-#					  specified using keys instead of passwords, and verify that it
-#					  is possible to login automatically
-# @param $1 - The IP address of the machine to login via ssh
-# @param $2 - The username to login with
-# @param $3	- The password to login with
+#****f* cernvm-preconditions/verify_autologin_ssh
+# NAME
+#   verify_autologin_ssh
+# DESCRIPTION
+#   Precondition Test - Enable automatic SSH login to the machine for the user
+#   specified using keys instead of passwords, and verify that it is possible 
+#   to login automatically
+# ARGUMENTS
+#   $1 - The IP address of the machine to login via ssh
+#   $2 - The username to login with
+#   $3 - The password to login with
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   verify_autologin_ssh 192.168.1.125 root password
+# TODO
+#   Implement support to only remove the offending key line from known_hosts
+#   instead of deleting the entire file
+#***
 verify_autologin_ssh()
 {
 	RESULT=1
@@ -94,14 +157,26 @@ verify_autologin_ssh()
 }
 
 
-# Precondition Test - Verify that the download page exists and that there is a 
-#					  valid download url for the CernVM image specified, returns
-#					  the url to download the image
-# @param $1 - The CernVM download page url
-# @param $2 - The image version
-# @param $3 - The hypervisor of the image
-# @param $4	- The architecture of the image
-# @param $5 - The type of image
+#****f* cernvm-preconditions/image_url
+# NAME
+#   image_url
+# DESCRIPTION
+#   Precondition Test - Verify that the download page exists and that there is a 
+#   valid download url for the CernVM image specified, returns the url to 
+#   download the image
+# ARGUMENTS
+#   $1 - The CernVM download page url
+#   $2 - The image version
+#   $3 - The hypervisor of the image
+#   $4 - The architecture of the image
+#   $5 - The type of image
+# RETURN VALUE
+#   imageurl - The url to download the image
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   IMAGE_URL=$(image_url http://downloadpage.com 2.4.0 kvm x86 desktop)
+#***
 image_url()
 {
 	RESULT=1
@@ -187,11 +262,23 @@ image_url()
 }
 
 
-# Precondition Test - Download and extract the CernVM image, returns the location 
-#					  of the extracted cernvm image file
-# @param $1 - The CernVM image download url
-# @param $2	- The directory to place the downloaded image in
-# @param $3 - The name of the log file
+#****f* cernvm-preconditions/download_extract
+# NAME
+#   download_extract
+# DESCRIPTION
+#   Precondition Test - Download and extract the CernVM image, returns the location 
+#   of the extracted cernvm image file
+# ARGUMENTS
+#   $1 - The CernVM image download url
+#   $2 - The directory to place the downloaded image in
+#   $3 - The name of the log file
+# RETURN VALUE
+#   imagelocation - The location of the extracted CernVM image file
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   IMAGE_LOCATION=$(download_extract http://someurl/file.vmdk.gz /root dl-extract.log)
+#***
 download_extract()
 {
 	RESULT=1
@@ -240,9 +327,19 @@ download_extract()
 # VIRTUAL MACHINE RELATED PRECONDITION TESTS
 # ------------------------------------------
 
-# Precondition Test - Verify that virtual machine NAT network is active and 
-#					  set to autostart
-# @param $1 - The virtual machine network name
+#****f* cernvm-preconditions/verify_vm_net
+# NAME
+#   verify_vm_net
+# DESCRIPTION
+#   Precondition Test - Verify that virtual machine NAT network is active and 
+#   set to autostart
+# ARGUMENTS
+#   $1 - The virtual machine network name
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   verify_vm_net default
+#***
 verify_vm_net()
 {
 	RESULT=1
@@ -261,8 +358,18 @@ verify_vm_net()
 }
 
 
-# Precondition Test - Verify that the XML definition file provided is valid
-# @param $1 - The virtual machine XML definition file
+#****f* cernvm-preconditions/validate_def_xml
+# NAME
+#   validate_def_xml
+# DESCRIPTION
+#   Precondition Test - Verify that the XML definition file provided is valid
+# ARGUMENTS
+#   $1 - The virtual machine XML definition file
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   validate_def_xml ./vm-definition.xml
+#***
 validate_def_xml()
 {
 	RESULT=1
@@ -280,10 +387,20 @@ validate_def_xml()
 	return $RESULT
 }	
 	
-	
-# Precondition Test - Verify that the mandatory configuration settings for the virtual
-#					  machine XML definition file have been provided and are valid
-# @param $1 - The virtual machine XML definition file
+
+#****f* cernvm-preconditions/validate_def_settings
+# NAME
+#   validate_def_settings
+# DESCRIPTION
+#   Precondition Test - Verify that the mandatory configuration settings for the
+#   virtual machine XML definition file have been provided and are valid
+# ARGUMENTS
+#   $1 - The virtual machine XML definition file
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   validate_def_settings ./vm-definition.xml
+#***
 validate_def_settings()
 {
 	RESULT=1
@@ -343,7 +460,8 @@ validate_def_settings()
 		fi
 
 		# Verify that the virtual machine image file is set and exists
-		IMAGE_FILE=$(egrep -E "^[[:space:]]*<source file='(.+)'" $1 | sed -E "s|.*'([^']+)'.*|\\1|")
+		IMAGE_FILE=$(egrep -E "^[[:space:]]*<source file='(.+)'" $1 | sed -E \
+					"s|.*'([^']+)'.*|\\1|")
 		if verify_exists ${IMAGE_FILE} ; test "$?" -ne 0
 		then
 			# Image file not set, or doesn't exist
@@ -359,9 +477,21 @@ validate_def_settings()
 }
 
 
-# Precondition Test - Verify that the mandatory configuration settings for the
-#					  network XML definition file have been provided and are valid
-# @param $1 - The network XML definition file
+
+
+#****f* cernvm-preconditions/validate_net_settings
+# NAME
+#   validate_net_settings
+# DESCRIPTION
+#   Precondition Test - Verify that the mandatory configuration settings for the
+#   network XML definition file have been provided and are valid
+# ARGUMENTS
+#   $1 - The network XML definition file
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   validate_net_settings ./network-definition.xml
+#***
 validate_net_settings()
 {
 	RESULT=1
@@ -410,9 +540,19 @@ validate_net_settings()
 }
 
 
-# Precondition Test - Verify that the hypervisor for the current virtual machine
-#					  tested is accessible, set the hypervisor URI as a global variable
-# @param $1 - The virtual machine XML definition file
+#****f* cernvm-preconditions/verify_hypervisor
+# NAME
+#   verify_hypervisor
+# DESCRIPTION
+#   Precondition Test - Verify that the hypervisor for the current virtual machine
+#   tested is accessible, set the hypervisor URI as a global variable
+# ARGUMENTS
+#   $1 - The virtual machine XML definition file
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   verify_hypervisor vm-definition.xml
+#***
 verify_hypervisor()
 {
 	RESULT=1
@@ -450,11 +590,24 @@ verify_hypervisor()
 	return $RESULT
 }
 
-# Precondition Test - Create an XML definition file for the virtual machine based
-#					  on the template XML definition file and settings defined and
-#					  return the location of the created xml defintion file
-# @param $1	- The template file to use
-# @param $2 - The directory to save the final xml definition file in
+
+#****f* cernvm-preconditions/create_def
+# NAME
+#   create_def
+# DESCRIPTION
+#   Precondition Test - Create an XML definition file for the virtual machine based
+#   on the template XML definition file and settings defined and return the
+#   location of the xml defintion file created
+# ARGUMENTS
+#   $1 - The template file to use
+#   $2 - The directory to save the final xml definition file in
+# RETURN VALUE
+#   definitionfile - The location of the xml defintion file created
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   create_def vm-template.xml /root
+#***
 create_def()
 {
 	RESULT=1
@@ -537,11 +690,23 @@ create_def()
 }
 
 
-# Precondition Test - Create an XML definition file for the virtual machine network
-#					  based on the template network XML definition file and settings 
-#					  defined and return the location of the created xml defintion file
-# @param $1	- The network template file to use
-# @param $2 - The directory to save the final network xml definition file in
+#****f* cernvm-preconditions/create_net_def
+# NAME
+#   create_net_def
+# DESCRIPTION
+#   Precondition Test - Create an XML definition file for the virtual machine network
+#   based on the template network XML definition file and settings defined and 
+#   return the location of the created xml defintion file
+# ARGUMENTS
+#   $1 - The network template file to use
+#   $2 - The directory to save the final network xml definition file in
+# RETURN VALUE
+#   netdefinitionfile - The location of the network xml defintion file created
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   create_net_def network-template.xml /root
+#***
 create_net_def()
 {
 	RESULT=1
@@ -591,10 +756,21 @@ create_net_def()
 	return $RESULT
 }
 
-# Precondition Test - Verify that the virtual machine network has been created 
-#					  from an xml file
-# @param $1	- The path to the network XML definition file
-# @param $2 - The virtual machine network name 
+
+#****f* cernvm-preconditions/create_net
+# NAME
+#   create_net
+# DESCRIPTION
+#   Precondition Test - Verify that the virtual machine network has been created 
+#   from an xml file
+# ARGUMENTS
+#   $1 - The path to the network XML definition file
+#   $2 - The virtual machine network name 
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   create_net ./network-definition.xml default
+#***
 create_net()
 {
 	RESULT=1
@@ -613,15 +789,29 @@ create_net()
 
 
 
+
 # WEB INTERFACE RELATED PRECONDITION TESTS
 # ------------------------------------------
 
-# Precondition Test - Setup and configure the initial CernVM image through the
-#					  web interface
-# @param $1 - The hostname or ip address for the web interface
-# @param $2 - The default username to access web interface
-# @param $3 - The default password to access web interface
-# @param $4 - The name of the logfile
+#****f* cernvm-preconditions/configure_image_web
+# NAME
+#   configure_image_web
+# DESCRIPTION
+#   Precondition Test - Setup and configure the initial CernVM image through the
+#   web interface
+# ARGUMENTS
+#   $1 - The hostname or ip address for the web interface
+#   $2 - The default username to access web interface
+#   $3 - The default password to access web interface
+#   $4 - The name of the logfile
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   configure_image_web 192.168.1.125 admin password config-image.log
+# TODO
+#   Implement a function that uses curl to get the updates from the web server 
+#   to determine when the system has rebooted
+#***
 configure_image_web()
 {
 	RESULT=1
@@ -694,19 +884,3 @@ configure_image_web()
 
 	return $RESULT
 }
-
-
-
-# 	TODO CLEAN UP THE FOLLOWING PRECONDITON TESTS AND PLACE THEM IN THIS FILE
-#	Precondition Test 2 - Verify that virtual machine domain has been created 
-#						  from an xml file
-#
-#	Precondition Test 3 - Verify that virtual machine can be started
-#
-#	Precondition Test 4 - Verify that virtual machine has been stopped
-#
-#	Precondition Test 5 - Verify that the virtual has console support
-#
-#	Precondition Test 6 - Verify that virtual machine has web interface support
-#
-#	Precondition Test 7 - Verify that it is possible to login on web interface
