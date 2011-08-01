@@ -2,22 +2,35 @@
 
 # =============================================================================
 #
-# virt-interface
-# -----------------
+#****** test-suite/virt-interface
+# NAME
+#   virt-interface
 #
-# This script contains several virtualization functions that
-# interface with libvirsh and return a success or failure, 
-# which can be used to generate a TAP report.
+# DESCRIPTION
+#   This script contains several virtualization functions that
+#   interface with libvirsh and return a success or failure, 
+#   which can be used to generate a TAP report.
 #
-# These functions are well suited for precondition tests to ensure
-# that virtual machines can be created and controlled before 
-# executing any more tests.
+#   These functions are well suited for precondition tests to ensure
+#   that virtual machines can be created and controlled before 
+#   executing any more tests.
+#***
 #
 # =============================================================================
 
 
-# Set the default network as active and verify it is active
-# @param $1 - The virtual machine network name
+#****f* virt-interface/vm_net_active
+# NAME
+#   vm_net_active
+# DESCRIPTION
+#   Set the default network as active and verify it is active
+# ARGUMENTS
+#   $1 - The virtual machine network name
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   vm_net_active default
+#***
 vm_net_active()
 {	
 	virsh --connect $URI net-list --all | egrep -q "^$1[[:space:]]*active"
@@ -31,8 +44,19 @@ vm_net_active()
 	return $?
 }
 
-# Set the default network to autostart and verify that it is set to autostart
-# @param $1 - The virtual machine network name
+
+#****f* virt-interface/vm_net_autostart
+# NAME
+#   vm_net_autostart
+# DESCRIPTION
+#   Set the default network to autostart and verify that it is set to autostart
+# ARGUMENTS
+#   $1 - The virtual machine network name
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   vm_net_autostart default
+#***
 vm_net_autostart()
 {
 	virsh --connect $URI net-list --all | egrep -q "^$1[[:space:]]*active[[:space:]]*yes"
@@ -46,10 +70,22 @@ vm_net_autostart()
 	return $?
 }
 
-# Destroy a virtual machine network, verify it has been removed from virsh
-# NOTE: The network definition files will still exist, network is simply
-# 		no longer accesible until it is re-created 
-# @param $1 - The virtual machine network name
+
+#****f* virt-interface/destroy_vm_net
+# NAME
+#   destroy_vm_net
+# DESCRIPTION
+#   Destroy a virtual machine network, verify it has been removed from virsh
+# ARGUMENTS
+#   $1 - The virtual machine network name
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   destroy_vm_net default
+# NOTES
+#   The network definition files will still exist, network is simply no longer 
+#   accesible until it is re-created 
+#***
 destroy_vm_net()
 {
 	# First forecably shutdown the network
@@ -67,9 +103,20 @@ destroy_vm_net()
 	fi
 }
 
-# Create a virtual machine network from an xml file, verify it has been created 
-# @param $1 - The path to the network definition file
-# @param $2 - The virtual machine network name
+
+#****f* virt-interface/create_vm_net
+# NAME
+#   create_vm_net
+# DESCRIPTION
+#   Create a virtual machine network from an xml file, verify it has been created 
+# ARGUMENTS
+#   $1 - The path to the network definition file
+#   $2 - The virtual machine network name
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   create_vm_net ./network-definition.xml default
+#***
 create_vm_net()
 {
 	virsh --connect $URI net-define $1
@@ -78,9 +125,20 @@ create_vm_net()
 	return $?
 }
 
-# Create a virtual machine from an xml file, verify it has been created 
-# @param $1 - The path to the virtual machine definition file
-# @param $2 - The name of the virtual machine
+
+#****f* virt-interface/create_vm
+# NAME
+#   create_vm
+# DESCRIPTION
+#   Create a virtual machine from an xml file, verify it has been created 
+# ARGUMENTS
+#   $1 - The path to the virtual machine definition file
+#   $2 - The name of the virtual machine
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   create_vm ./vm-definition.xml virt-machine
+#***
 create_vm()
 {
 	virsh --connect $URI define $1
@@ -89,10 +147,22 @@ create_vm()
 	return $?
 }
 
-# Destroy a virtual machine, verify it has been removed from virsh
-# NOTE: The files will still exist, the virtual machine is simply
-# 		no longer accesible until it is re-created 
-# @param $1 - The name of the virtual machine
+
+#****f* virt-interface/destroy_vm
+# NAME
+#   destroy_vm
+# DESCRIPTION
+#   Destroy a virtual machine, verify it has been removed from virsh
+# ARGUMENTS
+#   $1 - The name of the virtual machine
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   destroy_vm virt-machine
+# NOTES
+#   The files will still exist, the virtual machine is simply no longer 
+#   accesible until it is re-created 
+#***
 destroy_vm()
 {
 	# First forecably shutdown the virtual machine
@@ -110,8 +180,19 @@ destroy_vm()
 	fi
 }
 
-# Start the virtual machine and verify it started
-# @param $1 - The name of the virtual machine
+
+#****f* virt-interface/start_vm
+# NAME
+#   start_vm
+# DESCRIPTION
+#   Start the virtual machine and verify it started
+# ARGUMENTS
+#   $1 - The name of the virtual machine
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   start_vm virt-machine
+#***
 start_vm()
 {	
 	virsh --connect $URI start $1
@@ -122,8 +203,19 @@ start_vm()
 	return $?
 }
 
-# Stop the virtual machine and verify it has shutdown
-# @param $1 - The name of the virtual machine
+
+#****f* virt-interface/stop_vm
+# NAME
+#   stop_vm
+# DESCRIPTION
+#   Stop the virtual machine and verify it has shutdown
+# ARGUMENTS
+#   $1 - The name of the virtual machine
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   stop_vm virt-machine
+#***
 stop_vm()
 {
 	virsh --connect $URI shutdown $1
@@ -134,12 +226,23 @@ stop_vm()
 	return $?
 }
 
-# TODO: ADD SUPPORT TO VERIFY LOGIN THROUGH TTY CONSOLE
-# 		LOOKS RELATIVELY FEASIBLE USING
-#		http://search.cpan.org/~cosimo/Device-Modem-1.54/
-# Verify that the virtual machine has console support
-# requires that the virtual machine has been first started
-# @param $1 - The name of the virtual machine
+
+#****f* virt-interface/has_console_support
+# NAME
+#   has_console_support
+# DESCRIPTION
+#   Verify that the virtual machine has console support requires that the virtual
+#   machine has been first started
+# ARGUMENTS
+#   $1 - The name of the virtual machine
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   has_console_support virt-machine
+# WARNINGS
+#   Support for this function has been deprecated and its use is strongly
+#   discouraged as console support is unnecessary and only supported for KVM
+#***
 has_console_support()
 {
 	virsh --connect $URI ttyconsole $1
@@ -147,8 +250,19 @@ has_console_support()
 	return $?
 }
 
-# Connect to virsh for the current virtual machine hypervisor URI and display URI
-# @param $1 - The URI of the hypervisor
+
+#****f* virt-interface/connect_virsh
+# NAME
+#   connect_virsh
+# DESCRIPTION
+#   Connect to virsh for the current virtual machine hypervisor URI and display URI
+# ARGUMENTS
+#   $1 - The URI of the hypervisor
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   connect_virsh qemu:///system
+#***
 connect_virsh()
 {
 	virsh -q --connect $1 uri

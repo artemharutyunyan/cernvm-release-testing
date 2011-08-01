@@ -2,15 +2,18 @@
 
 # =============================================================================
 #
-# web-interface
-# -----------------
+#****** test-suite/web-interface
+# NAME
+#   web-interface
 #
-# This script contains several  functions that provide an interface to
-# the CernVM virtual machine web interface and return a success or failure, 
-# which can be used to generate a TAP report.
+# DESCRIPTION
+#   This script contains several  functions that provide an interface to
+#   the CernVM virtual machine web interface and return a success or failure, 
+#   which can be used to generate a TAP report.
 #
-# These functions can be utilized to create test cases in cernvm-testcases or 
-# can be executed individually as precondition tests
+#   These functions can be utilized to create test cases in cernvm-testcases or 
+#   can be executed individually as precondition tests
+#***
 #
 # =============================================================================
 
@@ -23,10 +26,21 @@ ADDITIONAL_HEADER=('')
 WEBINTERFACE="web_interface.log"
 
 
-# TODO: PERHAPS GENERATE DIFFERENT USER-AGENT BASED ON HOST OS
-# Generate a HTTP template header for the current hypervisor which
-# is a basis to generate headers for different web-interface functions
-# @param $1 - The hostname or ip address for the web interface
+#****f* web-interface/generate_template_header
+# NAME
+#   generate_template_header
+# DESCRIPTION
+#   Generate a HTTP template header for the current hypervisor which is a basis
+#   to generate headers for different web-interface functions
+# ARGUMENTS
+#   $1 - The hostname or ip address for the web interface
+# RESULT
+#   TEMPLATE_HEADER - Exports the generated HTTP template header globally
+# EXAMPLE
+#   generate_template_header 192.168.1.125
+# TODO
+#   PERHAPS GENERATE DIFFERENT USER-AGENT BASED ON HOST OS
+#***
 generate_template_header()
 {
 	TEMPLATE_HEADER=(
@@ -43,8 +57,19 @@ generate_template_header()
 }
 
 
-# Generate an http header using the template header and
-# any additional header values defined
+#****f* web-interface/generate_header
+# NAME
+#   generate_header
+# DESCRIPTION
+#   Generate an http header using the template header and any additional 
+#   header values defined
+# EXAMPLE
+#   generate_header
+# NOTES
+#   This function should only be called within the scope of a web-interface
+#   function after the TEMPLATE_HEADER has been generated and the 
+#   ADDITIONAL_HEADER information unique to the function has been set
+#***
 generate_header()
 {
 	HEADER=('-H' "${TEMPLATE_HEADER[0]}")
@@ -61,9 +86,19 @@ generate_header()
 }
 
 
-# Verify that virtual machine has web interface support
-# @param $1 - The hostname or ip address for the web interface
-# @param $2 - The name of the logfile
+#****f* web-interface/web_check_interface
+# NAME
+#   web_check_interface
+# DESCRIPTION
+#   Verify that virtual machine has web interface support
+# ARGUMENTS
+#   $1 - The hostname or ip address for the web interface
+#   $2 - The name of the logfile
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   web_check_interface 192.168.1.125 check-interface.log
+#***
 web_check_interface()
 {
 	RESULT=1
@@ -85,11 +120,21 @@ web_check_interface()
 }
 
 
-# Verify that it is possible to login on web interface
-# @param $1 - The hostname or ip address for the web interface
-# @param $2 - The web interface username, usually admin
-# @param $3 - The web interface password, by default password
-# @param $4 - The name of the logfile
+#****f* web-interface/web_check_login
+# NAME
+#   web_check_login
+# DESCRIPTION
+#   Verify that it is possible to login on web interface
+# ARGUMENTS
+#   $1 - The hostname or ip address for the web interface
+#   $2 - The web interface username, usually admin
+#   $3 - The web interface password, by default password
+#   $4 - The name of the logfile
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   web_check_login 192.168.1.125 admin password check-login.log
+#***
 web_check_login()
 {
 	RESULT=1
@@ -119,10 +164,21 @@ web_check_login()
 }
 
 
-# TODO: ADD SUPPORT TO ACTUALLY SPECIFY PROXY SETTINGS
-# Configure the proxy settings using the CernVM web interface
-# @param $1 - The hostname or ip address for the web interface
-# @param $2 - The name of the logfile
+#****f* web-interface/web_config_proxy
+# NAME
+#   web_config_proxy
+# DESCRIPTION
+#   Configure the proxy settings using the CernVM web interface
+# ARGUMENTS
+#   $1 - The hostname or ip address for the web interface
+#   $2 - The name of the logfile
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   web_config_proxy 192.168.1.125 config-proxy.log
+# TODO
+#   ADD SUPPORT TO ACTUALLY SPECIFY PROXY SETTINGS
+#***
 web_config_proxy()
 {
 	RESULT=1
@@ -153,10 +209,20 @@ web_config_proxy()
 }
 
 
-# Configure the web interface administrator password using the CernVM web interface
-# @param $1 - The hostname or ip address for the web interface
-# @param $2	- The new web interface administration password
-# @param $3 - The name of the logfile
+#****f* web-interface/web_config_password
+# NAME
+#   web_config_password
+# DESCRIPTION
+#   Configure the web interface administrator password using the CernVM web interface
+# ARGUMENTS
+#   $1 - The hostname or ip address for the web interface
+#   $2 - The new web interface administration password
+#   $3 - The name of the logfile
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   web_config_password 192.168.1.125 newpassword config-password.log
+#***
 web_config_password()
 {
 	RESULT=1
@@ -188,11 +254,21 @@ web_config_password()
 }
 
 
-# Set the root password using the CernVM web interface
-# @param $1 - The hostname or ip address for the web interface
-# @param $2	- The new root password
-# @param $3	- The current web interface administration password
-# @param $4 - The name of the logfile
+#****f* web-interface/web_root_password
+# NAME
+#   web_root_password
+# DESCRIPTION
+#   Set the root password using the CernVM web interface
+# ARGUMENTS
+#   $1 - The hostname or ip address for the web interface
+#   $2 - The new root password
+#   $3 - The current web interface administration password
+#   $4 - The name of the logfile
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+# web_root_password 192.168.1.125 newpass currentpass root-password.log
+#***
 web_root_password()
 {
 	RESULT=1
@@ -222,12 +298,22 @@ web_root_password()
 }
 
 
-# Configure the CernVM image desktop settings using the CernVM web interface
-# @param $1 - The hostname or ip address for the web interface
-# @param $2	- Configure startx on boot, accepted values are on or off
-# @param $3 - The CernVM image desktop resolution
-# @param $4	- The CernVM image keyboard locale
-# @param $5 - The name of the logfile
+#****f* web-interface/web_config_desktop
+# NAME
+#   web_config_desktop
+# DESCRIPTION
+#   Configure the CernVM image desktop settings using the CernVM web interface
+# ARGUMENTS
+#   $1 - The hostname or ip address for the web interface
+#   $2 - Configure startx on boot, accepted values are on or off
+#   $3 - The CernVM image desktop resolution
+#   $4 - The CernVM image keyboard locale
+#   $5 - The name of the logfile
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   web_config_desktop 192.168.1.125 on 1024x768 us config-desktop.log
+#***
 web_config_desktop()
 {
 	RESULT=1
@@ -260,11 +346,22 @@ web_config_desktop()
 }
 
 
-# TODO: ENABLE AN ARRAY / LIST OF APPLIANCE GROUPS
-# Configure the CernVM image appliance group settings using the CernVM web interface
-# @param $1 - The hostname or ip address for the web interface
-# @param $2	- The appliance primary group, all capitals, only one group may be specified
-# @param $3 - The name of the logfile
+#****f* web-interface/web_config_group
+# NAME
+#   web_config_group
+# DESCRIPTION
+#   Configure the CernVM image appliance group settings using the CernVM web interface
+# ARGUMENTS
+#   $1 - The hostname or ip address for the web interface
+#   $2 - The appliance primary group, all capitals, only one group may be specified
+#   $3 - The name of the logfile
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   web_config_group 192.168.1.125 ALICE config-group.log
+# TODO
+#   ENABLE AN ARRAY / LIST OF APPLIANCE GROUPS
+#***
 web_config_group()
 {
 	RESULT=1
@@ -336,12 +433,25 @@ web_config_group()
 }
 
 
-# Create a new user using the CernVM web interface
-# @param $1 - The hostname or ip address for the web interface
-# @param $2 - The name of the new user to create
-# @param $3 - The password for the new user
-# @param $4	- The group for the new user
-# @param $5 - The name of the logfile
+#****f* web-interface/web_create_user
+# NAME
+#   web_create_user
+# DESCRIPTION
+#   Create a new user using the CernVM web interface
+# ARGUMENTS
+#   $1 - The hostname or ip address for the web interface
+#   $2 - The name of the new user to create
+#   $3 - The password for the new user
+#   $4 - The group for the new user, lowercase
+#   $5 - The name of the logfile
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   web_create_user 192.168.1.125 newuser password alice create-user.log
+# TODO
+#   Add documentation to developer-manual which lists available user groups,
+#   as well, perhaps account for invalid user group and return error
+#***
 web_create_user()
 {
 	RESULT=1
@@ -375,10 +485,20 @@ web_create_user()
 }
 
 
-# Apply settings configured for the CernVM image using the CernVM web interface, 
-# which then reboots the CernVM image once completed
-# @param $1 - The hostname or ip address for the web interface
-# @param $2 - The name of the logfile
+#****f* web-interface/web_apply_settings
+# NAME
+#   web_apply_settings
+# DESCRIPTION
+#   Apply settings configured for the CernVM image using the CernVM web interface, 
+#   which then reboots the CernVM image once completed
+# ARGUMENTS
+#   $1 - The hostname or ip address for the web interface
+#   $2 - The name of the logfile
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   web_apply_settings 192.168.1.125 apply-settings.log
+#***
 web_apply_settings()
 {
 	RESULT=1
@@ -405,9 +525,19 @@ web_apply_settings()
 }
 
 
-# Restart through the web interface
-# @param $1 - The hostname or ip address for the web interface
-# @param $2 - The name of the web reboot logfile
+#****f* web-interface/web_restart
+# NAME
+#   web_restart
+# DESCRIPTION
+#   Restart through the web interface
+# ARGUMENTS
+#   $1 - The hostname or ip address for the web interface
+#   $2 - The name of the web reboot logfile
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   web_restart 192.168.1.125 web-restart.log
+#***
 web_restart()
 {
 	RESULT=1

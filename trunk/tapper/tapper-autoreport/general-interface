@@ -2,22 +2,36 @@
 
 # =============================================================================
 #
-# general-interface
-# -----------------
+#****** test-suite/general-interface
+# NAME
+#   general-interface
 #
-# This script contains general interface functions that interface with 
-# the host system and provide generic functionality such as checking the
-# host architecture, getting the host operating system, checking if a file
-# exists, etc.
+# DESCRIPTION
+#   This script contains general interface functions that interface with 
+#   the host system and provide generic functionality such as checking the
+#   host architecture, getting the host operating system, checking if a file
+#   exists, etc.
 #
-# These functions can be utilized to create precondition tests and test 
-# cases which require generic functionality that is not part of the
-# virt or web interface functions
+#   These functions can be utilized to create precondition tests and test 
+#   cases which require generic functionality that is not part of the
+#   virt or web interface functions
+#***
 #
 # =============================================================================
 
-# Simple function that checks if a file/folder exists
-# @param $1 - The location and name of the file
+
+#****f* general-interface/file_exists
+# NAME
+#   file_exists
+# DESCRIPTION
+#   Simple function that checks if a file/folder exists
+# ARGUMENTS
+#   $1 - The location and name of the file
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   file_exists ./template.xml
+#***
 file_exists()
 {
 	RESULT=1
@@ -29,8 +43,19 @@ file_exists()
 	return $RESULT
 }
 
-# Extracts a file based on extension within the directory it is located in
-# @param $1 - The location and name of the file
+
+#****f* general-interface/extract_file
+# NAME
+#   extract_file
+# DESCRIPTION
+#   Extracts a file based on extension within the directory it is located in
+# ARGUMENTS
+#   $1 - The location and name of the file
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   extract_file /root/file.tar.gz
+#***
 extract_file()
 {
 	RESULT=1
@@ -60,8 +85,19 @@ extract_file()
 	return $RESULT
 }
 
-# Function that returns the name of a file to be downloaded given a url
-# @param $1 - The download url of the file
+
+#****f* general-interface/filename_from_url
+# NAME
+#   filename_from_url
+# DESCRIPTION
+#   Function that returns the name of a file to be downloaded given a url
+# ARGUMENTS
+#   $1 - The download url of the file
+# RETURN VALUE
+#   filename - The name of a file to be downloaded
+# EXAMPLE
+#   FILE_NAME=$(filename_from_url http://someurl/file.tar.gz)
+#***
 filename_from_url()
 {
 	# Get the filename from location
@@ -70,9 +106,20 @@ filename_from_url()
 	echo ${FILENAME}
 }
 
-# Function that returns the name of a file to be downloaded given a url by
-# looking at the "Location:" specified in HTTP header
-# @param $1 - The download url of the file
+
+#****f* general-interface/filename_from_header
+# NAME
+#   filename_from_header
+# DESCRIPTION
+#   Function that returns the name of a file to be downloaded given a url by
+#   looking at the "Location:" specified in HTTP header
+# ARGUMENTS
+#   $1 - The download url of the file
+# RETURN VALUE
+#   filename - The name of a file to be downloaded
+# EXAMPLE
+#   FILE_NAME=$(filename_from_header http://someurl/file.tar.gz)
+#***
 filename_from_header()
 {
 	# Get the HTTP header with actual location of the file
@@ -85,10 +132,23 @@ filename_from_header()
 	echo ${FILENAME}
 }
 
-# Function that finds a file and returns the name and path of a file given the 
-# root directory and the extension of the file
-# @param $1	- The root directory to search for the file
-# @param $2 -The extension of the file to look for
+
+#****f* general-interface/find_file
+# NAME
+#   find_file
+# DESCRIPTION
+#   Function that finds a file and returns the name and path of a file given the 
+#   root directory and the extension of the file
+# ARGUMENTS
+#   $1 - The root directory to search for the file
+#   $2 - The extension of the file to look for
+# RETURN VALUE
+#   filelocation - The name and path of a file
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   FILE_LOCATION=$(find_file /usr/share/images vmdk)
+#***
 find_file()
 {
 	RESULT=1
@@ -101,10 +161,21 @@ find_file()
 	return $RESULT
 }
 
-# Simple function that returns the hash of a file
-# @param $1 - The location and name of the file
-# @param $2 - The type of hash, currently supported hashes are: 
-#			  crc32, md5, sha, sha1, sha224, sha256, sha384, sha512 
+
+#****f* general-interface/get_hash
+# NAME
+#   get_hash
+# DESCRIPTION
+#   Simple function that returns the hash of a file
+# ARGUMENTS
+#   $1 - The location and name of the file
+#   $2 - The type of hash, currently supported hashes are: 
+#        crc32, md5, sha, sha1, sha224, sha256, sha384, sha512
+# RETURN VALUE
+#   hash - The hash of the file
+# EXAMPLE
+#   HASH=$(get_hash /root/file.tar.gz md5)
+#***
 get_hash()
 {
 	HASH=""
@@ -140,8 +211,21 @@ get_hash()
 	echo ${HASH}
 }
 
-# Simple function that returns network name from xml network definition file
-# @param $1	- The network XML definition file
+
+#****f* general-interface/get_net_name
+# NAME
+#   get_net_name
+# DESCRIPTION
+#   Simple function that returns the network name from xml network definition file
+# ARGUMENTS
+#   $1 - The network XML definition file
+# RETURN VALUE
+#   networkname - The network name defined in the xml network definition file
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   NET_NAME=$(get_net_name ./network-definition.xml)
+#***
 get_net_name()
 {
 	RESULT=1
@@ -155,8 +239,21 @@ get_net_name()
 	return $RESULT	
 }
 
-# Simple function that returns ip address from xml network definition file
-# @param $1	- The network XML definition file
+
+#****f* general-interface/get_ip_address
+# NAME
+#   get_ip_address
+# DESCRIPTION
+#   Simple function that returns the ip address from the xml network definition file
+# ARGUMENTS
+#   $1 - The network XML definition file
+# RETURN VALUE
+#   ipaddress - The ip address defined in the xml network definition file
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   IP_ADDRESS=$(get_ip_address ./network-definition.xml)
+#***
 get_ip_address()
 {
 	RESULT=1
@@ -171,10 +268,20 @@ get_ip_address()
 }
 
 
-# A function which configures automatic SSH login using keys instead of passwords
-# @param $1 - The IP address of the machine to login via ssh
-# @param $2 - The username to login with
-# @param $3	- The password to login with
+#****f* general-interface/ssh_autologin
+# NAME
+#   ssh_autologin
+# DESCRIPTION
+#   A function which configures automatic SSH login using keys instead of passwords
+# ARGUMENTS
+#   $1 - The IP address of the machine to login via ssh
+#   $2 - The username to login with
+#   $3 - The password to login with
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   ssh_autologin 192.168.1.125 root password
+#***
 ssh_autologin()
 {
 	# Use a here-doc to script expect to automate password authentication
