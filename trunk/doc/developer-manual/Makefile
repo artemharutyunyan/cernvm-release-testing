@@ -5,6 +5,9 @@ SOURCES = developer-manual.tex atex.tex
 
 pdf: $(SOURCES) clean
 #	pdflatex -interaction=batchmode cvmfstech > /dev/null
+# 	Create the api reference using ROBODoc, requires full tree checkout
+	robodoc --src ../../tapper/tapper-autoreport/ --doc ./content/apireference --singledoc --latex --altlatex --sections --headless --footless
+
 	pdflatex -interaction=batchmode developer-manual	
 	bibtex developer-manual
 	makeindex developer-manual.idx
