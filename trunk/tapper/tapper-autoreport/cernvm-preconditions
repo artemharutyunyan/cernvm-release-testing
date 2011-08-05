@@ -197,7 +197,7 @@ image_url()
 	if test "$?" -eq 0 && verify_exists $DOWNLOAD_PAGE ; test "$?" -eq 0
 	then
 		# Remove trailing control statments
-		sed -i 's/'"$(printf '\015')"'$//g' $DOWNLOAD_PAGE
+		sed -i -E "s/$(printf '\015')$//g" $DOWNLOAD_PAGE
 		
 		# Set the release id as latest release if not defined
 		if [ ! "$RELEASE_ID" ]
@@ -375,7 +375,7 @@ validate_def_xml()
 	RESULT=1
 
 	# Precondition - verify file exists
-	if file_exists $1 ; test "$?" -eq 0
+	if verify_exists $1 ; test "$?" -eq 0
 	then
 		# Verify xml file is valid
 		if xmllint --noout $1 ; test "$?" -eq 0
@@ -877,9 +877,9 @@ configure_image_web()
 		RESULT=0
 		# TODO:	Implement this using a function that uses curl to get the updates
 		#		from the web server to determine when system has rebooted
-		# Wait 7 minutes for the settings to be applied, updates installed, and
+		# Wait 10 minutes for the settings to be applied, updates installed, and
 		# the system to reboot		
-		sleep 720
+		sleep 600
 	fi
 
 	return $RESULT
