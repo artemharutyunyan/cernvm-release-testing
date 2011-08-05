@@ -74,7 +74,7 @@ generate_header()
 {
 	HEADER=('-H' "${TEMPLATE_HEADER[0]}")
 
-	for i in $(seq 1 $((${#TEMPLATE_HEADER[@]} - 1)))
+	for i in $(eval echo {1..$((${#TEMPLATE_HEADER[@]} - 1))})
 	do
 		HEADER=("${HEADER[@]}" '-H' "${TEMPLATE_HEADER[i]}")
 	done
