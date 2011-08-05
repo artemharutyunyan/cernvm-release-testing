@@ -281,6 +281,44 @@ $ virsh -c vbox:///session
 
 
 
+\subsection{Installing and configuring VMware}
+\label{sec:osxvmware}
+\begin{enumerate}
+\item	First, begin by downloading and installing the latest version of VMware Workstation or Player  from the VMware product 
+		page, \url{http://www.vmware.com/products/}, VMware Workstation requires a license, so you will have to purchase it
+		in order to continue.
+		
+\item	Next, to verify that VMware Workstation has been installed properly, verify that the following VMware kernel modules 
+		are loaded, currently virsh has support to connect to the VMware hypervisor, but there are some minor issues such as
+		 a lack of support for VMware network configurations, currently only ``bridged'' mode is supported.
+		
+\begin{itemize}
+\item        vmnet
+\item        vmblock
+\item        vmci
+\item        vmmon
+
+\end{itemize}
+
+\lstset{language=bash,caption=Verify VMware Kernel Extensions Loaded}
+\begin{lstlisting}
+# Verify that the kernel extentsions are loaded
+$ lsmod | grep -i vm
+\end{lstlisting}
+
+.\item      Finally, verify that VMware has been configured properly and that virsh supports the current version of VMware 
+                installed by connecting to the virsh console for the VMware hypervisor.
+
+\lstset{language=bash,caption=Verify VMware Works with Virsh}
+\begin{lstlisting}
+# Verify that virsh can connect to vmware
+$ virsh --connect vmwarews:///session
+\end{lstlisting}
+\end{enumerate}
+
+
+
+
 \subsection{Setting up the Tapper Test Suite}
 \label{sec:rhtestsuite}
 \begin{enumerate}
