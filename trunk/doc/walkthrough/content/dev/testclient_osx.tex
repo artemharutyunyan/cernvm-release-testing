@@ -62,7 +62,7 @@
                 be used to install dependencies instead of manually building from source} using the following command, for a more detailed
                 installation guide refer to the Homebrew wiki  \url{https://github.com/mxcl/homebrew/wiki/ Installation}.
 
-\lstset{language=bash caption=Install Homebrew}
+\lstset{language=bash, caption=Install Homebrew}
 \begin{lstlisting}
 # Install Homebrew using the following command
 /usr/bin/ruby -e "$(curl -fsSL https://raw.github.com/gist/323731)"
@@ -78,7 +78,7 @@
                 benefit yourself and others who may install libvirt using Homebrew.  The following are instruction for creating a formula 
                 \url{https://github.com/mxcl/homebrew/wiki/Formula- Cookbook}.
                 
-\lstset{language=bash caption=Install libvirt}
+\lstset{language=bash, caption=Install libvirt}
 \begin{lstlisting}
 # Install libvirt using the following command
 brew install libvirt
@@ -177,7 +177,7 @@ $ virsh --connect vmwarews:///session
 
 
 \subsection{Setting up the Tapper Test Suite}
-\label{sec:rhtestsuite}
+\label{sec:osxtestsuite}
 \begin{enumerate}
 \item 	{\bf Before proceeding any further ensure that you have all other test clients set up this far, and then proceed
 		to follow the instructions for setting up and configuring the \tapper~server in the section ``Server Platform Setup''}		
@@ -188,7 +188,7 @@ $ virsh --connect vmwarews:///session
 		the form of a TAP file. After sending the TAP report to the server, ensure that the test client is working by viewing 
 		the tapper reports in your browser at the following url: \url{http:/<tapper\_server>/tapper/reports}. You should now see a 
 		report from the test client, there should be a report from a system named whatever the ``Tapper-Machine-Name'' in 
-		demo\_report.tap was set as. \emph{For the example demo\_report.tap provided below it would be cernvm-rhtestclient}.
+		demo\_report.tap was set as. \emph{For the example demo\_report.tap provided below it would be cernvm-osxtestclient}.
 		\footnote{This is why a consistent hostname convention was emphasized earlier, as reports are often sorted and organized 
 		based on hostnames}.
 		
@@ -199,7 +199,7 @@ $ virsh --connect vmwarews:///session
 	1..2
 	# Tapper-Suite-Name: Tapper-Deployment
 	# Tapper-Suite-Version: 1.001
-	# Tapper-Machine-Name: cernvm-rhtestclient
+	# Tapper-Machine-Name: cernvm-osxtestclient
 	ok - Hello World
 	ok - Just another description
 

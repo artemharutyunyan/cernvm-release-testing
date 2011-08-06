@@ -221,11 +221,13 @@ $ virsh -c qemu:///system
 \subsection{Installing and configuring VirtualBox}
 \label{sec:rhvbox}
 \begin{enumerate}
-\item	First, begin by downloading the latest version of VirtualBox from the VirtualBox download page,
-		\url{http://www.virtualbox.org/wiki/Downloads} ensure that you select the appropriate Red Hat based
-		distribution, version and architecture for your system. The following instructions for this section of
-		the guide uses VirtualBox 4.0.10 for Fedora 13, AMD64.
-		
+\item	First, begin by downloading and installing a version of VirtualBox supported by libvirt from the VirtualBox download 
+		page, it is best to download the latest version within the series \emph{that has been available for at least a month 
+		prior to the release of the version of libvirt installed}. VirtualBox can be downloaded from the following location,  
+		\url{http://www.virtualbox.org/wiki/Downloads} ensure that you select the appropriate Red Hat based distribution, 
+		version and architecture for your system. The following instructions for this section of the guide uses VirtualBox 
+		4.0.10 for Fedora 13, AMD64.
+		 	
 \item	Next, after downloading the latest version of VirtualBox for your distribution install VirtualBox as the root
 		account using the following command.
 \begin{lstlisting}
@@ -271,18 +273,13 @@ $ lsmod | grep -i vboxdrv
 # Verify that virsh can connect to virtualbox
 $ virsh -c vbox:///session
 \end{lstlisting}
-
-\item	If everything so far has worked, then libvirt, virsh, and the hypervisors have been installed and configured properly,
-		if you have any outstanding issues solve them before proceeding further, or go to the section ``Server Platform 		
-		Setup''~\ref{sec:serversetup} as the \tapper~server does not require libvirt, virsh, or hypervisor configuration.
-
 \end{enumerate}
 
 
 
 
 \subsection{Installing and configuring VMware}
-\label{sec:osxvmware}
+\label{sec:rhvmware}
 \begin{enumerate}
 \item	First, begin by downloading and installing the latest version of VMware Workstation or Player  from the VMware product 
 		page, \url{http://www.vmware.com/products/}, VMware Workstation requires a license, so you will have to purchase it
@@ -300,7 +297,7 @@ $ virsh -c vbox:///session
 
 \end{itemize}
 
-\lstset{language=bash,caption=Verify VMware Kernel Extensions Loaded}
+\lstset{language=bash,caption=Verify VMware Kernel Modules Loaded}
 \begin{lstlisting}
 # Verify that the kernel extentsions are loaded
 $ lsmod | grep -i vm
@@ -314,6 +311,11 @@ $ lsmod | grep -i vm
 # Verify that virsh can connect to vmware
 $ virsh --connect vmwarews:///session
 \end{lstlisting}
+
+\item	If everything so far has worked, then libvirt, virsh, and the hypervisors have been installed and configured properly,
+		if you have any outstanding issues solve them before proceeding further, or go to the section ``Server Platform 		
+		Setup''~\ref{sec:serversetup} as the \tapper~server does not require libvirt, virsh, or hypervisor configuration.
+		
 \end{enumerate}
 
 
@@ -382,7 +384,7 @@ $ yum install nmh
 $ install-mh
 \end{lstlisting}
 
-\item	Now that that tapper-autoreport has been installed, configure the variables in the configuration file for the
+\item	Now that tapper-autoreport has been installed, configure the variables in the configuration file for the
 		hypervisors you want to test and according to your \tapper infrastructure setup. All of the settings provided in
 		the configuration files by default are the {\bf mandatory, minimum configuration options} and in most cases the
 		defaults should be sufficient for testing, the only mandatory settings that are not provided by default {\bf and
