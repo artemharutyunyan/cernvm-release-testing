@@ -5,7 +5,7 @@
   <currentMemory>524288</currentMemory>
   <vcpu>1</vcpu>
   <os>
-    <type arch='' machine='pc-0.13'>hvm</type>
+    <type arch='' machine='pc'>hvm</type>
     <boot dev='hd'/>
   </os>
   <features>
