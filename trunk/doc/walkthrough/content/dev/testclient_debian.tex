@@ -170,13 +170,26 @@ $ su -c "update-grub"
 		following instructions and examples.
 		
 \item	Next, install the following dependencies which are required to install the libvirt files from the source files
-		that were downloaded, \emph{from now on execute all commands as root}.
+			that were downloaded, \emph{from now on execute all commands as root}.
 
 \lstset{language=bash,caption=Install Dependencies}
 \begin{lstlisting}
 $ su
 $ apt-get install libxen-dev gnutls-dev libnuma-dev \
-libdevmapper-dev python-dev libnl-dev
+libdevmapper-dev python-dev libnl-dev libxml2 \
+libxml2-dev libgnutls-dev 
+
+# Install GCC
+$ apt-get install gcc make build-essential
+\end{lstlisting}
+
+\item	Next, install software for managing and viewing virtual machines.
+
+\lstset{language=bash,caption=Install Virtual Machine Management Software}
+\begin{lstlisting}
+# Change to root account, enter password if prompted
+$ su
+$ apt-get install virt-manager virtinst virt-viewer
 \end{lstlisting}
 		
 \item	Next extract the files and execute configure with the following options, then finally compile and install libvirt.
@@ -186,18 +199,19 @@ libdevmapper-dev python-dev libnl-dev
 # Extract and execute configure
 $ tar -xvvzf libvirt-*.tar.gz
 $ cd libvirt-*/
-$ ./configure --disable-silent-rules --disable-shared --enable-static \
---enable-dependency-tracking --with-xen --with-xen-inotify --with-qemu \
---with-vmware --with-libssh2 --with-vbox --with-test --with-remote \
---with-libvirtd --with-numactl --with-network --with-storage-dir
+$ ./configure --prefix=/usr --disable-silent-rules --disable-shared \
+--enable-static --enable-dependency-tracking --with-xen \
+--with-xen-inotify --with-qemu --with-vmware --with-libssh2 \
+--with-vbox --with-test --with-remote --with-libvirtd --with-numactl \
+--with-network --with-storage-dir
 
 # Compile and install libvirt
 $ make 
 $ make install
 \end{lstlisting}
 
-\item 	Finally, start the service libvirtd, and ensure that virsh installed correctly and is running by 
-		connecting to the test hypervisor and ensuring that the test virtual machine, named ``test'' is running.
+\item 	Finally ensure that virsh installed correctly and is running by connecting to the test hypervisor and ensuring 
+			that the test virtual machine, named ``test'' is running.
 
 \lstset{language=bash,caption=Verify virsh was Installed Properly}
 \begin{lstlisting}
@@ -222,7 +236,8 @@ $ virsh -c test:///default list --all
 
 \lstset{language=bash,caption=Installing KVM and Other Related Programs}
 \begin{lstlisting}
-$  su -c "apt-get install qemu-kvm virt-manager"
+$  su
+$ apt-get install qemu-kvm
 \end{lstlisting}
 
 \item	Next, verify that KVM has been installed properly and that virsh can connect to the KVM hypervisor using the
@@ -235,15 +250,21 @@ $ su
 $ virsh -c qemu:///session
 \end{lstlisting}
 
-\item 	Finally, to ensure that KVM is properly configured and installed, follow this guide provided on the CernVM website
-		\url{http://cernvm.cern.ch/portal/kvm} {\bf except, do not create a kvm definition file as the xml template file
-		is provided by the test suite scripts} and verify that you are able to connect to the libvirtd kvm system session.
+\item 	Next, to ensure that KVM is properly configured and installed, follow this guide provided on the CernVM website
+			\url{http://cernvm.cern.ch/portal/kvm} {\bf except, do not create a kvm definition file as the xml template file
+			is provided by the test suite scripts} and verify that you are able to connect to the libvirtd kvm system session.
 		
 \lstset{language=bash,caption=Verify that KVM is Properly Configured}
 \begin{lstlisting}
 $ su
 $ virsh -c qemu:///system 
 \end{lstlisting}
+
+\item	Finally, ensure that you are able to connect to the QEMU/KVM hypervisor using the virtual machine manager, as it 
+			is necessary to view the status of the CernVM images and must be installed to troubleshoot and view the CernVM 
+			images. Simply launch the virtual machine manager application from 
+			\verb|Applications -> System Tools -> Virtual Machine Manager| and{\bf if you are prompted to install libvirt, 
+			select ``No'' } as a custom version of libvirt was installed previously.
 \end{enumerate}
 
 
@@ -257,22 +278,35 @@ $ virsh -c qemu:///system
 		prior to the release of the version of libvirt installed}. VirtualBox can be downloaded from the following location,  
 		\url{http://www.virtualbox.org/wiki/Downloads} ensure that you select the appropriate Debian based distribution, 
 		version and architecture for your system. The following instructions for this section of the guide uses VirtualBox 
-		4.0.10 for Debian Squeeze, AMD64.
+		4.0.12 for Debian Squeeze, AMD64.
+		
+\item	Before installing VirtualBox, install the dependencies for executing VirtualBox as well as the dependencies 
+			required to build the VirtualBox kernel modules.
+
+\lstset{language=bash,caption=Install VirtualBox Dependencies}
+\begin{lstlisting}
+$ su
+$ apt-get install libqt4-network libqt4-opengl libqtcore4 libqtgui4
+$ apt-get install linux-headers-$(uname -r)
+\end{lstlisting}
 		 	
+\item	Next, after downloading the latest version of VirtualBox for your distribution and installing the dependencies 
+			install VirtualBox as the root account using the following command.
 \item	Next, after downloading the latest version of VirtualBox for your distribution install VirtualBox as the root
 		account using the following command.
 \begin{lstlisting}
 # Enter the root password when prompted
 $ su
-$ dpkg -i VirtualBox-*.deb
+$ dpkg -i virtualbox-*.deb
 \end{lstlisting}	
 
 \item	Next, in order to use VirtualBox and have full access to the drivers needed for USB support, ensure that the root
-		account belongs to the group ``vboxusers''. Begin by navigating to \verb|System -> Users and Groups| and then from
-		the ``User Manager'' window click the ``Groups'' tab, under the column ``Group Name'' for the group ``vboxusers'' 
-		ensure that root is one of the group members. If the root account is not a group member of ``vboxusers'' highlight
-		the ``vboxusers'' entry and click the ``Properties'' button, then enable the root account from the list of users
-		and click ``OK'' to apply the changes.
+			account belongs to the group ``vboxusers'' using the following command.
+		
+\lstset{language=bash,caption=Add root to VirtualBox Group}
+\begin{lstlisting}
+$ su -c "usermod -a -G vboxusers root"
+\end{lstlisting}	
 		
 \item	Due to an issue with VirtualBox\footnote{The issues is that VirtualBox looks for virtual machine configuration files (*.vbox)
 		in the ``VirtualBox VMs'' folder of the user that launched VirtualBox. The issue is worsened by the fact that there can
@@ -312,13 +346,30 @@ $ virsh -c vbox:///session
 \subsection{Installing and configuring VMware}
 \label{sec:debianvmware}
 \begin{enumerate}
-\item	First, begin by downloading and installing the latest version of VMware Workstation or Player  from the VMware product 
-		page, \url{http://www.vmware.com/products/}, VMware Workstation requires a license, so you will have to purchase it
-		in order to continue.
+\item	First, begin by downloading the latest version of VMware Workstation or VMware Player  from the VMware product 
+			page, \url{http://www.vmware.com/products/}, VMware Player is free, whereas VMware Workstation requires a
+			license. So if you decide to use VMware Workstation instead of VMware Player you will have to purchase a license
+			for it in order to continue.
+
+\item	Before installing VMware, install the dependencies required to build the VMware kernel modules.
+
+\lstset{language=bash,caption=Install VMware Dependencies}
+\begin{lstlisting}
+$ su
+$ apt-get install linux-headers-$(uname -r)
+\end{lstlisting}
 		
-\item	Next, to verify that VMware Workstation has been installed properly, verify that the following VMware kernel modules 
-		are loaded, currently virsh has support to connect to the VMware hypervisor, but there are some minor issues such as
-		a lack of support for VMware network configurations, currently only ``bridged'' mode is supported.
+\item 	Next, to install VMware simply set the bundle file as executable and execute the file as root.
+\lstset{language=bash,caption=Install VMware}
+\begin{lstlisting}
+$ su
+$ chmod +x VMware*.bundle
+$ ./VMware*.bundle
+\end{lstlisting}
+
+\item	Next, launch VMware as root and wait for it to compile the kernel modules, then verify that the following VMware 
+			kernel modules are loaded, currently virsh has support to connect to the VMware hypervisor, but there are some minor
+			issues such as a lack of support for VMware network configurations, currently only ``bridged'' mode is supported.
 		
 \begin{itemize}
 \item        vmnet
@@ -330,11 +381,15 @@ $ virsh -c vbox:///session
 
 \lstset{language=bash,caption=Verify VMware Kernel Extensions Loaded}
 \begin{lstlisting}
+# Launch VMware as root, this will build kernel modules
+$ su
+$ vmware
+
 # Verify that the kernel extentsions are loaded
 $ lsmod | grep -i vm
 \end{lstlisting}
 
-.\item      Finally, verify that VMware has been configured properly and that virsh supports the current version of VMware 
+\item      Finally, verify that VMware has been configured properly and that virsh supports the current version of VMware 
                 installed by connecting to the virsh console for the VMware hypervisor.
 
 \lstset{language=bash,caption=Verify VMware Works with Virsh}
@@ -347,6 +402,125 @@ $ virsh --connect vmwarews:///session
 		if you have any outstanding issues solve them before proceeding further, or go to the section ``Server Platform 		
 		Setup''~\ref{sec:serversetup} as the \tapper~server does not require libvirt, virsh, or hypervisor configuration.
 		
+\end{enumerate}
+
+
+
+
+\subsection{Installing and configuring Xen}
+\label{sec:debianxen}
+\begin{enumerate}
+
+\item	At the moment Xen is not natively supported on Red Hat based platforms, therefore the instructions provided
+			are specific to Debian Squeeze and currently Debian provides the only option for testing CernVM Xen images.
+			The following instructions are specific to Debian Squeeze, Xen support on Lenny is much more difficult and
+			only support for Xen 3.x, which is much older than the latest version of Xen which is provided by
+			default on Debian Squeeze. The following instructions are for Xen 4.0, which is currently the latest version of
+			Xen.
+			
+\item	{\bf Before proceeding any further ensure that Xen is not installed on a system which has any of the other 
+			hypervisors installed as it will cause severe instability}. It is best to create a new installation for the Xen
+			hypervisor only, with libvirt installed as installing Xen on a system with any other hypervisor installed
+			causes severe instability and either makes the system kernel panic or causes other failures. 
+			
+\item	Now that you have a dedicated system for Xen, begin by installing the Xen package and Xen Linux 
+			kernel with dom0 support.
+
+\lstset{language=bash,caption=Installing Xen Package and Kernel}
+\begin{lstlisting}
+$ su
+$ apt-get install xen-linux-system
+\end{lstlisting}
+
+\item	Next, install the following tools for Xen, which make managing virtual machine and interfacting with the Xen
+			dom0 hypervisor much easier.
+
+\lstset{language=bash,caption=Installing Xen Tools}
+\begin{lstlisting}
+$ apt-get install xen-watch xen-tools
+\end{lstlisting}
+
+\item 	Next, configure GRUB to support booting from the Xen kernel by default, otherwise you may reboot and determine
+			the Xen entry from the boot menu and then modify the value of GRUB\_DEFAULT in the file /etc/default/grub. The
+			easiest method is provided, which is to simply boot the Xen kernel by default, {\bf please note that you may not be
+			able to run or test \cernvm images on any hypervisor other than Xen if you boot the Xen kernel}. If you need to use
+			KVM/VMware/VirtualBox then you will have to reboot the system and manually select and boot the regular Linux
+			kernel instead of the Xen kernel.
+			
+\lstset{language=bash,caption=Configure Booting the Xen Kernel}
+\begin{lstlisting}
+# Set Xen kernel to boot by default
+$ su
+$ mv /etc/grub.d/10_linux /etc/grub.d/50_linux
+
+# Update grub configuration
+$ update-grub
+\end{lstlisting}
+
+\item	Next, before rebooting the system, configure Xen to shutdown the virtual machines when the host system 
+			shuts down instead of attempting to save the state of the virtual machine. Edit the file \verb|/etc/default/xendomains|
+			and configure the two settings XENDOMAINS\_RESTORE and XENDOMAINS\_SAVE as follows.
+
+\lstset{language=bash,caption=Configure Xen Virtual Machine Shutdown}
+\begin{lstlisting}
+$ su -c "gedit /etc/default/xendomains"
+
+# Configure the settings in the file as follows
+XENDOMAINS_RESTORE=false
+XENDOMAINS_SAVE=""
+\end{lstlisting}
+
+\item	Next, enable a bridged network to the Xen virtual machine by editting the file \verb|/etc/xen/xend-config.sxp| and
+			uncommenting the lines {\bf (network-script network-bridge)} and {\bf (vif-script vif-bridge)}.
+	
+\item	Next, configure the minimal memory for the dom0 and disable dom0 memory ballooning, the minimal memory 
+			set for this guide is 1024, but you may increase or lower the amount, 512 should still be an acceptable amount.
+			
+\lstset{language=bash,caption=Configure Xen Memory Use}
+\begin{lstlisting}
+$ su -c "gedit /etc/xen/xend-config.sxp"
+
+# Uncomment and configure the following options
+(dom0-min-mem 1024)
+(enable-dom0-ballooning no)
+\end{lstlisting}
+			
+\item	Finally, while editing the same file you must also enable the Xen unix daemon which is a mandatory requirement
+			for executing tests and using libvirt with Xen. Simply uncomment the following line, {\bf (xend-unix-server no)} 
+			and change the value to {\bf yes}. 
+
+\item	Now that Xen has been properly configured reboot the system and wait for it to boot the Xen kernel with dom0
+			support, it may take several minutes for the system to boot Xen. {\bf Please note, that if you intend
+			on using any of the other hypervisors you must use a completely separate system or installation}.\footnote{This
+			is because the Xen dom0 and kernel conflicts with the other hypervisors}.
+
+\item	After the system has booted, first verify that the Xen kernel has loaded properly and that the Xen kernel has booted
+			correctly with Domain-0 (dom0) support, which is required in order for the Xen hypervisor to function. \footnote{Booting
+			the Xen kernel does nothing unless the kernel has booted with Xen dom0 support}
+
+\lstset{language=bash,caption=Verify Xen Booted Correctly}
+\begin{lstlisting}
+# Verify the kernel, it should contain "xen"
+$ su
+$ uname -r
+
+# Verify that Xen has Domain-0 running
+$ xm list
+\end{lstlisting}
+
+\item	Finally, if Xen kernel has booted correctly and the system is also running with Xen Domain-0 support, verify that it is
+			possible to connect to the Xen hypervisor with virsh. If virsh is able to connect to the Xen hypervisor then the Xen dom0, 
+			Domain-0 should be seen running by executing``list --all''.
+			
+\lstset{language=bash,caption=Verify virsh can Connect to Xen Hypervisor}
+\begin{lstlisting}
+# Connect to Xen hypervisor
+$ su
+$ virsh -c xen:///
+
+# Domain-0 must be running for Xen support
+$ list --all
+\end{lstlisting}
 \end{enumerate}
 
 
