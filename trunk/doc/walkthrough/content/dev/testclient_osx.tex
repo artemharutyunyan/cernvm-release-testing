@@ -207,21 +207,21 @@ $ virsh --connect vmwarews:///session
 $ cat demo_report.tap | nc -w10 cernvm-server 7357
 \end{lstlisting}
 
-\item 	First, start by downloading a copy of tapper-autoreport and the CernVM Test Cases from the Google Code svn repository
-		\cite{GCreleasetesting} and then proceed to the next step to install the dependencies required by tapper-autoreport.
-		
-\lstset{language=bash,caption=Install \tapper~AutoReport}
+\item 	Next, download a copy of the CernVM Test Suite and the CernVM Test Cases from the Google Code svn repository
+		\cite{GCreleasetesting} and install the the following dependencies.
+			
+\lstset{language=bash,caption=Install CernVM Test Suite}
 \begin{lstlisting}
 # Install subversion, required to checkout auto-tapper
 $ brew install subversion
 
 # Checkout a copy of auto-tapper and cernvm testcases
 $ svn checkout http://cernvm-release-testing.googlecode.com/svn/\
-trunk/tapper/tapper-autoreport/ cernvm-release-testing-read-only
+trunk/tapper/tapper-autoreport/ cernvm-testsuite
 \end{lstlisting}
 
 \item        Now, install the following dependencies using Homebrew\footnote{This section is extremely short in comparison to the previous
-                instructions which required building the dependencies from source}.
+                instructions for this section which required building the dependencies from source}.
                 
 \lstset{language=bash,caption=Install Dependencies}
 \begin{lstlisting}
@@ -231,15 +231,16 @@ $ brew install wget
 $ brew install ossp-uuid
 $ brew install spawn-fcgi
 $ brew install md5sha1sum
-$ brwe install curl
+$ brew install curl
 \end{lstlisting}
 
-\item	Now that that tapper-autoreport has been installed, configure the variables in the configuration file for the
-		hypervisors you want to test and according to your \tapper infrastructure setup. All of the settings provided in
-		the configuration files by default are the {\bf mandatory, minimum configuration options} and in most cases the
-		defaults should be sufficient for testing, the only mandatory settings that are not provided by default {\bf and
-		must be configured manually are CVM\_TS\_REPORT\_SERVER and CVM\_VM\_IMAGE\_VERSION }. Please refer to the developer manual
-		for a more complete detailed list of the mandatory and optional configuration settings.
+\item	Now that cernvm-testsuite has been installed, configure the variables in the configuration file for the
+			hypervisors you want to test and according to your \tapper infrastructure setup. Sample configuration files are provided
+			in the {\bf config} folder, all of the settings provided in the configuration files by default are the {\bf mandatory, minimum 
+			configuration options} and in most cases the	defaults should be sufficient for testing, the only mandatory settings that are
+			not provided by default {\bf and must be configured manually are CVM\_TS\_REPORT\_SERVER and 
+			CVM\_VM\_IMAGE\_VERSION }. Please refer to the developer manual for a more complete detailed list of the mandatory and 
+			optional configuration settings.
 
 \begin{description}
 \item[CVM\_TS\_SUITENAME]	Must ALWAYS be set, the default suite name in the configuration file should be suitable
@@ -274,15 +275,16 @@ $ brwe install curl
 							x86 and x86\_64}
 \end{description}	
 
-\item	Finally, now that tapper-autoreport has been installed and configured on the test client and the test client and \tapper~Server
-		have proven to be working, the next step is to verify that tapper-autoreport works correctly and can actually send a report to 	
-		the \tapper~server in the form of a TAP file. After the \cernvm Test Cases script, ``cernvm-tests.sh'' has completed and sent
-		a TAP report to the server, ensure that the test client is working by viewing the tapper reports in your browser at the 
-		following url: \url{http:/<tapper\_server>/tapper/reports}. You should now see a new report from the test client, there should be a 
-		report from a system with the same hostname\footnote{This is why a consistent hostname convention was emphasized earlier, as 
-		reports are often sorted and organized based on hostnames}.
+\item	Finally, now that cernvm-testsuite has been installed and configured on the test client and the test client and \tapper~Server
+			have proven to be working, the next step is to verify that cernvm-testsuite works correctly and can actually send a report to 	
+			the \tapper~server in the form of a TAP file. To execute the \cernvm Test Cases script, ``cernvm-tests.sh'' simply source
+			the configuration file you wish to use and execute the script. Once the script has completed and sent a TAP report to the server, 
+			ensure that the test client is working by viewing the tapper reports in your browser at the  following 
+			url: \url{http:/<tapper\_server>/tapper/reports}. You should now see a new report from the test client, there should be a 
+			report from a system with the same hostname.\footnote{This is why a consistent hostname convention was emphasized earlier, as 
+			reports are often sorted and organized based on hostnames}.
 
-\lstset{language=bash,caption=Run \tapper-AutoReport for CernVM Test Cases}
+\lstset{language=bash,caption=Execute CernVM Test Cases Script}
 \begin{lstlisting}
 # Simply source the configuration file, and execute the script
 $ . ./config/<configuration_file>

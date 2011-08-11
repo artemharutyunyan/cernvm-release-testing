@@ -23,7 +23,7 @@
 \item	Enable the option ``Allow other users to control your desktop''
 \item	Disable the option ``You must confirm access to this machine''
 \end{itemize}
-
+			
 \item	Next enable SSH access to the machine, in order for SSH and VNC access to work the firewall will have to be disabled
 \begin{itemize}
 \item[a.]	First disable the firewall from the menu \verb|System -> Adminisration -> Firewall| and click the ``Disable'' 
@@ -53,9 +53,6 @@ $ su -c "gedit /etc/gdm/custom.conf"
 \begin{lstlisting}
 AutomaticLoginEnable=true
 AutomaticLogin=cernvm
-TimedLoginEnable=true
-TimedLogin=cernvm
-TimedLoginDelay=0
 \end{lstlisting}		
 \end{itemize}
 
@@ -93,87 +90,75 @@ TimedLoginDelay=0
 		\cernvm virtualization platforms, which would include \emph{Xen, KVM, VirtualBox, and VMware}, then you must download
 		a version later than \emph{0.8.7} as there was no support for VMware prior to that release.
 
-\item	Next, download the latest release that is a {\bf src.rpm} file from the libvirt release server, 
+\item	Next, download the latest release that is a {\bf tar.gz} file from the libvirt release server, 
 		\url{http://libvirt.org/sources/} based on the latest release which does not have any regressions or deprecations for
 		the virtualization platforms you wish to support~\footnote{This shouldn't be an issue but just in case there is a 
 		newer version in which Xen support is deprecated, then you would need to use the last release which has Xen support}.
 		As of this date, the latest release of libvirt is version 0.9.2, this is the release that will be used for the
 		following instructions and examples.
 		
-\item	Next, install the following dependencies which are required to generate the libvirt rpm files from the src.rpm file
-		that was downloaded, \emph{from now on execute all commands as root}.
+\item	Next, install the following dependencies which are required to build libvirt from source, \emph{from now on execute all 
+			commands as root}.
 		
-\lstset{language=bash,caption=Install src.rpm Dependencies}
+\lstset{language=bash,caption=Install Dependencies}
 \begin{lstlisting}
 # Change to root account, enter password if prompted
 $ su
 
-# Install dependencies for using a src.rpm
-$ yum install rpm rpm-devel rpm-libs rpmdevtools rpm-python \
-rpm-build rpmrebuild
+# Install dependencies for building from source
+$ yum install gnutls-devel numactl numactl-devel python-devel libnl-devel \
+libxml2-devel device-mapper-libs device-mapper-devel
+
+# Install GCC
+$ yum install gcc make
 \end{lstlisting}
 
-\item	Next, install the following dependencies which are required to install libvirt.
+\item	Next, install software for managing and viewing virtual machines, \emph{it is imperative that these applications are
+			installed before compiling and installing libvirt otherwise there will be conflicts}.
 
-\lstset{language=bash,caption=Install libvirt Dependencies}
+\lstset{language=bash,caption=Install Virtual Machine Management Software}
 \begin{lstlisting}
 # Change to root account, enter password if prompted
 $ su
 
-# Install dependencies for libvirt
-$ yum install xhtml1-dtds readline-devel ncurses-devel gettext augeas \
-libpciaccess-devel yajl-devel libpcap-devel avahi-devel radvd \
-cyrus-sasl-devel parted-devel libcap-ng-devel libssh2-devel \
-audit-libs-devel systemtap-sdt-devel gnutls-utils gnutls-devel \
-python-devel xen-devel libudev-devel libnl-devel device-mapper-devel \
-numactl-devel netcf-devel libcurl-devel libcgroup
+# Install management software
+$ yum install virt-manager python-virtinst virt-viewer
 \end{lstlisting}
 	
-\item 	Next, create the libvirt RPM installation files using the following command, replace the src.rpm file
-		shown in the example with the file you downloaded previously.
+\item	Next extract the files and execute configure with the following options, then finally compile and install libvirt.
 
-\lstset{language=bash,caption=Create libvirt RPM Files}
+\lstset{language=bash,caption=Compile and Install libvirt}
 \begin{lstlisting}
 # Change to root account, enter password if prompted
 $ su
 
-$ rpmbuild --rebuild libvirt-0.9.2-1.fc14.src.rpm
+# Extract and execute configure
+$ tar -xvvzf libvirt-*.tar.gz
+$ cd libvirt-*/
+$	./configure --prefix=/usr --disable-silent-rules --disable-shared \
+--enable-static --enable-dependency-tracking --with-qemu \
+--with-vmware --with-libssh2 --with-vbox --with-test --with-remote \
+--with-libvirtd --with-numactl --with-network --with-storage-dir
+
+# Compile and install libvirt
+$ make 
+$ make install	
 \end{lstlisting}
-
-\item	Finally, install the libvirt RPM files by navigating to the \verb|/root/rpmbuild/RPMS| folder and
-		then changing to the directory for your computer architecture \emph{such as x86\_64}. Then install
-		the files in the same order as shown in the example, replacing the version of src.rpm file shown in 
-		the example	with the version of the files in your directory, most importantly install the files
-		in the following order: \emph{libvirt-client, libvirt-devel, libvirt-python, libvirt}. Finally,
-		if a package does not install or complains about conflicts use the \emph{--force} argument to
-		force the installation.
-
-\lstset{language=bash,caption=Install libvirt}
-\begin{lstlisting}
-# Change to root account, enter password if prompted
-$ su
-
-# Change to location of RPM files
-$ cd /root/rpmbuild/RPMS/x86_64/
-
-# Install the files in the following order, if install
-# fails or has conflicts use   rpm -iv --force   
-$ rpm -iv libvirt-client-0.9.2-1.fc13.x86_64.rpm 
-$ rpm -iv libvirt-devel-0.9.2-1.fc13.x86_64.rpm
-$ rpm -iv libvirt-python-0.9.2-1.fc13.x86_64.rpm
-$ rpm -iv libvirt-0.9.2-1.fc13.x86_64.rpm
-\end{lstlisting}
-
-\item 	Finally, start the service libvirtd, and ensure that virsh installed correctly and is running by 
-		connecting to the test hypervisor and ensuring that the test virtual machine, named ``test'' is running.
+	
+\item 	Finally, verify that the the service libvirtd can start, because it is required for libvirt to function,  and then
+			configure libvirtd to start automatically at boot. As well, ensure that virsh installed correctly and is running by 
+			connecting to the test hypervisor and ensuring that the test virtual machine, named ``test'' is running.
 
 \lstset{language=bash,caption=Verify virsh was Installed Properly}
 \begin{lstlisting}
 # Change to root account, enter password if prompted
 $ su
 
-# Verify virsh is working, test should be running
+# Verify libvirtd starts, set to start automatically at boot
 $ service libvirtd start
+$ chkconfig --level 2345 libvirtd on
+
+# Verify vitual machine "test" running
 $ virsh -c test:///default list --all
 \end{lstlisting}
 \end{enumerate}
@@ -184,19 +169,27 @@ $ virsh -c test:///default list --all
 \subsection{Installing and configuring KVM}
 \label{sec:rhkvm}
 \begin{enumerate}
-\item	The first step is to install the KVM hypervisor, start by installing KVM and the other additional packages such
-		as virt-manager, which is a graphical management tool and virt-install, which is a command line interface (CLI)
-		virtual machine creation/installation/configuration tool using the following commands with root privileges. If
-		you receive a message that a package is already installed then simply continue.
+\item	The first step is to start by installing the KVM package, KVM may have alrready been installed by default, If
+			you receive a message that a package is already installed then simply continue.
 
-\lstset{language=bash,caption=Installing KVM and Other Related Programs}
+\lstset{language=bash,caption=Install KVM}
 \begin{lstlisting}
-$ yum install virt-manager qemu-kvm python-virtinst virt-viewer
+$ yum install qemu-kvm
+\end{lstlisting}
+
+\item	Next, verify the location of the qemu-kvm binary, at the moment virsh still expects that the binary is located
+			in \verb|/usr/bin|, but since Red Hat 6, the binary has been moved into the directory \verb|/usr/libexec|.
+			To resolve the issue simply create a symbolic link to the binary if qemu-kvm does not exist.
+			
+\lstset{language=bash,caption=Symbolic Link to qemu-kvm}
+\begin{lstlisting}
+# If qemu-kvm does not exist create symbolic link
+$ ln -s /usr/libexec/qemu-kvm /usr/bin/qemu-kvm
 \end{lstlisting}
 
 \item	Next, verify that KVM has been installed properly and that virsh can connect to the KVM hypervisor using the
-		following commands, if you are able to connect to the virsh console without any errors then virsh is able
-		to connect to the KVM hypervisor.
+			following commands, if you are able to connect to the virsh console without any errors then virsh is able
+			to connect to the KVM hypervisor.
 
 \lstset{language=bash,caption=Verify that virsh can Access KVM}
 \begin{lstlisting}
@@ -204,15 +197,21 @@ $ su
 $ virsh -c qemu:///session
 \end{lstlisting}
 
-\item 	Finally, to ensure that KVM is properly configured and installed, follow this guide provided on the CernVM website
-		\url{http://cernvm.cern.ch/portal/kvm} {\bf except, do not create a kvm definition file as the xml template file
-		is provided by the test suite scripts} and verify that you are able to connect to the libvirtd kvm system session.
+\item 	Next, to ensure that KVM is properly configured and installed, follow this guide provided on the CernVM website
+			\url{http://cernvm.cern.ch/portal/kvm} {\bf except, do not create a kvm definition file as the xml template file
+			is provided by the test suite scripts} and verify that you are able to connect to the libvirtd kvm system session.
 		
 \lstset{language=bash,caption=Verify that KVM is Properly Configured}
 \begin{lstlisting}
 $ su
 $ virsh -c qemu:///system 
 \end{lstlisting}
+
+\item	Finally, ensure that you are able to connect to the QEMU/KVM hypervisor using the virtual machine manager, as it 
+			is necessary to view the status of the CernVM images and must be installed to troubleshoot and view the CernVM 
+			images. Simply launch the virtual machine manager application from 
+			\verb|Applications -> System Tools -> Virtual Machine Manager| and{\bf if you are prompted to install libvirt, 
+			select ``No'' } as a custom version of libvirt was installed previously.
 \end{enumerate}
 
 
@@ -222,26 +221,37 @@ $ virsh -c qemu:///system
 \label{sec:rhvbox}
 \begin{enumerate}
 \item	First, begin by downloading and installing a version of VirtualBox supported by libvirt from the VirtualBox download 
-		page, it is best to download the latest version within the series \emph{that has been available for at least a month 
-		prior to the release of the version of libvirt installed}. VirtualBox can be downloaded from the following location,  
-		\url{http://www.virtualbox.org/wiki/Downloads} ensure that you select the appropriate Red Hat based distribution, 
-		version and architecture for your system. The following instructions for this section of the guide uses VirtualBox 
-		4.0.10 for Fedora 13, AMD64.
+			page, it is best to download the latest version within the series \emph{that has been available for at least a month 
+			prior to the release of the version of libvirt installed}. VirtualBox can be downloaded from the following location,  
+			\url{http://www.virtualbox.org/wiki/Downloads} ensure that you select the appropriate Red Hat based distribution, 
+			version and architecture for your system. The following instructions for this section of the guide uses VirtualBox 
+			4.0.12 for Red Hat 6, AMD64.
 		 	
-\item	Next, after downloading the latest version of VirtualBox for your distribution install VirtualBox as the root
-		account using the following command.
+\item	Before installing VirtualBox, install the dependencies required to build the VirtualBox kernel modules.
+
+\lstset{language=bash,caption=Install VirtualBox Dependencies}
+\begin{lstlisting}
+$ su
+$ yum install kernel-headers kernel-devel
+\end{lstlisting}
+		 	
+\item	Next, after downloading the latest version of VirtualBox for your distribution and installing the dependencies 
+			install VirtualBox as the root account using the following command.
+			
 \begin{lstlisting}
 # Enter the root password when prompted
 $ su
 $ rpm -iv VirtualBox-*.rpm
 \end{lstlisting}	
 
-\item	Next, in order to use VirtualBox and have full access to the drivers needed for USB support, ensure that the root
-		account belongs to the group ``vboxusers''. Begin by navigating to \verb|System -> Users and Groups| and then from
-		the ``User Manager'' window click the ``Groups'' tab, under the column ``Group Name'' for the group ``vboxusers'' 
-		ensure that root is one of the group members. If the root account is not a group member of ``vboxusers'' highlight
-		the ``vboxusers'' entry and click the ``Properties'' button, then enable the root account from the list of users
-		and click ``OK'' to apply the changes.
+\item	Next, in order to use VirtualBox and have full access to the drivers needed, ensure that the root
+			account belongs to the group ``vboxusers''. Add the root account to the group ``vboxusers'' using
+			the following command.
+
+\lstset{language=bash,caption=Add root to vboxusers}
+\begin{lstlisting}
+$ su -c "usermod -a -G vboxusers root"
+\end{lstlisting}
 		
 \item	Due to an issue with VirtualBox\footnote{The issues is that VirtualBox looks for virtual machine configuration files (*.vbox)
 		in the ``VirtualBox VMs'' folder of the user that launched VirtualBox. The issue is worsened by the fact that there can
@@ -281,13 +291,30 @@ $ virsh -c vbox:///session
 \subsection{Installing and configuring VMware}
 \label{sec:rhvmware}
 \begin{enumerate}
-\item	First, begin by downloading and installing the latest version of VMware Workstation or Player  from the VMware product 
-		page, \url{http://www.vmware.com/products/}, VMware Workstation requires a license, so you will have to purchase it
-		in order to continue.
+\item	First, begin by downloading the latest version of VMware Workstation or VMware Player  from the VMware product 
+			page, \url{http://www.vmware.com/products/}, VMware Player is free, whereas VMware Workstation requires a
+			license. So if you decide to use VMware Workstation instead of VMware Player you will have to purchase a license
+			for it in order to continue.
+
+\item	Before installing VMware, install the dependencies required to build the VMware kernel modules.
+
+\lstset{language=bash,caption=Install VMware Dependencies}
+\begin{lstlisting}
+$ su
+$ yum install kernel-headers kernel-devel
+\end{lstlisting}
 		
-\item	Next, to verify that VMware Workstation has been installed properly, verify that the following VMware kernel modules 
-		are loaded, currently virsh has support to connect to the VMware hypervisor, but there are some minor issues such as
-		 a lack of support for VMware network configurations, currently only ``bridged'' mode is supported.
+\item 	Next, to install VMware simply set the bundle file as executable and execute the file as root.
+\lstset{language=bash,caption=Install VMware}
+\begin{lstlisting}
+$ su
+$ chmod +x VMware*.bundle
+$ ./VMware*.bundle
+\end{lstlisting}
+
+\item	Next, launch VMware as root and wait for it to compile the kernel modules, then verify that the following VMware 
+			kernel modules are loaded, currently virsh has support to connect to the VMware hypervisor, but there are some minor
+			issues such as a lack of support for VMware network configurations, currently only ``bridged'' mode is supported.
 		
 \begin{itemize}
 \item        vmnet
@@ -299,6 +326,10 @@ $ virsh -c vbox:///session
 
 \lstset{language=bash,caption=Verify VMware Kernel Modules Loaded}
 \begin{lstlisting}
+# Launch VMware as root, this will build kernel modules
+$ su
+$ vmware
+
 # Verify that the kernel extentsions are loaded
 $ lsmod | grep -i vm
 \end{lstlisting}
@@ -313,8 +344,8 @@ $ virsh --connect vmwarews:///session
 \end{lstlisting}
 
 \item	If everything so far has worked, then libvirt, virsh, and the hypervisors have been installed and configured properly,
-		if you have any outstanding issues solve them before proceeding further, or go to the section ``Server Platform 		
-		Setup''~\ref{sec:serversetup} as the \tapper~server does not require libvirt, virsh, or hypervisor configuration.
+			if you have any outstanding issues solve them before proceeding further, or go to the section ``Server Platform 		
+			Setup''~\ref{sec:serversetup} as the \tapper~server does not require libvirt, virsh, or hypervisor configuration.
 		
 \end{enumerate}
 
@@ -352,28 +383,20 @@ $ virsh --connect vmwarews:///session
 $ cat demo_report.tap | nc -w10 cernvm-server 7357
 \end{lstlisting}
 
-\item 	Next, download a copy of tapper-autoreport and the CernVM Test Cases from the Google Code svn repository
-		\cite{GCreleasetesting} and install the the following dependencies required by tapper-autoreport.
+\item 	Next, download a copy of the CernVM Test Suite and the CernVM Test Cases from the Google Code svn repository
+		\cite{GCreleasetesting} and install the the following dependencies.
 		
-\lstset{language=bash,caption=Install \tapper~AutoReport and Dependencies}
+\lstset{language=bash,caption=Install CernVM Test Suite and Dependencies}
 \begin{lstlisting}
 # Install subversion, required to checkout auto-tapper
 $ yum install subversion
 
-# Checkout a copy of auto-tapper and cernvm testcases
+# Checkout a copy of cernvm testsuite and cernvm testcases
 $ svn checkout http://cernvm-release-testing.googlecode.com/svn/\
-trunk/tapper/tapper-autoreport/ cernvm-release-testing-read-only
+trunk/tapper/tapper-autoreport/ cernvm-testsuite
 
 # Install the missing dependencies
-$ yum install perl-Module-CoreList
-$ yum install perl-CPAN
-
-# Install the required perl modules
-$ cpan
-$ install prove
-$ install XML::XPath
-
-# Install test suite dependencies
+$ yum install prove
 $ yum install uuid
 $ yum install spawn
 $ yum install expect
@@ -384,12 +407,13 @@ $ yum install nmh
 $ install-mh
 \end{lstlisting}
 
-\item	Now that tapper-autoreport has been installed, configure the variables in the configuration file for the
-		hypervisors you want to test and according to your \tapper infrastructure setup. All of the settings provided in
-		the configuration files by default are the {\bf mandatory, minimum configuration options} and in most cases the
-		defaults should be sufficient for testing, the only mandatory settings that are not provided by default {\bf and
-		must be configured manually are CVM\_TS\_REPORT\_SERVER and CVM\_VM\_IMAGE\_VERSION }. Please refer to the developer manual
-		for a more complete detailed list of the mandatory and optional configuration settings.
+\item	Now that cernvm-testsuite has been installed, configure the variables in the configuration file for the
+			hypervisors you want to test and according to your \tapper infrastructure setup. Sample configuration files are provided
+			in the {\bf config} folder, all of the settings provided in the configuration files by default are the {\bf mandatory, minimum 
+			configuration options} and in most cases the	defaults should be sufficient for testing, the only mandatory settings that are
+			not provided by default {\bf and must be configured manually are CVM\_TS\_REPORT\_SERVER and 
+			CVM\_VM\_IMAGE\_VERSION }. Please refer to the developer manual for a more complete detailed list of the mandatory and 
+			optional configuration settings.
 
 \begin{description}
 \item[CVM\_TS\_SUITENAME]	Must ALWAYS be set, the default suite name in the configuration file should be suitable
@@ -424,15 +448,16 @@ $ install-mh
 							x86 and x86\_64}
 \end{description}	
 
-\item	Finally, now that tapper-autoreport has been installed and configured on the test client and the test client and \tapper~Server
-		have proven to be working, the next step is to verify that tapper-autoreport works correctly and can actually send a report to 	
-		the \tapper~server in the form of a TAP file. After the \cernvm Test Cases script, ``cernvm-tests.sh'' has completed and sent
-		a TAP report to the server, ensure that the test client is working by viewing the tapper reports in your browser at the 
-		following url: \url{http:/<tapper\_server>/tapper/reports}. You should now see a new report from the test client, there should be a 
-		report from a system with the same hostname\footnote{This is why a consistent hostname convention was emphasized earlier, as 
-		reports are often sorted and organized based on hostnames}.
+\item	Finally, now that cernvm-testsuite has been installed and configured on the test client and the test client and \tapper~Server
+			have proven to be working, the next step is to verify that cernvm-testsuite works correctly and can actually send a report to 	
+			the \tapper~server in the form of a TAP file. To execute the \cernvm Test Cases script, ``cernvm-tests.sh'' simply source
+			the configuration file you wish to use and execute the script. Once the script has completed and sent a TAP report to the server, 
+			ensure that the test client is working by viewing the tapper reports in your browser at the  following 
+			url: \url{http:/<tapper\_server>/tapper/reports}. You should now see a new report from the test client, there should be a 
+			report from a system with the same hostname.\footnote{This is why a consistent hostname convention was emphasized earlier, as 
+			reports are often sorted and organized based on hostnames}.
 
-\lstset{language=bash,caption=Run \tapper-AutoReport for CernVM Test Cases}
+\lstset{language=bash,caption=Execute CernVM Test Cases Script}
 \begin{lstlisting}
 # Simply source the configuration file, and execute the script
 $ . ./config/<configuration_file>
