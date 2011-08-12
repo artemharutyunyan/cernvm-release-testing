@@ -1,0 +1,45 @@
+<domain type='xen'>
+  <name>cernvm-xen</name>
+  <uuid></uuid>
+  <memory>524288</memory>
+  <currentMemory>524288</currentMemory>
+  <vcpu>1</vcpu>
+  <bootloader></bootloader>
+  <bootloader_args>-q</bootloader_args>
+  <os>
+    <type>linux</type>
+  </os>
+  <features>
+    <acpi/>
+    <apic/>
+    <pae/>
+  </features>
+  <clock offset='utc'>
+    <timer name='hpet' present='no'/>
+  </clock>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>restart</on_crash>
+  <devices>
+    <emulator>/usr/lib/xen-4.0/bin/qemu-dm</emulator>
+    <disk type='file' device='disk'>
+      <driver name='file'/>
+      <source file=''/>
+      <target dev='sda' bus='scsi'/>
+    </disk>
+    <interface type='bridge'>
+      <mac address='00:16:36:7e:18:f8'/>
+      <source bridge='virbr0'/>
+      <script path='/etc/xen/scripts/vif-bridge'/>
+      <target dev='vif11.0'/>
+    </interface>
+    <console type='pty' tty='/dev/pts/2'>
+      <source path='/dev/pts/2'/>
+      <target type='xen' port='0'/>
+    </console>
+    <input type='mouse' bus='xen'/>
+    <graphics type='vnc' port='5901' autoport='yes' listen='0.0.0.0' keymap='en-us'>
+      <listen type='address' address='0.0.0.0'/>
+    </graphics>  
+  </devices>
+</domain>
