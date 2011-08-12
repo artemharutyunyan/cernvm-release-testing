@@ -228,6 +228,9 @@ image_url()
 		"vmware")
 		  HYP_KEYWORD="(VMware)"
 		  ;;
+		"xen")
+		  HYP_KEYWORD="(Xen)"
+		  ;;
 		*)
 		  return $RESULT
 		  ;;
@@ -311,7 +314,7 @@ download_extract()
 			then
 				# Get the location and name of the extracted CernVM image file
 				# which is either a hdd or vmdk file
-				IMAGE_LOCATION=$(find_file $2 hdd ; find_file $2 vmdk ; find_file $2 vdi)
+				IMAGE_LOCATION=$(find_file $2 hdd ; find_file $2 vmdk ; find_file $2 vdi ; find_file $2 ext3)
 				RESULT=0
 			fi
 		fi			
@@ -422,6 +425,8 @@ validate_def_settings()
 		"vbox")
 		  ;;
 		"vmware")
+		  ;;
+		"xen")
 		  ;;
 		*)
 		  # Failure, domain type not supported
@@ -576,6 +581,9 @@ verify_hypervisor()
 		  ;;
 		"vmware")
 		  URI="vmwarews:///session"
+		  ;;
+		"xen")
+		  URI="xen:///"
 		  ;;
 		esac
 	fi
