@@ -432,6 +432,16 @@ $ su
 $ apt-get install xen-linux-system
 \end{lstlisting}
 
+\item	Next, install the packages required by Xen for Hardware Virtual Machine (HVM) which is required to run the
+			\cernvm image.\footnote{This is because the \cernvm image for Xen currently requires a fully virtualized environment,
+			(HVM) rather than a paravirtualized environment}
+
+\lstset{language=bash,caption=Installing Packages for HVM Support}
+\begin{lstlisting}
+$ su
+$ apt-get install xen-qemu-dm-4.0
+\end{lstlisting}
+
 \item	Next, install the following tools for Xen, which make managing virtual machine and interfacting with the Xen
 			dom0 hypervisor much easier.
 
@@ -444,7 +454,7 @@ $ apt-get install xen-watch xen-tools
 			the Xen entry from the boot menu and then modify the value of GRUB\_DEFAULT in the file /etc/default/grub. The
 			easiest method is provided, which is to simply boot the Xen kernel by default, {\bf please note that you may not be
 			able to run or test \cernvm images on any hypervisor other than Xen if you boot the Xen kernel}. If you need to use
-			KVM/VMware/VirtualBox then you will have to reboot the system and manually select and boot the regular Linux
+			KVM/VMware/VirtualBox then you will have to use a separate system or installation and boot the regular Linux
 			kernel instead of the Xen kernel.
 			
 \lstset{language=bash,caption=Configure Booting the Xen Kernel}
@@ -452,9 +462,6 @@ $ apt-get install xen-watch xen-tools
 # Set Xen kernel to boot by default
 $ su
 $ mv /etc/grub.d/10_linux /etc/grub.d/50_linux
-
-# Update grub configuration
-$ update-grub
 \end{lstlisting}
 
 \item	Next, before rebooting the system, configure Xen to shutdown the virtual machines when the host system 
@@ -473,7 +480,7 @@ XENDOMAINS_SAVE=""
 \item	Next, enable a bridged network to the Xen virtual machine by editting the file \verb|/etc/xen/xend-config.sxp| and
 			uncommenting the lines {\bf (network-script network-bridge)} and {\bf (vif-script vif-bridge)}.
 	
-\item	Next, configure the minimal memory for the dom0 and disable dom0 memory ballooning, the minimal memory 
+\item	Next, configure the memory for the Xen dom0 and disable dom0 memory ballooning, the minimal memory 
 			set for this guide is 1024, but you may increase or lower the amount, 512 should still be an acceptable amount.
 			
 \lstset{language=bash,caption=Configure Xen Memory Use}
@@ -485,9 +492,26 @@ $ su -c "gedit /etc/xen/xend-config.sxp"
 (enable-dom0-ballooning no)
 \end{lstlisting}
 			
-\item	Finally, while editing the same file you must also enable the Xen unix daemon which is a mandatory requirement
-			for executing tests and using libvirt with Xen. Simply uncomment the following line, {\bf (xend-unix-server no)} 
-			and change the value to {\bf yes}. 
+\item	In addition to configuring the 	the memory for the Xen dom0 in the xend configuration file, the Xen dom0 minimal
+			memory must also be set as a GRUB boot paramater, \emph{otherwise dom0 will use all available memory making it
+			impossible to boot virtual machines}. The memory set for this guide is 1024, but you may increase or lower the 
+			amount, 512 should still be an acceptable amount.
+
+\lstset{language=bash,caption=Configure Xen Memory Use as GRUB Boot Paramater}
+\begin{lstlisting}
+# Edit /etc/default/grub
+$ su
+$ gedit /etc/default/grub
+# Add the following line to the grub configuration file
+# Xen boot parameters for all Xen boots
+GRUB_CMDLINE_XEN="dom0_mem=1024M"
+ 		
+# update grub with new configurations
+$ update-grub
+\end{lstlisting}
+
+\item	Finally, enable the Xen unix daemon, which is a mandatory requirement for executing tests and using libvirt with Xen. Simply 	
+			uncomment the following line, {\bf (xend-unix-server no)} and change the value to {\bf yes}. 
 
 \item	Now that Xen has been properly configured reboot the system and wait for it to boot the Xen kernel with dom0
 			support, it may take several minutes for the system to boot Xen. {\bf Please note, that if you intend
@@ -496,7 +520,8 @@ $ su -c "gedit /etc/xen/xend-config.sxp"
 
 \item	After the system has booted, first verify that the Xen kernel has loaded properly and that the Xen kernel has booted
 			correctly with Domain-0 (dom0) support, which is required in order for the Xen hypervisor to function. \footnote{Booting
-			the Xen kernel does nothing unless the kernel has booted with Xen dom0 support}
+			the Xen kernel does nothing unless the kernel has booted with Xen dom0 support} {\bf If you receive any errors for the 
+			follow procedure try waiting 5 minutes for the xen daemon (xend) to start, it can often take several minutes to start}.
 
 \lstset{language=bash,caption=Verify Xen Booted Correctly}
 \begin{lstlisting}
@@ -526,11 +551,113 @@ $ list --all
 
 
 
-%\newpage
-%\subsection{Setting up the Tapper Test Suite}
-%\label{sec:debiantestsuite}
-%\begin{enumerate}
-%\item 	{\bf Before proceeding any further ensure that you have all other test clients set up this far, and then proceed
-%		to follow the instructions for setting up and configuring the \tapper~server in the section ``Server Platform Setup''}		
-%		~\ref{sec:serversetup}.
-%\end{enumerate}
+\subsection{Setting up the Tapper Test Suite}
+\label{sec:debiantestsuite}
+\begin{enumerate}
+\item 	{\bf Before proceeding any further ensure that you have all other test clients set up this far, and then proceed
+		to follow the instructions for setting up and configuring the \tapper~server in the section ``Server Platform Setup''}		
+		~\ref{sec:serversetup}.
+		
+\item 	Now that the \tapper~server has been installed and configured and the \tapper web interface and database have proven
+		to be working, the next step is to verify that the test client can actually send a report to the \tapper~server in
+		the form of a TAP file. After sending the TAP report to the server, ensure that the test client is working by viewing 
+		the tapper reports in your browser at the following url: \url{http:/<tapper\_server>/tapper/reports}. You should now see a 
+		report from the test client, there should be a report from a system named whatever the ``Tapper-Machine-Name'' in 
+		demo\_report.tap was set as. \emph{For the example demo\_report.tap provided below it would be cernvm-rhtestclient}.
+		\footnote{This is why a consistent hostname convention was emphasized earlier, as reports are often sorted and organized 
+		based on hostnames}.
+		
+\lstset{language=bash,caption=Send a Basic Report to the \tapper~Server}
+\begin{lstlisting}
+# Save the following in a file named demo_report.tap
+
+	1..2
+	# Tapper-Suite-Name: Tapper-Deployment
+	# Tapper-Suite-Version: 1.001
+	# Tapper-Machine-Name: cernvm-rhtestclient
+	ok - Hello World
+	ok - Just another description
+
+# Send the report to the tapper server using netcat
+$ cat demo_report.tap | nc -w10 cernvm-server 7357
+\end{lstlisting}
+
+\item 	Next, download a copy of the CernVM Test Suite and the CernVM Test Cases from the Google Code svn repository
+		\cite{GCreleasetesting} and install the the following dependencies.
+		
+\lstset{language=bash,caption=Install CernVM Test Suite and Dependencies}
+\begin{lstlisting}
+# Install subversion, required to checkout auto-tapper
+$ yum install subversion
+
+# Checkout a copy of cernvm testsuite and cernvm testcases
+$ svn checkout http://cernvm-release-testing.googlecode.com/svn/\
+trunk/tapper/tapper-autoreport/ cernvm-testsuite
+
+# Install the missing dependencies
+$ apt-get install curl
+$ apt-get install wget
+$ apt-get install uuid
+$ apt-get install spawn-fcgi
+$ apt-get install expect
+$ apt-get install expectk
+$ apt-get install nmh
+\end{lstlisting}
+
+\item	Now that cernvm-testsuite has been installed, configure the variables in the configuration file for the
+			hypervisors you want to test and according to your \tapper infrastructure setup. Sample configuration files are provided
+			in the {\bf config} folder, all of the settings provided in the configuration files by default are the {\bf mandatory, minimum 
+			configuration options} and in most cases the	defaults should be sufficient for testing, the only mandatory settings that are
+			not provided by default {\bf and must be configured manually are CVM\_TS\_REPORT\_SERVER and 
+			CVM\_VM\_IMAGE\_VERSION }. Please refer to the developer manual for a more complete detailed list of the mandatory and 
+			optional configuration settings.
+
+\begin{description}
+\item[CVM\_TS\_SUITENAME]	Must ALWAYS be set, the default suite name in the configuration file should be suitable
+
+	  		  
+\item[CVM\_TS\_SUITEVERSION] 	Must ALWAYS be set, reflects the release version number of the test suite framework, the  default
+								version given in the configuration should only be changed if you customize/update the scripts
+
+\item[CVM\_TS\_REPORT\_SERVER]	Must ALWAYS be set, this is the ip address or hostname of the Tapper report server which the reports
+      							from the test results are sent to
+		
+\item[CVM\_TS\_DOWNLOAD\_PAGE]	Must ALWAYS be set, normally the default url provided in the configuration file is accurate, but in the
+								event that the internal \cernvm image release page is relocated then this url must be changed.
+
+\item[CVM\_VM\_HYPERVISOR]	Must ALWAYS be set, should not have to change the defaul hypervisor in the configuration files, valid values 
+							(case sensitive) are {\bf kvm,vbox,vmware}
+
+\item[CVM\_VM\_TEMPLATE]		Must ALWAYS be set, normally the default template provided in the configuration file should not be changed,
+								only change this to use a custom template file. The custom template file \emph{must be placed within the
+								templates folder}
+
+\item[CVM\_VM\_NET\_TEMPLATE]	Must ALWAYS be set, normally the default network template provided in the configuration file should not be
+	 							changed, only change this to use a custom network template file for the \cernvm image,  {\bf only applies to kvm
+	 							and virtualbox}. The custom network template file \emph{must be placed within the templates folder}
+
+\item[CVM\_VM\_IMAGE\_VERSION]	Must ALWAYS be set, specifies the version of the CernVM image to use from the release page
+	
+\item[CVM\_VM\_IMAGE\_TYPE]		Must ALWAYS be set,  specifies the type of CernVM image, valid image types supported, (case sensitive) are 
+								{\bf basic and desktop}
+
+\item[CVM\_VM\_ARCH]		Must ALWAYS be set, specifies the architecture of the \cernvm image, valid architectures (case sensitive) are {\bf 
+							x86 and x86\_64}
+\end{description}	
+
+\item	Finally, now that cernvm-testsuite has been installed and configured on the test client and the test client and \tapper~Server
+			have proven to be working, the next step is to verify that cernvm-testsuite works correctly and can actually send a report to 	
+			the \tapper~server in the form of a TAP file. To execute the \cernvm Test Cases script, ``cernvm-tests.sh'' simply source
+			the configuration file you wish to use and execute the script. Once the script has completed and sent a TAP report to the server, 
+			ensure that the test client is working by viewing the tapper reports in your browser at the  following 
+			url: \url{http:/<tapper\_server>/tapper/reports}. You should now see a new report from the test client, there should be a 
+			report from a system with the same hostname.\footnote{This is why a consistent hostname convention was emphasized earlier, as 
+			reports are often sorted and organized based on hostnames}.
+
+\lstset{language=bash,caption=Execute CernVM Test Cases Script}
+\begin{lstlisting}
+# Simply source the configuration file, and execute the script
+$ . ./config/<configuration_file>
+$ ./cernvm-tests.sh
+\end{lstlisting}
+\end{enumerate}

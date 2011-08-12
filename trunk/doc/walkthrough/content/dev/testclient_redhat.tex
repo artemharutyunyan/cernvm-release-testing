@@ -135,7 +135,7 @@ $ su
 # Extract and execute configure
 $ tar -xvvzf libvirt-*.tar.gz
 $ cd libvirt-*/
-$	./configure --prefix=/usr --disable-silent-rules --disable-shared \
+$ ./configure --prefix=/usr --disable-silent-rules --disable-shared \
 --enable-static --enable-dependency-tracking --with-qemu \
 --with-vmware --with-libssh2 --with-vbox --with-test --with-remote \
 --with-libvirtd --with-numactl --with-network --with-storage-dir
@@ -209,9 +209,9 @@ $ virsh -c qemu:///system
 
 \item	Finally, ensure that you are able to connect to the QEMU/KVM hypervisor using the virtual machine manager, as it 
 			is necessary to view the status of the CernVM images and must be installed to troubleshoot and view the CernVM 
-			images. Simply launch the virtual machine manager application from 
-			\verb|Applications -> System Tools -> Virtual Machine Manager| and{\bf if you are prompted to install libvirt, 
-			select ``No'' } as a custom version of libvirt was installed previously.
+			images. Simply launch the virtual machine manager application from \verb|Applications -> System Tools| 
+			\verb| -> Virtual Machine Manager| and {\bf if you are prompted to install libvirt, select ``No'' } as a 
+			custom version of libvirt was installed previously.
 \end{enumerate}
 
 
@@ -250,7 +250,8 @@ $ rpm -iv VirtualBox-*.rpm
 
 \lstset{language=bash,caption=Add root to vboxusers}
 \begin{lstlisting}
-$ su -c "usermod -a -G vboxusers root"
+$ su
+$ usermod -a -G vboxusers root
 \end{lstlisting}
 		
 \item	Due to an issue with VirtualBox\footnote{The issues is that VirtualBox looks for virtual machine configuration files (*.vbox)
