@@ -277,3 +277,170 @@ create_trace_log()
     # Create the trace log file
     echo -e "Trace Log File - ${CURRENT_DATE}" > $1
 }
+
+
+#****f* testsuite-trace/success_msg
+# NAME
+#   success_msg
+# DESCRIPTION
+#   Message to report in the trace log file if a function executes successfully
+# ARGUMENTS
+#   $1 - The success message to report
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   success_msg "The function executed successfully"
+#***
+success_msg()
+{
+    return 0
+}
+
+
+#****f* testsuite-trace/error_msg
+# NAME
+#   error_msg
+# DESCRIPTION
+#   Message to report in the trace log file if a function has an error
+# ARGUMENTS
+#   $1 - The error message to report
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   error_msg "The function had an unknown error"
+#***
+error_msg()
+{
+    return 0
+}
+
+
+#****f* testsuite-trace/generic_msg
+# NAME
+#   generic_msg
+# DESCRIPTION
+#   A generic message to report in the trace log file
+# ARGUMENTS
+#   $1 - A generic message to report
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   generic_msg "Waiting for the CernVM image to start"
+#***
+generic_msg()
+{
+    return
+}
+
+
+#****f* testsuite-trace/call
+# NAME
+#   call
+# DESCRIPTION
+#   The core of the trace functionality, to register the function with trace
+#   and enable debug and logging support prefix the name of the function and
+#   its arguments with the trace function "call". This executes the function
+#   in the trace debugging environment and logs the results based on the 
+#   trace verbosity level specified, the trace function "call" is transparent
+#   and returns the same exitstatus and return values as the function called.
+# ARGUMENTS
+#   $1 - The name of the function to call with trace/debugging support
+#   $@ - The arguments to the function that is being called
+# RETURN VALUE
+#   value - The value returned by the function called if applicable
+# RESULT
+#   exitstatus - Sets the exitstatus as what is returned by the function
+#                called, $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   call download_extract http://cern.ch/cernvm-img.tar.gz /usr/share/image logfile.log
+#***
+call()
+{
+    # Variables specific to the function to trace
+    local FUNCTION_NAME="$1"
+    local FUNCTION_CALL="$@"
+    local FUNCTION_RETURN_VALUE=""
+    local FUNCTION_RESULT=""
+
+    # Scope and trace logfile formatting
+    local CURRENT_DEPTH="$DEPTH"
+    local CURRENT_INDEX="$INDEX"
+    local TEMPLATE_LENGTH=0
+    local OUTPUT_TEMP=("")
+    export TRACE_TEMPLATE=("")
+   
+
+    # Verify that the trace log file exists
+    if file_exists $TRACE_LOGFILE ; test "$?" -eq 1 \
+    && test "$TRACE_VERBOSITY" -gt 0
+    then
+        echo -e "ERROR: The trace log file does not exist" 1>&2
+        exit 1
+    fi
+
+    # Generate the detailed trace output for verbosity level 3 logging
+    if [ "$TRACE_VERBOSITY" -eq 3 ]
+    then
+        if [ "$CURRENT_DEPTH" -eq 0 ]
+        then
+            # Generate a blank trace output array
+            export TRACE_OUTPUT=("")
+        else    
+            # Export the contents of TRACE_OUTPUT from previous recursive
+            # function to make it available to subshells
+            export TRACE_OUTPUT=("${TRACE_OUTPUT[@]}")
+        fi
+        
+
+        # Generate a template for trace log file
+        generate_trace_template $FUNCTION_CALL
+
+        # Determine the lenght of the trace template heading
+        TEMPLATE_LENGTH="${#TRACE_TEMPLATE[@]}"
+
+        # Add the trace template contents to the trace output array
+        add_trace_template
+
+        # Now, call the function provided transparently and store the exitstatus
+        # and return values from the function call
+        FUNCTION_RETURN_VALUE=($(${FUNCTION_CALL}))
+        FUNCTION_RESULT="$?"
+      
+        # Source the contents of the previous subshell
+        if [ -e trace_output ]
+        then
+            . ./trace_output
+        fi
+
+        # Add the results from the function call to the trace output
+        add_trace_results "${FUNCTION_RETURN_VALUE}" $FUNCTION_RESULT \
+                          $CURRENT_INDEX $TEMPLATE_LENGTH
+
+        # use this for adding msg? and adding the closing <-
+        add_trace_close ${FUNCTION_NAME}
+
+        # Output the contents of the current TRACE_OUTPUT so that parent
+        # shell can source it, this is due to scope issues with bash and subshells
+        OUTPUT_TEMP[0]="\"${TRACE_OUTPUT[0]}\""
+        for i in $(eval echo {1..$((${#TRACE_OUTPUT[@]} - 1))})
+        do
+            OUTPUT_TEMP=("${OUTPUT_TEMP[@]}" "\"${TRACE_OUTPUT[i]}\"")
+        done
+
+        echo -e "export TRACE_OUTPUT=(""${OUTPUT_TEMP[@]}"")" > trace_output
+
+        # Output the contents of TRACE_OUTPUT to the logfile for the initial function
+        # traced, TRACE_OUTPUT also includes nested results of recusively traced functions
+        if [ "${CURRENT_DEPTH}" -eq 0 ]
+        then
+            log_trace_output $TRACE_LOGFILE
+        fi
+    fi
+
+
+    # Return the same RETURN VALUES and STATUS as the traced function called,
+    # which makes the tracing of the function executed by "call" transparent
+    echo "${FUNCTION_RETURN_VALUES}"
+    return $FUNCTION_RESULT
+    
+}
