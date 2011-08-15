@@ -34,13 +34,13 @@
 #***
 file_exists()
 {
-	RESULT=1
-	if [ -e "$1" ]
-	then
-		RESULT=0
-	fi
+    RESULT=1
+    if [ -e "$1" ]
+    then
+        RESULT=0
+    fi
 
-	return $RESULT
+    return $RESULT
 }
 
 
@@ -58,31 +58,31 @@ file_exists()
 #***
 extract_file()
 {
-	RESULT=1
-	
-	# Set the root directory to extract the file within
-	FOLDER=$(echo $1 | sed -E "s/^(\/.*)+\/.*\..*/\\1/")
-	
-	# Determine the extension of the file
-	EXTENSION=$(echo $1 | sed -E "s/^.*\.(.*\..*)/\\1/")
-	
-	# Extract the file based on extension
-	case "${EXTENSION}" in
-	"tar.gz")
-	  tar -xvzf $1 -C ${FOLDER} > /dev/null 2>&1
-	  ;;
-	*.gz)
-	  # cd to folder and extract file
-	  FILE=$(echo $1 | sed -E "s/^\/.*\/(.*\.gz)/\\1/")
-	  cd ${FOLDER} ; gunzip -vd ${FILE} > /dev/null 2>&1
-	  ;;
-	*)
-	  return $RESULT
-	  ;;
-	esac
+    RESULT=1
+    
+    # Set the root directory to extract the file within
+    FOLDER=$(echo $1 | sed -E "s/^(\/.*)+\/.*\..*/\\1/")
+    
+    # Determine the extension of the file
+    EXTENSION=$(echo $1 | sed -E "s/^.*\.(.*\..*)/\\1/")
+    
+    # Extract the file based on extension
+    case "${EXTENSION}" in
+    "tar.gz")
+      tar -xvzf $1 -C ${FOLDER} > /dev/null 2>&1
+      ;;
+    *.gz)
+      # cd to folder and extract file
+      FILE=$(echo $1 | sed -E "s/^\/.*\/(.*\.gz)/\\1/")
+      cd ${FOLDER} ; gunzip -vd ${FILE} > /dev/null 2>&1
+      ;;
+    *)
+      return $RESULT
+      ;;
+    esac
 
-	RESULT="$?"
-	return $RESULT
+    RESULT="$?"
+    return $RESULT
 }
 
 
@@ -100,10 +100,10 @@ extract_file()
 #***
 filename_from_url()
 {
-	# Get the filename from location
-	FILENAME=$(echo $1 | sed -E "s/^.*\/(.*)/\\1/")
-	
-	echo ${FILENAME}
+    # Get the filename from location
+    FILENAME=$(echo $1 | sed -E "s/^.*\/(.*)/\\1/")
+    
+    echo ${FILENAME}
 }
 
 
@@ -122,14 +122,14 @@ filename_from_url()
 #***
 filename_from_header()
 {
-	# Get the HTTP header with actual location of the file
-	# Filter the ^M characters out of the stream (this caused many headaches)
-	LOCATION=$(curl -i $1 | sed 's/'"$(printf '\015')"'$//g' | egrep -E "^Location:[[:space:]]*")
+    # Get the HTTP header with actual location of the file
+    # Filter the ^M characters out of the stream (this caused many headaches)
+    LOCATION=$(curl -i $1 | sed 's/'"$(printf '\015')"'$//g' | egrep -E "^Location:[[:space:]]*")
 
-	# Get the filename from location
-	FILENAME=$(echo ${LOCATION} | sed -E "s/^.*\/(.*)/\\1/")
-	
-	echo ${FILENAME}
+    # Get the filename from location
+    FILENAME=$(echo ${LOCATION} | sed -E "s/^.*\/(.*)/\\1/")
+    
+    echo ${FILENAME}
 }
 
 
@@ -151,14 +151,14 @@ filename_from_header()
 #***
 find_file()
 {
-	RESULT=1
-	
-	# Search for the file in the root directory based on extension
-	FILE_LOCATION=$(find $1/* -name "*.$2")
-	RESULT="$?"
-	echo ${FILE_LOCATION}
-	
-	return $RESULT
+    RESULT=1
+    
+    # Search for the file in the root directory based on extension
+    FILE_LOCATION=$(find $1/* -name "*.$2")
+    RESULT="$?"
+    echo ${FILE_LOCATION}
+    
+    return $RESULT
 }
 
 
@@ -178,37 +178,37 @@ find_file()
 #***
 get_hash()
 {
-	HASH=""
-		
-		# Get the hash of the file
-		case "$2" in
-		"crc32")
-		  HASH=$(cksum $1 | awk '{print $1}')
-		  ;;
-		"md5")
-		  HASH=$(md5sum $1 | awk '{print $1}')
-		  ;;
-		"sha")
-		  HASH=$(shasum $1 | awk '{print $1}')
-		  ;;
-		"sha1")
-		  HASH=$(sha1sum $1 | awk '{print $1}')
-		  ;;
-		"sha224")
-		  HASH=$(sha224sum $1 | awk '{print $1}')
-		  ;;
-		"sha256")
-		  HASH=$(sha256sum $1 | awk '{print $1}')
-		  ;;
-		"sha384")
-		  HASH=$(sha384sum $1 | awk '{print $1}')
-		  ;;
-		"sha512")
-		  HASH=$(sha512sum $1 | awk '{print $1}')
-		  ;;
-		esac
+    HASH=""
+        
+        # Get the hash of the file
+        case "$2" in
+        "crc32")
+          HASH=$(cksum $1 | awk '{print $1}')
+          ;;
+        "md5")
+          HASH=$(md5sum $1 | awk '{print $1}')
+          ;;
+        "sha")
+          HASH=$(shasum $1 | awk '{print $1}')
+          ;;
+        "sha1")
+          HASH=$(sha1sum $1 | awk '{print $1}')
+          ;;
+        "sha224")
+          HASH=$(sha224sum $1 | awk '{print $1}')
+          ;;
+        "sha256")
+          HASH=$(sha256sum $1 | awk '{print $1}')
+          ;;
+        "sha384")
+          HASH=$(sha384sum $1 | awk '{print $1}')
+          ;;
+        "sha512")
+          HASH=$(sha512sum $1 | awk '{print $1}')
+          ;;
+        esac
 
-	echo ${HASH}
+    echo ${HASH}
 }
 
 
@@ -228,15 +228,15 @@ get_hash()
 #***
 get_net_name()
 {
-	RESULT=1
-	
-	# Network name not specified, set network name as default name in template
-	NET_NAME=$(egrep -E "^[[:space:]]*<name>.+</name>" $1 | \
-			   sed -E "s|.*<name>(.*)</name>.*|\\1|")
+    RESULT=1
+    
+    # Network name not specified, set network name as default name in template
+    NET_NAME=$(egrep -E "^[[:space:]]*<name>.+</name>" $1 | \
+               sed -E "s|.*<name>(.*)</name>.*|\\1|")
 
-	RESULT=$?
-	echo ${NET_NAME}
-	return $RESULT	
+    RESULT=$?
+    echo ${NET_NAME}
+    return $RESULT  
 }
 
 
@@ -256,15 +256,15 @@ get_net_name()
 #***
 get_ip_address()
 {
-	RESULT=1
+    RESULT=1
 
-	# IP address not specified, set the ip address as default in template
-	IP_ADDRESS=$(egrep -E "^[[:space:]]*<range[[:space:]]*start='(.*)'" $1 | \
-				 sed -E "s|.*start='([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})'.*|\\1|")
-	
-	RESULT=$?
-	echo ${IP_ADDRESS}
-	return $RESULT			
+    # IP address not specified, set the ip address as default in template
+    IP_ADDRESS=$(egrep -E "^[[:space:]]*<range[[:space:]]*start='(.*)'" $1 | \
+                 sed -E "s|.*start='([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})'.*|\\1|")
+    
+    RESULT=$?
+    echo ${IP_ADDRESS}
+    return $RESULT          
 }
 
 
@@ -284,27 +284,27 @@ get_ip_address()
 #***
 ssh_autologin()
 {
-	# Use a here-doc to script expect to automate password authentication
-	/usr/bin/expect <<EOF
-	match_max 100000
-	set prompt "*?\$"
+    # Use a here-doc to script expect to automate password authentication
+    /usr/bin/expect <<EOF
+    match_max 100000
+    set prompt "*?\$"
 
-	spawn ssh-copy-id $2@$1
-	# Look for connection prompt
-	expect {
-		"\(yes\/no)\?" {
-		send_user "saying yes to connect\r"
-		send "yes\r"
-		exp_continue
-		}
-		"*?assword:*" {
-		# Login
-		send_user "Logging in\r"
-		send "$3\r"
-		exp_continue	
-		}
-	}
+    spawn ssh-copy-id $2@$1
+    # Look for connection prompt
+    expect {
+        "\(yes\/no)\?" {
+        send_user "saying yes to connect\r"
+        send "yes\r"
+        exp_continue
+        }
+        "*?assword:*" {
+        # Login
+        send_user "Logging in\r"
+        send "$3\r"
+        exp_continue    
+        }
+    }
 EOF
 
-	return $?
+    return $?
 }

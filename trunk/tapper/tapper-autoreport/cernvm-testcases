@@ -51,9 +51,9 @@
 #***
 check_ssh()
 {
-	verify_ssh_login $1 $2
+    verify_ssh_login $1 $2
 
-	return $?
+    return $?
 }
 
 
@@ -72,30 +72,30 @@ check_ssh()
 #***
 check_boot_error()
 {
-	RESULT=0
-	BOOT_TESTS=("ssh -q -o \"BatchMode=yes\" root@$1 dmesg | egrep \"error|warning|fail\" > $2" 
+    RESULT=0
+    BOOT_TESTS=("ssh -q -o \"BatchMode=yes\" root@$1 dmesg | egrep \"error|warning|fail\" > $2" 
 "ssh -q -o \"BatchMode=yes\" root@$1 cat /var/log/boot.log | egrep \"error|warning|fail\" >> $2" 
 "ssh -q -o \"BatchMode=yes\" root@$1 cat /var/log/messages | egrep \"error|warning|fail\" >> $2" 
 "ssh -q -o \"BatchMode=yes\" root@$1 cat /var/log/cernvm-update.log | egrep \"error|warning|fail\" >> $2")
 
-	# Precondition for ssh support as root for boot error tests
-	if check_ssh $1 root ; test "$?" -eq 0 ; then
-	for test in "${BOOT_TESTS[@]}"
-	do
-		eval $test
-		    # If any of the tests has boot error, set result as failure and continue
-			# logging the rest of the boot messages that contain boot errors
-		    if [ "$?" -eq 0 ]
-		    then
-		            RESULT=1
-		    fi
-	done
-	else
-		echo "FAIL - Precondition for ssh support as root for boot error tests"
-		RESULT=1
-	fi
-	
-	return $RESULT
+    # Precondition for ssh support as root for boot error tests
+    if check_ssh $1 root ; test "$?" -eq 0 ; then
+    for test in "${BOOT_TESTS[@]}"
+    do
+        eval $test
+            # If any of the tests has boot error, set result as failure and continue
+            # logging the rest of the boot messages that contain boot errors
+            if [ "$?" -eq 0 ]
+            then
+                    RESULT=1
+            fi
+    done
+    else
+        echo "FAIL - Precondition for ssh support as root for boot error tests"
+        RESULT=1
+    fi
+    
+    return $RESULT
 }
 
 
@@ -113,9 +113,9 @@ check_boot_error()
 #***
 check_time()
 {
-	ssh -q -o "BatchMode=yes" root@$1 ps -eaf | grep -q ntpd
+    ssh -q -o "BatchMode=yes" root@$1 ps -eaf | grep -q ntpd
 
-	return $?
+    return $?
 }
 
 
@@ -136,24 +136,24 @@ check_time()
 #***
 check_web_restart()
 {
-	RESULT=1
+    RESULT=1
 
-	# Restart through the web interface
-	web_restart $1 $2
+    # Restart through the web interface
+    web_restart $1 $2
 
-	# If restarted through the web interface successfully check for boot errors
-	if [ "$?" -eq 0 ]
-	then
-		# Wait for system to start, check for boot error
-		sleep 120
-		check_boot_error $1 $3
-		
-		# No boot errors, return success
-		if [ "$?" -eq 0 ]
-		then
-			RESULT=0
-		fi
-	fi
+    # If restarted through the web interface successfully check for boot errors
+    if [ "$?" -eq 0 ]
+    then
+        # Wait for system to start, check for boot error
+        sleep 120
+        check_boot_error $1 $3
+        
+        # No boot errors, return success
+        if [ "$?" -eq 0 ]
+        then
+            RESULT=0
+        fi
+    fi
 
-	return $RESULT
+    return $RESULT
 }

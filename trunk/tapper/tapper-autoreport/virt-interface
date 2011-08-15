@@ -32,16 +32,16 @@
 #   vm_net_active default
 #***
 vm_net_active()
-{	
-	virsh --connect $URI net-list --all | egrep -q "^$1[[:space:]]*active"
-	
-	if [ "$?" -eq 1 ]
-	then
-		virsh --connect $URI net-start $1
-		virsh --connect $URI net-list --all | egrep -q "^$1[[:space:]]*active"
-	fi	
-	
-	return $?
+{   
+    virsh --connect $URI net-list --all | egrep -q "^$1[[:space:]]*active"
+    
+    if [ "$?" -eq 1 ]
+    then
+        virsh --connect $URI net-start $1
+        virsh --connect $URI net-list --all | egrep -q "^$1[[:space:]]*active"
+    fi  
+    
+    return $?
 }
 
 
@@ -59,15 +59,15 @@ vm_net_active()
 #***
 vm_net_autostart()
 {
-	virsh --connect $URI net-list --all | egrep -q "^$1[[:space:]]*active[[:space:]]*yes"
+    virsh --connect $URI net-list --all | egrep -q "^$1[[:space:]]*active[[:space:]]*yes"
 
-	if [ "$?" -eq 1 ]
-	then
-		virsh --connect $URI net-autostart $1
-		virsh --connect $URI net-list --all | egrep -q "^$1[[:space:]]*active[[:space:]]*yes"
-	fi	
+    if [ "$?" -eq 1 ]
+    then
+        virsh --connect $URI net-autostart $1
+        virsh --connect $URI net-list --all | egrep -q "^$1[[:space:]]*active[[:space:]]*yes"
+    fi  
 
-	return $?
+    return $?
 }
 
 
@@ -88,19 +88,19 @@ vm_net_autostart()
 #***
 destroy_vm_net()
 {
-	# First forecably shutdown the network
-	virsh --connect $URI net-destroy $1
+    # First forecably shutdown the network
+    virsh --connect $URI net-destroy $1
 
-	# Remove network from virsh, verify removed
-	virsh --connect $URI net-undefine $1
-	virsh --connect $URI net-list --all | grep -q $1
-	
-	if [ $? -eq 0 ]
-	then
-		return 1
-	else
-		return 0
-	fi
+    # Remove network from virsh, verify removed
+    virsh --connect $URI net-undefine $1
+    virsh --connect $URI net-list --all | grep -q $1
+    
+    if [ $? -eq 0 ]
+    then
+        return 1
+    else
+        return 0
+    fi
 }
 
 
@@ -119,10 +119,10 @@ destroy_vm_net()
 #***
 create_vm_net()
 {
-	virsh --connect $URI net-define $1
-	virsh --connect $URI net-list --all | grep -q $2
-	
-	return $?
+    virsh --connect $URI net-define $1
+    virsh --connect $URI net-list --all | grep -q $2
+    
+    return $?
 }
 
 
@@ -141,10 +141,9 @@ create_vm_net()
 #***
 create_vm()
 {
-	virsh --connect $URI define $1
-	virsh --connect $URI list --all | grep -q $2
-	
-	return $?
+    virsh --connect $URI define $1
+    virsh --connect $URI list --all | grep -q $2
+    return $?
 }
 
 
@@ -165,19 +164,19 @@ create_vm()
 #***
 destroy_vm()
 {
-	# First forecably shutdown the virtual machine
-	virsh --connect $URI destroy $1
+    # First forecably shutdown the virtual machine
+    virsh --connect $URI destroy $1
 
-	# Remove virtual machine from virsh, verify removed
-	virsh --connect $URI undefine $1
-	virsh --connect $URI list --all | grep -q $1
-	
-	if [ $? -eq 0 ]
-	then
-		return 1
-	else
-		return 0
-	fi
+    # Remove virtual machine from virsh, verify removed
+    virsh --connect $URI undefine $1
+    virsh --connect $URI list --all | grep -q $1
+    
+    if [ $? -eq 0 ]
+    then
+        return 1
+    else
+        return 0
+    fi
 }
 
 
@@ -194,13 +193,13 @@ destroy_vm()
 #   start_vm virt-machine
 #***
 start_vm()
-{	
-	virsh --connect $URI start $1
-	# Wait five minutes for virtual machine to start
-	sleep 300
-	virsh --connect $URI list --all | egrep -q "^[[:space:]]*[[:digit:]]*[[:space:]]*$1[[:space:]]*running"
+{   
+    virsh --connect $URI start $1
+    # Wait five minutes for virtual machine to start
+    sleep 300
+    virsh --connect $URI list --all | egrep -q "^[[:space:]]*[[:digit:]]*[[:space:]]*$1[[:space:]]*running"
 
-	return $?
+    return $?
 }
 
 
@@ -218,12 +217,12 @@ start_vm()
 #***
 stop_vm()
 {
-	virsh --connect $URI shutdown $1
-	# Wait 2 minutes for virtual machine to turn off
-	sleep 120
-	virsh --connect $URI list --all | egrep -q "^[[:space:]]*-[[:space:]]*$1[[:space:]]*shut[[:space:]]off"
+    virsh --connect $URI shutdown $1
+    # Wait 2 minutes for virtual machine to turn off
+    sleep 120
+    virsh --connect $URI list --all | egrep -q "^[[:space:]]*-[[:space:]]*$1[[:space:]]*shut[[:space:]]off"
 
-	return $?
+    return $?
 }
 
 
@@ -245,9 +244,9 @@ stop_vm()
 #***
 has_console_support()
 {
-	virsh --connect $URI ttyconsole $1
-	
-	return $?
+    virsh --connect $URI ttyconsole $1
+    
+    return $?
 }
 
 
@@ -258,6 +257,8 @@ has_console_support()
 #   Connect to virsh for the current virtual machine hypervisor URI and display URI
 # ARGUMENTS
 #   $1 - The URI of the hypervisor
+# RETURN VALUE
+#   URI - The actual URI of the hypervisor that virsh is connected to
 # RESULT
 #   exitstatus - Sets $? as a zero for success, otherwise sets an error code
 # EXAMPLE
@@ -265,7 +266,7 @@ has_console_support()
 #***
 connect_virsh()
 {
-	virsh -q --connect $1 uri
+    virsh -q --connect $1 uri
 
-	return $?
+    return $?
 }
