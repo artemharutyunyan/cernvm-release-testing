@@ -80,3 +80,72 @@ generate_trace_template()
         echo -e ${TRACE_TEMPLATE[i]} >> logfile.log
     done
 }
+
+
+#****f* testsuite-trace/add_trace_template
+# NAME
+#   add_trace_template
+# DESCRIPTION
+#   Adds the contents of the global TRACE_TEMPLATE to TRACE_OUTPUT, this allows the
+#   TRACE_TEMPLATE file to be dynamically re-generated if "call" is used recursively
+# RESULT
+#   TRACE_OUTPUT - Adds the contents of TRACE_TEMPLATE to the TRACE_OUTPUT global variable
+#   INDEX        - Sets the global variable INDEX as the next index element of TRACE_OUTPUT
+# EXAMPLE
+#   add_trace_template
+#***
+add_trace_template()
+{
+    # Add the function name heading first 
+    TRACE_OUTPUT[$INDEX]="${TRACE_TEMPLATE[0]}"
+
+    # Add the remaining contents of trace template to output
+    for i in $(eval echo {1..$((${#TRACE_TEMPLATE[@]} - 1))})
+    do
+        TRACE_OUTPUT=("${TRACE_OUTPUT[@]}" "${TRACE_TEMPLATE[i]}")
+    done
+
+    for i in $(eval echo {0..$((${#TRACE_OUTPUT[@]} - 1))})
+    do
+        echo -e ${TRACE_OUTPUT[i]} >> logfile2.log
+    done
+
+    # Update the index as the next available index element of TRACE_OUTPUT
+    export INDEX="${#TRACE_OUTPUT[@]}"
+
+    # Increment the DEPTH so that the next trace template for the current function
+    # being traced is indented further
+    export DEPTH=$((${DEPTH} + 1))
+}
+
+
+#****f* testsuite-trace/add_trace_output
+# NAME
+#   add_trace_output
+# DESCRIPTION
+#   Adds the data specified to the trace output, which will be logged to file
+# ARGUMENTS
+#   $@ - The data to add to the trace output
+# RESULT
+#   TRACE_OUTPUT - Adds the data speficied to TRACE_OUTPUT global variable
+#   INDEX        - Sets the global variable index as the next index element of TRACE_OUTPUT
+# EXAMPLE
+#   add_trace_output "${TRACE_TEMPLATE[@]}"
+#***
+add_trace_output()
+{
+    local DATA_LIST=( "$@" )
+    
+    for i in $(eval echo {0..$((${#DATA_LIST[@]} - 1))})
+    do
+        TRACE_OUTPUT=("${TRACE_OUTPUT[@]}" "${DATA_LIST[i]}")
+    done
+
+    for i in $(eval echo {0..$((${#TRACE_OUTPUT[@]} - 1))})
+    do
+        echo -e ${TRACE_OUTPUT[i]} >> logfile2.log
+    done
+
+    # Update the index as the next available index element of TRACE_OUTPUT
+    export INDEX="${#TRACE_OUTPUT[@]}"
+}
