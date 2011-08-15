@@ -149,3 +149,88 @@ add_trace_output()
     # Update the index as the next available index element of TRACE_OUTPUT
     export INDEX="${#TRACE_OUTPUT[@]}"
 }
+
+
+#****f* testsuite-trace/add_trace_results
+# NAME
+#   add_trace_results
+# DESCRIPTION
+#   Adds the results from a traced function call back to the TRACE_OUTPUT heading for the function 
+# ARGUMENTS
+#   $1 - The RETURN VALUE from the function called
+#   $2 - The RESULT from the function called
+#   $3 - The index of the heading in TRACE_OUTPUT for the function called
+#   $4 - The length of the heading for the function called 
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   add_trace_results $FUNCTION_RETURN_VALUE $FUNCTION_RESULT 0 12
+#***
+add_trace_results()
+{
+    local TAB_DEPTH=""
+    local HEADING_INDEX="$3"
+    local HEADING_LENGTH="$4"
+
+    # Since the function traced has exited decrease the DEPTH to indent the results
+    export DEPTH=$((${DEPTH} - 1))
+
+    # Specify the depth to tab in for the current function, add exra indentation 
+    for i in $(eval echo {0..$((${DEPTH} + 1))})
+    do
+        TAB_DEPTH=${TAB_DEPTH}${TAB_SPACE}  
+    done
+
+    # Set the STATUS heading for the function called
+    if [ "$2" -eq 0 ]
+    then
+        TRACE_OUTPUT[$((${HEADING_INDEX} + 2))]="${TAB_DEPTH}SUCCESS"
+    else
+        TRACE_OUTPUT[$((${HEADING_INDEX} + 2))]="${TAB_DEPTH}FAILURE"
+    fi 
+         
+    # Set the RETURN VALUE heading for function called if it is defined
+    if [ -n "$1" ]
+    then
+        # Set the return value at OUTPUT_RESULT index based on length of heading
+        TRACE_OUTPUT[$[${HEADING_INDEX} + ${HEADING_LENGTH} - 3]]="${TAB_DEPTH}${1}"
+    else
+        # Delete the RETURN VALUE heading since the function called has no return value
+        #echo "deleting values"
+        unset TRACE_OUTPUT[$[${HEADING_INDEX} + ${HEADING_LENGTH} - 3]]
+        unset TRACE_OUTPUT[$[${HEADING_INDEX} + ${HEADING_LENGTH} - 4]]
+    fi
+
+    # Set the RESULT heading for the function called
+    TRACE_OUTPUT[$[${HEADING_INDEX} + ${HEADING_LENGTH} - 1]]="${TAB_DEPTH}${2}"
+}
+
+
+#****f* testsuite-trace/add_trace_close
+# NAME
+#   add_trace_close
+# DESCRIPTION
+#   Adds the closing marker for the trace of the function call
+# ARGUMENTS
+#   $1 - The name of the function that was called
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   add_trace_close connect_virsh
+#***
+add_trace_close()
+{
+    local TAB_DEPTH=""
+    
+    # Specify the depth to tab in the current function close in trace logfile
+    if [ "$DEPTH" -gt 0 ]
+    then
+        for i in $(eval echo {0..$((${DEPTH} - 1))})
+        do
+            TAB_DEPTH=${TAB_DEPTH}${TAB_SPACE}
+        done
+    fi
+
+    # Create function call closure identifier
+    TRACE_OUTPUT=("${TRACE_OUTPUT[@]}" "${TAB_DEPTH}<-${1}")
+}
