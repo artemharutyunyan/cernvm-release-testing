@@ -18,18 +18,18 @@
 #
 # TODO
 #   CLEAN UP THE FOLLOWING PRECONDITON TESTS AND PLACE THEM IN THIS FILE
-#	Precondition Test 2 - Verify that virtual machine domain has been created 
+#   Precondition Test 2 - Verify that virtual machine domain has been created 
 #                         from an xml file
 #
-#	Precondition Test 3 - Verify that virtual machine can be started
+#   Precondition Test 3 - Verify that virtual machine can be started
 #
-#	Precondition Test 4 - Verify that virtual machine has been stopped
+#   Precondition Test 4 - Verify that virtual machine has been stopped
 #
-#	Precondition Test 5 - Verify that the virtual has console support
+#   Precondition Test 5 - Verify that the virtual has console support
 #
-#	Precondition Test 6 - Verify that virtual machine has web interface support
+#   Precondition Test 6 - Verify that virtual machine has web interface support
 #
-#	Precondition Test 7 - Verify that it is possible to login on web interface
+#   Precondition Test 7 - Verify that it is possible to login on web interface
 #***
 #
 # =============================================================================
@@ -51,9 +51,9 @@
 #***
 verify_exists()
 {
-	file_exists $1
-	
-	return $?
+    file_exists $1
+    
+    return $?
 }
 
 
@@ -73,7 +73,7 @@ verify_exists()
 #***
 verify_hash()
 {
-	return 0
+    return 0
 }
 
 
@@ -92,9 +92,9 @@ verify_hash()
 #***
 verify_ssh_login()
 {
-	ssh -q -o "BatchMode=yes" $2@$1 "echo 2>&1"
+    ssh -q -o "BatchMode=yes" $2@$1 "echo 2>&1"
 
-	return $?
+    return $?
 }
 
 
@@ -119,41 +119,41 @@ verify_ssh_login()
 #***
 verify_autologin_ssh()
 {
-	RESULT=1
-	# Remove conflicting key line from known_hosts file to avoid host key mismatch message
-	#OFFENDING_KEY=$(ssh -o "BatchMode=yes" $2@$1 2>&1 | egrep -E "^Offending[[:space:]]*key[[:space:]]*in.*\:[0-9]+" | \
-	#				sed -E "s/.*\:([0-9]+).*/\\1/")
-	
-	#echo "Displaying offending key"
-	#echo $OFFENDING_KEY
+    RESULT=1
+    # Remove conflicting key line from known_hosts file to avoid host key mismatch message
+    #OFFENDING_KEY=$(ssh -o "BatchMode=yes" $2@$1 2>&1 | egrep -E "^Offending[[:space:]]*key[[:space:]]*in.*\:[0-9]+" | \
+    #               sed -E "s/.*\:([0-9]+).*/\\1/")
+    
+    #echo "Displaying offending key"
+    #echo $OFFENDING_KEY
 
-	# Check if an offending key was found, if so remove it from known_hosts file
-	#if [[ "${OFFENDING_KEY}" =~ ^[0-9]+$ ]]
-	#then
- 	  	#exec >&2; echo "error: Not a number"; exit 1
-	#	echo "number found"
-		# Delete the key from known_hosts
-	#	echo ${OFFENDING_KEY}d
-	#	sed -i ${OFFENDING_KEY}d ~/.ssh/known_hosts
-	#fi
+    # Check if an offending key was found, if so remove it from known_hosts file
+    #if [[ "${OFFENDING_KEY}" =~ ^[0-9]+$ ]]
+    #then
+        #exec >&2; echo "error: Not a number"; exit 1
+    #   echo "number found"
+        # Delete the key from known_hosts
+    #   echo ${OFFENDING_KEY}d
+    #   sed -i ${OFFENDING_KEY}d ~/.ssh/known_hosts
+    #fi
 
-	#TODO: Implement support to only remove the offending key line from known_hosts
-	#	   instead of deleting the entire file
-	# Remove known_hosts file to avoid host key mismatch message
-	rm -f ~/.ssh/known_hosts
+    #TODO: Implement support to only remove the offending key line from known_hosts
+    #      instead of deleting the entire file
+    # Remove known_hosts file to avoid host key mismatch message
+    rm -f ~/.ssh/known_hosts
 
-	# Configure account specifed to automatically login through SSH'
-	if ssh_autologin $1 $2 $3 ; test "$?" -eq 0
-	then
-		# Precondition - Verify that user is able to login via ssh automatically
-		if verify_ssh_login $1 $2 ; test "$?" -eq 0
-		then
-			# SSH autologin configured, working
-			RESULT=0
-		fi
-	fi
+    # Configure account specifed to automatically login through SSH'
+    if ssh_autologin $1 $2 $3 ; test "$?" -eq 0
+    then
+        # Precondition - Verify that user is able to login via ssh automatically
+        if verify_ssh_login $1 $2 ; test "$?" -eq 0
+        then
+            # SSH autologin configured, working
+            RESULT=0
+        fi
+    fi
 
-	return $RESULT
+    return $RESULT
 }
 
 
@@ -179,89 +179,89 @@ verify_autologin_ssh()
 #***
 image_url()
 {
-	RESULT=1
-	DOWNLOAD_PAGE="/tmp/page-$RANDOM"
-	URL=""
-	# Setting search keywords to be more readable variables
-	VERSION="$2"
-	RELEASE_ID="${IMAGE_RELEASE_ID}"
-	ARCH="" 		# The architecture keyword, 32 or 64
-	TYPE="$5"
-	HYP_KEYWORD=""	# Keyword to identify hypervisor
+    RESULT=1
+    DOWNLOAD_PAGE="/tmp/page-$RANDOM"
+    URL=""
+    # Setting search keywords to be more readable variables
+    VERSION="$2"
+    RELEASE_ID="${IMAGE_RELEASE_ID}"
+    ARCH=""         # The architecture keyword, 32 or 64
+    TYPE="$5"
+    HYP_KEYWORD=""  # Keyword to identify hypervisor
 
-	# Get a copy of the download page
-	curl $1 > $DOWNLOAD_PAGE 1>&1
+    # Get a copy of the download page
+    curl $1 > $DOWNLOAD_PAGE 1>&1
 
-	# If the download page url exists, remove control statements from file
-	# and retrieve CernVM image url from file
-	if test "$?" -eq 0 && verify_exists $DOWNLOAD_PAGE ; test "$?" -eq 0
-	then
-		# Remove trailing control statments
-		sed -i -E "s/$(printf '\015')$//g" $DOWNLOAD_PAGE
-		
-		# Set the release id as latest release if not defined
-		if [ ! "$RELEASE_ID" ]
-		then
-			# Release id not specified, use latest release
-			RELEASE_ID='[[:digit:]]+'
-		fi
+    # If the download page url exists, remove control statements from file
+    # and retrieve CernVM image url from file
+    if test "$?" -eq 0 && verify_exists $DOWNLOAD_PAGE ; test "$?" -eq 0
+    then
+        # Remove trailing control statments
+        sed -i -E "s/$(printf '\015')$//g" $DOWNLOAD_PAGE
+        
+        # Set the release id as latest release if not defined
+        if [ ! "$RELEASE_ID" ]
+        then
+            # Release id not specified, use latest release
+            RELEASE_ID='[[:digit:]]+'
+        fi
 
-		# Set the architecture keyword as 32 or 64
-		if [ "$4" == "x86_64" ]
-		then
-			ARCH="64"
-		else
-			ARCH="32"
-		fi
+        # Set the architecture keyword as 32 or 64
+        if [ "$4" == "x86_64" ]
+        then
+            ARCH="64"
+        else
+            ARCH="32"
+        fi
 
-		# Set the hypervisor keyword
-		case "$3" in
-		"kvm")
-		  HYP_KEYWORD="(QEMU,KVM)"
-		  ;;
-		"qemu")
-		  HYP_KEYWORD="(QEMU,KVM)"
-		  ;;
-		"vbox")
-		  HYP_KEYWORD="VirtualBox Image"
-		  ;;
-		"vmware")
-		  HYP_KEYWORD="(VMware)"
-		  ;;
-		"xen")
-		  HYP_KEYWORD="(Xen)"
-		  ;;
-		*)
-		  return $RESULT
-		  ;;
-		esac
+        # Set the hypervisor keyword
+        case "$3" in
+        "kvm")
+          HYP_KEYWORD="(QEMU,KVM)"
+          ;;
+        "qemu")
+          HYP_KEYWORD="(QEMU,KVM)"
+          ;;
+        "vbox")
+          HYP_KEYWORD="VirtualBox Image"
+          ;;
+        "vmware")
+          HYP_KEYWORD="(VMware)"
+          ;;
+        "xen")
+          HYP_KEYWORD="(Xen)"
+          ;;
+        *)
+          return $RESULT
+          ;;
+        esac
 
-		# SOME UGLY HACKS
-		# VERY ANNOYING SCOPE ISSUE WITH BASH, IF YOU USE
-		# cat $DOWNLOAD_PAGE | while read line 	INSTEAD THERE IS NO SCOPE OUTSIDE
-		# OF THE LOOP BECAUSE OF PIPE!!! CANNOT EVEN SET GLOBAL/EXPORTED VARIABLES
-		while read line
-		do
-        	echo $line |  tr -d '\n' | grep -q -E \
-			"^$RELEASE_ID;$VERSION;[[:digit:]]+;$ARCH;(http.*.-$TYPE-.*\.gz).*$HYP_KEYWORD.*"
+        # SOME UGLY HACKS
+        # VERY ANNOYING SCOPE ISSUE WITH BASH, IF YOU USE
+        # cat $DOWNLOAD_PAGE | while read line  INSTEAD THERE IS NO SCOPE OUTSIDE
+        # OF THE LOOP BECAUSE OF PIPE!!! CANNOT EVEN SET GLOBAL/EXPORTED VARIABLES
+        while read line
+        do
+            echo $line |  tr -d '\n' | grep -q -E \
+            "^$RELEASE_ID;$VERSION;[[:digit:]]+;$ARCH;(http.*.-$TYPE-.*\.gz).*$HYP_KEYWORD.*"
 
-        	# If theres a match extract the url using sed
-        	if test "$?" -eq 0
-        	then
-				# Trim any new line characters
-            	TRIMMED=$(echo $line | sed ':a;N;$!ba;s/\n//g')
-				
-				# Retrieve the URL
-            	URL=$(echo ${TRIMMED} | sed -E \
-			    "s|^$RELEASE_ID;$VERSION;[[:digit:]]+;$ARCH;(http.*.-$TYPE-.*\.gz).*$HYP_KEYWORD.*|\\1|")
-				RESULT=0
-				break
-			fi
-		done < $DOWNLOAD_PAGE
-	fi
+            # If theres a match extract the url using sed
+            if test "$?" -eq 0
+            then
+                # Trim any new line characters
+                TRIMMED=$(echo $line | sed ':a;N;$!ba;s/\n//g')
+                
+                # Retrieve the URL
+                URL=$(echo ${TRIMMED} | sed -E \
+                "s|^$RELEASE_ID;$VERSION;[[:digit:]]+;$ARCH;(http.*.-$TYPE-.*\.gz).*$HYP_KEYWORD.*|\\1|")
+                RESULT=0
+                break
+            fi
+        done < $DOWNLOAD_PAGE
+    fi
 
-	echo ${URL}
-	return $RESULT
+    echo ${URL}
+    return $RESULT
 }
 
 
@@ -284,44 +284,44 @@ image_url()
 #***
 download_extract()
 {
-	RESULT=1
-	# This is specific to the cernvm website which doesn't give the actual location
-	FILENAME=$(filename_from_url $1)
-	FILE_LOCATION="$2/${FILENAME}"
-	IMAGE_LOCATION=""
+    RESULT=1
+    # This is specific to the cernvm website which doesn't give the actual location
+    FILENAME=$(filename_from_url $1)
+    FILE_LOCATION="$2/${FILENAME}"
+    IMAGE_LOCATION=""
 
-	# Precondition - verify file has not already been downloaded
-	if verify_exists ${FILE_LOCATION} ; test "$?" -eq 1
-	then
-		
-		# Create the directory if it does not already exist
-		if verify_exists $2 ; test "$?" -eq 1
-		then
-			mkdir -p $2
-		fi
+    # Precondition - verify file has not already been downloaded
+    if verify_exists ${FILE_LOCATION} ; test "$?" -eq 1
+    then
+        
+        # Create the directory if it does not already exist
+        if verify_exists $2 ; test "$?" -eq 1
+        then
+            mkdir -p $2
+        fi
 
-		# Download the image
-		wget --verbose $1 -P $2 > $3 2>&1
+        # Download the image
+        wget --verbose $1 -P $2 > $3 2>&1
 
-		# If download succeeded extract file		
-		if test "$?" -eq 0 && verify_exists ${FILE_LOCATION} ; test "$?" -eq 0
-		then
-			# Extract downloaded CernVM image in the directory it is located in
-			extract_file ${FILE_LOCATION}
-			
-			# Verify extraction succeeded and get the location of CernVM image file
-			if test "$?" -eq 0
-			then
-				# Get the location and name of the extracted CernVM image file
-				# which is either a hdd or vmdk file
-				IMAGE_LOCATION=$(find_file $2 hdd ; find_file $2 vmdk ; find_file $2 vdi ; find_file $2 ext3)
-				RESULT=0
-			fi
-		fi			
-	fi
+        # If download succeeded extract file        
+        if test "$?" -eq 0 && verify_exists ${FILE_LOCATION} ; test "$?" -eq 0
+        then
+            # Extract downloaded CernVM image in the directory it is located in
+            extract_file ${FILE_LOCATION}
+            
+            # Verify extraction succeeded and get the location of CernVM image file
+            if test "$?" -eq 0
+            then
+                # Get the location and name of the extracted CernVM image file
+                # which is either a hdd vmdk vdi or ext3 file
+                IMAGE_LOCATION=$(find_file $2 hdd ; find_file $2 vmdk ; find_file $2 vdi ; find_file $2 ext3)
+                RESULT=0
+            fi
+        fi          
+    fi
 
-	echo ${IMAGE_LOCATION}
-	return $RESULT
+    echo ${IMAGE_LOCATION}
+    return $RESULT
 }
 
 
@@ -329,6 +329,46 @@ download_extract()
 
 # VIRTUAL MACHINE RELATED PRECONDITION TESTS
 # ------------------------------------------
+
+
+#****f* cernvm-preconditions/verify_virsh_uri
+# NAME
+#   verify_virsh_uri
+# DESCRIPTION
+#   Precondition Test - Verify that the URI virsh is connected to matches the
+#                       URI for the current hypervisor 
+# NOTES
+#   This precondition test is useful for catching a potential libvirt or hypervisor error
+#   that is not caught by the scripts or virsh, for example if virsh fails to connect properly
+#   to the URI specified, the URI that is returned by virsh will be the default and not match
+#   the URI for the current hypervisor being tested
+# ARGUMENTS
+#   $1 - The URI of the hypervisor
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   verify_virsh_uri vmwarews:///session
+#***
+verify_virsh_uri()
+{
+    RESULT=1
+    ACTUAL_URI=""
+
+    ACTUAL_URI=$(connect_virsh $1)
+
+    # Verify virsh connected to the URI
+    if [ "$?" -eq 0 ]
+    then
+        # Verify that the URI virsh connected to matches the correct URI
+        if [ "${ACTUAL_URI}" == "$1" ]
+        then
+            RESULT=0
+        fi
+    fi
+
+    return $RESULT
+}
+
 
 #****f* cernvm-preconditions/verify_vm_net
 # NAME
@@ -345,19 +385,19 @@ download_extract()
 #***
 verify_vm_net()
 {
-	RESULT=1
+    RESULT=1
 
-	# Verify that the network is set as active
-	if vm_net_active $1 ; test "$?" -eq 0
-	then
-		# Verify that the network set as autostart
-		if vm_net_autostart $1 ; test "$?" -eq 0
-		then
-			RESULT=0
-		fi
-	fi
+    # Verify that the network is set as active
+    if vm_net_active $1 ; test "$?" -eq 0
+    then
+        # Verify that the network set as autostart
+        if vm_net_autostart $1 ; test "$?" -eq 0
+        then
+            RESULT=0
+        fi
+    fi
 
-	return $RESULT
+    return $RESULT
 }
 
 
@@ -375,21 +415,21 @@ verify_vm_net()
 #***
 validate_def_xml()
 {
-	RESULT=1
+    RESULT=1
 
-	# Precondition - verify file exists
-	if verify_exists $1 ; test "$?" -eq 0
-	then
-		# Verify xml file is valid
-		if xmllint --noout $1 ; test "$?" -eq 0
-		then
-			RESULT=0
-		fi
-	fi
+    # Precondition - verify file exists
+    if verify_exists $1 ; test "$?" -eq 0
+    then
+        # Verify xml file is valid
+        if xmllint --noout $1 ; test "$?" -eq 0
+        then
+            RESULT=0
+        fi
+    fi
 
-	return $RESULT
-}	
-	
+    return $RESULT
+}   
+    
 
 #****f* cernvm-preconditions/validate_def_settings
 # NAME
@@ -406,79 +446,79 @@ validate_def_xml()
 #***
 validate_def_settings()
 {
-	RESULT=1
+    RESULT=1
 
-	# Precondition - verify file exists
-	# Precondition - verify xml file is valid
-	if verify_exists $1 ; test "$?" -eq 0 \
-	&& validate_def_xml $1 ; test "$?" -eq 0
-	then
-		# Check that mandatory settings are correct
-		# Verify domain type from xml file, return failure if not valid type
-		DOMAIN_TYPE=$(egrep -E "^<domain[[:space:]]*type='([a-zA-Z]+)'" $1 | sed -E \
-					"s/.*type='([^']+)'.*/\\1/")
-		case "$DOMAIN_TYPE" in
-		"kvm")
-		  ;;
-		"qemu")
-		  ;;
-		"vbox")
-		  ;;
-		"vmware")
-		  ;;
-		"xen")
-		  ;;
-		*)
-		  # Failure, domain type not supported
-		  return $RESULT
-		  ;;
-		esac
+    # Precondition - verify file exists
+    # Precondition - verify xml file is valid
+    if verify_exists $1 ; test "$?" -eq 0 \
+    && validate_def_xml $1 ; test "$?" -eq 0
+    then
+        # Check that mandatory settings are correct
+        # Verify domain type from xml file, return failure if not valid type
+        DOMAIN_TYPE=$(egrep -E "^<domain[[:space:]]*type='([a-zA-Z]+)'" $1 | sed -E \
+                    "s/.*type='([^']+)'.*/\\1/")
+        case "$DOMAIN_TYPE" in
+        "kvm")
+          ;;
+        "qemu")
+          ;;
+        "vbox")
+          ;;
+        "vmware")
+          ;;
+        "xen")
+          ;;
+        *)
+          # Failure, domain type not supported
+          return $RESULT
+          ;;
+        esac
 
-		# Verify that the name is set
-		if egrep -q -E "^[[:space:]]*<name>.+</name>" $1 ; test "$?" -ne 0
-		then
-			# No virtual machine name set
-			return $RESULT
-		fi
-		
-		# Verify that a valid uuid for the virtual machine is set
-		if egrep -q -E \
-		"^[[:space:]]*<uuid>[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}</uuid>" \
-		$1 ; test "$?" -ne 0
-		then
-			# No uuid or invalid uuid set
-			return $RESULT
-		fi
+        # Verify that the name is set
+        if egrep -q -E "^[[:space:]]*<name>.+</name>" $1 ; test "$?" -ne 0
+        then
+            # No virtual machine name set
+            return $RESULT
+        fi
+        
+        # Verify that a valid uuid for the virtual machine is set
+        if egrep -q -E \
+        "^[[:space:]]*<uuid>[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}</uuid>" \
+        $1 ; test "$?" -ne 0
+        then
+            # No uuid or invalid uuid set
+            return $RESULT
+        fi
 
-		# Verify that the number of virtual cpus is set
-		if egrep -q -E "^[[:space:]]*<vcpu>[0-9]{1}</vcpu>" $1 ; test "$?" -ne 0
-		then
-			# No vcpus set
-			return $RESULT
-		fi
+        # Verify that the number of virtual cpus is set
+        if egrep -q -E "^[[:space:]]*<vcpu>[0-9]{1}</vcpu>" $1 ; test "$?" -ne 0
+        then
+            # No vcpus set
+            return $RESULT
+        fi
 
-		# Verify that the memory is set
-		if egrep -q -E "^[[:space:]]*<memory>[0-9]+</memory>" $1 ; test "$?" -ne 0
-		then
-			# No memory set
-			return $RESULT
-		fi
+        # Verify that the memory is set
+        if egrep -q -E "^[[:space:]]*<memory>[0-9]+</memory>" $1 ; test "$?" -ne 0
+        then
+            # No memory set
+            return $RESULT
+        fi
 
-		# Verify that the virtual machine image file is set and exists
-		IMAGE_FILE=$(egrep -E "^[[:space:]]*<source file='(.+)'" $1 | sed -E \
-					"s|.*'([^']+)'.*|\\1|")
-		if verify_exists ${IMAGE_FILE} ; test "$?" -ne 0
-		then
-			# Image file not set, or doesn't exist
-			return $RESULT
-		fi
-	
-		# All mandatory configuration settings for the virtual machine XML 
-		# definition file have been provided and are valid
-		RESULT=0
-	fi
+        # Verify that the virtual machine image file is set and exists
+        IMAGE_FILE=$(egrep -E "^[[:space:]]*<source file='(.+)'" $1 | sed -E \
+                    "s|.*'([^']+)'.*|\\1|")
+        if verify_exists ${IMAGE_FILE} ; test "$?" -ne 0
+        then
+            # Image file not set, or doesn't exist
+            return $RESULT
+        fi
+    
+        # All mandatory configuration settings for the virtual machine XML 
+        # definition file have been provided and are valid
+        RESULT=0
+    fi
 
-	return $RESULT
+    return $RESULT
 }
 
 
@@ -499,49 +539,49 @@ validate_def_settings()
 #***
 validate_net_settings()
 {
-	RESULT=1
+    RESULT=1
 
-	# Precondition - verify file exists
-	# Precondition - verify xml file is valid
-	if verify_exists $1 ; test "$?" -eq 0 \
-	&& validate_def_xml $1 ; test "$?" -eq 0
-	then
-		# Check that mandatory settings are correct
-		# Verify that a valid uuid for the network is set
-		if egrep -q -E \
-		"^[[:space:]]*<uuid>[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}</uuid>" \
-		$1 ; test "$?" -ne 0
-		then
-			# No uuid or invalid uuid set
-			return $RESULT
-		fi
+    # Precondition - verify file exists
+    # Precondition - verify xml file is valid
+    if verify_exists $1 ; test "$?" -eq 0 \
+    && validate_def_xml $1 ; test "$?" -eq 0
+    then
+        # Check that mandatory settings are correct
+        # Verify that a valid uuid for the network is set
+        if egrep -q -E \
+        "^[[:space:]]*<uuid>[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}</uuid>" \
+        $1 ; test "$?" -ne 0
+        then
+            # No uuid or invalid uuid set
+            return $RESULT
+        fi
 
-		# Verify that the name is set
-		if egrep -q -E "^[[:space:]]*<name>.+</name>" $1 ; test "$?" -ne 0
-		then
-			# No network name set
-			return $RESULT
-		fi
-		
-		# Verify that the ip address is set and valid
-		if egrep -q -E \
-		"^[[:space:]]*<ip[[:space:]]*address='[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'" \
-		$1 ; test "$?" -ne 0 && egrep -q -E \
-		"^[[:space:]]*<range[[:space:]]*start='[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'" \
-		$1 ; test "$?" -ne 0 && egrep -q -E \
-		"^[[:space:]]*<range.*end='[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'" \
-		$1 ; test "$?" -ne 0
-		then
-			# No ip address or invalid ip address set
-			return $RESULT
-		fi
-		
-		# All mandatory configuration settings for the virtual machine XML 
-		# definition file have been provided and are valid
-		RESULT=0
-	fi
+        # Verify that the name is set
+        if egrep -q -E "^[[:space:]]*<name>.+</name>" $1 ; test "$?" -ne 0
+        then
+            # No network name set
+            return $RESULT
+        fi
+        
+        # Verify that the ip address is set and valid
+        if egrep -q -E \
+        "^[[:space:]]*<ip[[:space:]]*address='[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'" \
+        $1 ; test "$?" -ne 0 && egrep -q -E \
+        "^[[:space:]]*<range[[:space:]]*start='[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'" \
+        $1 ; test "$?" -ne 0 && egrep -q -E \
+        "^[[:space:]]*<range.*end='[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'" \
+        $1 ; test "$?" -ne 0
+        then
+            # No ip address or invalid ip address set
+            return $RESULT
+        fi
+        
+        # All mandatory configuration settings for the virtual machine XML 
+        # definition file have been provided and are valid
+        RESULT=0
+    fi
 
-	return $RESULT
+    return $RESULT
 }
 
 
@@ -560,42 +600,42 @@ validate_net_settings()
 #***
 verify_hypervisor()
 {
-	RESULT=1
-	URI="test:///default"
+    RESULT=1
+    URI="test:///default"
 
-	# Precondition - Validate the mandatory virtual machine settings for the hypervisor
-	if validate_def_settings $1 ; test "$?" -eq 0
-	then
-		# Set the virsh URI for the virtual machine hypervisor
-		DOMAIN_TYPE=$(egrep -E "^<domain[[:space:]]*type='([a-zA-Z]+)'" $1 | sed -E \
-					"s/.*type='([^']+)'.*/\\1/")
-		case "$DOMAIN_TYPE" in
-		"kvm")
-		  URI="qemu:///system"
-		  ;;
-		"qemu")
-		  URI="qemu:///system"
-		  ;;
-		"vbox")
-		  URI="vbox:///session"
-		  ;;
-		"vmware")
-		  URI="vmwarews:///session"
-		  ;;
-		"xen")
-		  URI="xen:///"
-		  ;;
-		esac
-	fi
+    # Precondition - Validate the mandatory virtual machine settings for the hypervisor
+    if validate_def_settings $1 ; test "$?" -eq 0
+    then
+        # Set the virsh URI for the virtual machine hypervisor
+        DOMAIN_TYPE=$(egrep -E "^<domain[[:space:]]*type='([a-zA-Z]+)'" $1 | sed -E \
+                    "s/.*type='([^']+)'.*/\\1/")
+        case "$DOMAIN_TYPE" in
+        "kvm")
+          URI="qemu:///system"
+          ;;
+        "qemu")
+          URI="qemu:///system"
+          ;;
+        "vbox")
+          URI="vbox:///session"
+          ;;
+        "vmware")
+          URI="vmwarews:///session"
+          ;;
+        "xen")
+          URI="xen:///"
+          ;;
+        esac
+    fi
 
-	# If it is possible to connect to the hypervisor through virsh export URI
-	if connect_virsh $URI ; test "$?" -eq 0
-	then
-		export URI
-		RESULT=0
-	fi
+    # If it is possible to connect to the hypervisor through virsh export URI
+    if connect_virsh $URI ; test "$?" -eq 0
+    then
+        export URI
+        RESULT=0
+    fi
 
-	return $RESULT
+    return $RESULT
 }
 
 
@@ -618,83 +658,83 @@ verify_hypervisor()
 #***
 create_def()
 {
-	RESULT=1
-	TEMPLATE_FILE="$TEMPLATE_DIR/$1"
-	DEFINITION_FILE=""
-	
-	# Precondition - Verify that the template file and destination directory exist
-	if verify_exists $TEMPLATE_FILE ; test "$?" -eq 0 \
-	&& verify_exists $2 ; test "$?" -eq 0
-	then
-		# Copy template file to the directory specified
-		cp -f $TEMPLATE_FILE $2
-		
-		# Set the definition file location
-		DEFINITION_FILE="$2/$1"
+    RESULT=1
+    TEMPLATE_FILE="$TEMPLATE_DIR/$1"
+    DEFINITION_FILE=""
+    
+    # Precondition - Verify that the template file and destination directory exist
+    if verify_exists $TEMPLATE_FILE ; test "$?" -eq 0 \
+    && verify_exists $2 ; test "$?" -eq 0
+    then
+        # Copy template file to the directory specified
+        cp -f $TEMPLATE_FILE $2
+        
+        # Set the definition file location
+        DEFINITION_FILE="$2/$1"
 
-		# Apply each virtual setting specified to create the final definition file
-		# Set the mandatory definition setting not specified in template
-		if [ "${CERNVM_IMAGE}" ]
-		then
-			# Set the location of the cernvm image file
-			# Must use a different delimeter than / for sed since variable is a path
-			sed -i -E "s|<source file=''|<source file='${CERNVM_IMAGE}'|" $DEFINITION_FILE
-		fi
-		
-		# Set the mandatory definition setting not specified in template
-		if [ "${VM_UUID}" ]
-		then
-			# Set a unique uuid for the virtual machine
-			sed -i -E "s|<uuid></uuid>|<uuid>${VM_UUID}</uuid>|" $DEFINITION_FILE
-		fi
+        # Apply each virtual setting specified to create the final definition file
+        # Set the mandatory definition setting not specified in template
+        if [ "${CERNVM_IMAGE}" ]
+        then
+            # Set the location of the cernvm image file
+            # Must use a different delimeter than / for sed since variable is a path
+            sed -i -E "s|<source file=''|<source file='${CERNVM_IMAGE}'|" $DEFINITION_FILE
+        fi
+        
+        # Set the mandatory definition setting not specified in template
+        if [ "${VM_UUID}" ]
+        then
+            # Set a unique uuid for the virtual machine
+            sed -i -E "s|<uuid></uuid>|<uuid>${VM_UUID}</uuid>|" $DEFINITION_FILE
+        fi
 
-		# Set the mandatory definition setting not specified in template
-		if [ "$ARCH" ]
-		then
-			# Set the architecture of the CernVM image
-			sed -i -E "s|arch=''|arch='$ARCH'|" $DEFINITION_FILE
-		fi
-				
-		# Set the following template setting overrides, if specified
-		# Must use a different delimeter than / for sed since xml tags use /
-		if [ "$NAME" ]
-		then
-			# Override the default virtual machine name
-			sed -i -E "s|<name>.*</name>|<name>$NAME</name>|" $DEFINITION_FILE
-		fi
+        # Set the mandatory definition setting not specified in template
+        if [ "$ARCH" ]
+        then
+            # Set the architecture of the CernVM image
+            sed -i -E "s|arch=''|arch='$ARCH'|" $DEFINITION_FILE
+        fi
+                
+        # Set the following template setting overrides, if specified
+        # Must use a different delimeter than / for sed since xml tags use /
+        if [ "$NAME" ]
+        then
+            # Override the default virtual machine name
+            sed -i -E "s|<name>.*</name>|<name>$NAME</name>|" $DEFINITION_FILE
+        fi
 
-		if [ "$CPUS" ]
-		then
-			# Override the default number of cpus
-			sed -i -E "s|<vcpu>.*</vcpu>|<vcpu>$CPUS</vcpu>|" $DEFINITION_FILE
-		fi
+        if [ "$CPUS" ]
+        then
+            # Override the default number of cpus
+            sed -i -E "s|<vcpu>.*</vcpu>|<vcpu>$CPUS</vcpu>|" $DEFINITION_FILE
+        fi
 
-		if [ "$MEMORY" ]
-		then
-			# Override the default amount of memory
-			sed -i -E "s|<memory>.*</memory>|<memory>$MEMORY</memory>|" \
-			$DEFINITION_FILE
-		fi
+        if [ "$MEMORY" ]
+        then
+            # Override the default amount of memory
+            sed -i -E "s|<memory>.*</memory>|<memory>$MEMORY</memory>|" \
+            $DEFINITION_FILE
+        fi
 
-		# Virtual machine network name, this is the same as defined in network xml file
-		if [ "$NET_NAME" ]
-		then
-			# Override the default virtual network name
-			sed -i -E "s|<source[[:space:]]*network='.*'|<source network='$NET_NAME'|" \
-			$DEFINITION_FILE
-		fi
+        # Virtual machine network name, this is the same as defined in network xml file
+        if [ "$NET_NAME" ]
+        then
+            # Override the default virtual network name
+            sed -i -E "s|<source[[:space:]]*network='.*'|<source network='$NET_NAME'|" \
+            $DEFINITION_FILE
+        fi
 
-		if [ "$VIDEO_MEMORY" ]
-		then
-			# Override the default amount of video memory
-			sed -i -E "s|vram='.*'|vram='$VIDEO_MEMORY'|" $DEFINITION_FILE
-		fi
+        if [ "$VIDEO_MEMORY" ]
+        then
+            # Override the default amount of video memory
+            sed -i -E "s|vram='.*'|vram='$VIDEO_MEMORY'|" $DEFINITION_FILE
+        fi
 
-		RESULT=0
-	fi
-	
-	echo $DEFINITION_FILE
-	return $RESULT
+        RESULT=0
+    fi
+    
+    echo $DEFINITION_FILE
+    return $RESULT
 }
 
 
@@ -717,51 +757,51 @@ create_def()
 #***
 create_net_def()
 {
-	RESULT=1
-	TEMPLATE_FILE="$TEMPLATE_DIR/$1"
-	DEFINITION_FILE=""
-	
-	# Precondition - Verify that the template file and destination directory exist
-	if verify_exists $TEMPLATE_FILE ; test "$?" -eq 0 \
-	&& verify_exists $2 ; test "$?" -eq 0
-	then
-		# Copy template file to the directory specified
-		cp -f $TEMPLATE_FILE $2
-		
-		# Set the definition file location
-		DEFINITION_FILE="$2/$1"
+    RESULT=1
+    TEMPLATE_FILE="$TEMPLATE_DIR/$1"
+    DEFINITION_FILE=""
+    
+    # Precondition - Verify that the template file and destination directory exist
+    if verify_exists $TEMPLATE_FILE ; test "$?" -eq 0 \
+    && verify_exists $2 ; test "$?" -eq 0
+    then
+        # Copy template file to the directory specified
+        cp -f $TEMPLATE_FILE $2
+        
+        # Set the definition file location
+        DEFINITION_FILE="$2/$1"
 
-		# Apply each virtual setting specified to create the final definition file
-		# Set the mandatory definition setting not specified in template
-		if [ "${NET_UUID}" ]
-		then
-			# Set a unique uuid for the virtual machine
-			sed -i -E "s|<uuid></uuid>|<uuid>${NET_UUID}</uuid>|" $DEFINITION_FILE
-		fi
-			
-		# Set the mandatory definition setting not specified in template
-		# Must use a different delimeter than / for sed since xml tags use /
-		if [ "$NET_NAME" ]
-		then
-			# Override the default virtual machine name
-			sed -i -E "s|<name>.*</name>|<name>$NET_NAME</name>|" $DEFINITION_FILE
-		fi
+        # Apply each virtual setting specified to create the final definition file
+        # Set the mandatory definition setting not specified in template
+        if [ "${NET_UUID}" ]
+        then
+            # Set a unique uuid for the virtual machine
+            sed -i -E "s|<uuid></uuid>|<uuid>${NET_UUID}</uuid>|" $DEFINITION_FILE
+        fi
+            
+        # Set the mandatory definition setting not specified in template
+        # Must use a different delimeter than / for sed since xml tags use /
+        if [ "$NET_NAME" ]
+        then
+            # Override the default virtual machine name
+            sed -i -E "s|<name>.*</name>|<name>$NET_NAME</name>|" $DEFINITION_FILE
+        fi
 
-		# Set the mandatory definition setting not specified in template
-		# Must use a different delimeter than / for sed since xml tags use /
-		if [ "$IP_ADDRESS" ]
-		then
-			# Override the default ip address
-			# TODO: IMPLEMENT SUPPORT FOR OVERRIDING THE DEFAULT IP ADDRESS SPECIFIED
-			# 		IN TEMPLATE FILE, INVOLVES SETTING APPROPRIATE NETMASK/RANGE/ETC..
-			echo "todo" > /dev/null
-		fi
+        # Set the mandatory definition setting not specified in template
+        # Must use a different delimeter than / for sed since xml tags use /
+        if [ "$IP_ADDRESS" ]
+        then
+            # Override the default ip address
+            # TODO: IMPLEMENT SUPPORT FOR OVERRIDING THE DEFAULT IP ADDRESS SPECIFIED
+            #       IN TEMPLATE FILE, INVOLVES SETTING APPROPRIATE NETMASK/RANGE/ETC..
+            echo "todo" > /dev/null
+        fi
 
-		RESULT=0
-	fi
-	
-	echo $DEFINITION_FILE
-	return $RESULT
+        RESULT=0
+    fi
+    
+    echo $DEFINITION_FILE
+    return $RESULT
 }
 
 
@@ -781,18 +821,18 @@ create_net_def()
 #***
 create_net()
 {
-	RESULT=1
+    RESULT=1
 
-	# Remove previously existing networks with the same name
-	if destroy_vm_net $2 ; test "$?" -eq 0
-	then
-		# Create the network
-		create_vm_net $1 $2
+    # Remove previously existing networks with the same name
+    if destroy_vm_net $2 ; test "$?" -eq 0
+    then
+        # Create the network
+        create_vm_net $1 $2
 
-		RESULT=0
-	fi
+        RESULT=0
+    fi
 
-	return $RESULT
+    return $RESULT
 }
 
 
@@ -822,73 +862,73 @@ create_net()
 #***
 configure_image_web()
 {
-	RESULT=1
+    RESULT=1
 
-	# Generate the template header which is used as a basis for 
-	# creating headers for interacting with CernVM web interface
-	generate_template_header $1
+    # Generate the template header which is used as a basis for 
+    # creating headers for interacting with CernVM web interface
+    generate_template_header $1
 
 
-	# Precondition - verify virtual machine has web interface support
-	# Precondition - verify that it is possible to login on web interface
-	if web_check_interface $1 web_config_check.log ; test "$?" -eq 0 \
-	&& web_check_login $1 $2 $3 web_config_login.log ; test "$?" -eq 0
-	then
+    # Precondition - verify virtual machine has web interface support
+    # Precondition - verify that it is possible to login on web interface
+    if web_check_interface $1 web_config_check.log ; test "$?" -eq 0 \
+    && web_check_login $1 $2 $3 web_config_login.log ; test "$?" -eq 0
+    then
 
-		# Configure the proxy settings using the CernVM web interface
-		# at the moment it doesn't specify any proxy settings
-		if web_config_proxy $1 web_config_proxy.log ; test "$?" -ne 0
-		then
-			# Configure proxy settings failed
-			return $RESULT
-		fi
+        # Configure the proxy settings using the CernVM web interface
+        # at the moment it doesn't specify any proxy settings
+        if web_config_proxy $1 web_config_proxy.log ; test "$?" -ne 0
+        then
+            # Configure proxy settings failed
+            return $RESULT
+        fi
 
-		# Configure the web interface administrator password
-		if web_config_password $1 $ADMIN_PASS web_config_password.log ; test "$?" -ne 0
-		then
-			# Configure the web interface administrator password failed
-			return $RESULT
-		fi
-	
-		# Create a new user using the CernVM web interface
-		if web_create_user $1 $USER_NAME $USER_PASS $USER_GROUP \
-		web_create_new_user.log ; test "$?" -ne 0
-		then
-			# Create new user failed
-			return $RESULT
-		fi
+        # Configure the web interface administrator password
+        if web_config_password $1 $ADMIN_PASS web_config_password.log ; test "$?" -ne 0
+        then
+            # Configure the web interface administrator password failed
+            return $RESULT
+        fi
+    
+        # Create a new user using the CernVM web interface
+        if web_create_user $1 $USER_NAME $USER_PASS $USER_GROUP \
+        web_create_new_user.log ; test "$?" -ne 0
+        then
+            # Create new user failed
+            return $RESULT
+        fi
 
-		# Configure the CernVM image desktop settings using the CernVM web interface
-		if web_config_desktop $1 $STARTXONBOOT $RESOLUTION $KEYBOARD_LOCALE \
-		web_config_desktop.log ; test "$?" -ne 0
-		then
-			# Configure CernVM image desktop failed
-			return $RESULT
-		fi
+        # Configure the CernVM image desktop settings using the CernVM web interface
+        if web_config_desktop $1 $STARTXONBOOT $RESOLUTION $KEYBOARD_LOCALE \
+        web_config_desktop.log ; test "$?" -ne 0
+        then
+            # Configure CernVM image desktop failed
+            return $RESULT
+        fi
 
-		# Configure the CernVM image appliance group settings using web interface
-		if web_config_group $1 $EXPERIMENT_GROUP web_config_group.log ; test "$?" -ne 0
-		then
-			# Configure experiment group failed
-			return $RESULT
-		fi
+        # Configure the CernVM image appliance group settings using web interface
+        if web_config_group $1 $EXPERIMENT_GROUP web_config_group.log ; test "$?" -ne 0
+        then
+            # Configure experiment group failed
+            return $RESULT
+        fi
 
-		# Apply configuration changes made using the CernVM web interface, which
-		# then reboots the CernVM image once completed
-		if web_apply_settings $1 web_apply_settings.log ; test "$?" -ne 0
-		then
-			# Apply settings failed
-			return $RESULT
-		fi
-		
-		# Setup and configure the initial CernVM image succeeded
-		RESULT=0
-		# TODO:	Implement this using a function that uses curl to get the updates
-		#		from the web server to determine when system has rebooted
-		# Wait 10 minutes for the settings to be applied, updates installed, and
-		# the system to reboot		
-		sleep 600
-	fi
+        # Apply configuration changes made using the CernVM web interface, which
+        # then reboots the CernVM image once completed
+        if web_apply_settings $1 web_apply_settings.log ; test "$?" -ne 0
+        then
+            # Apply settings failed
+            return $RESULT
+        fi
+        
+        # Setup and configure the initial CernVM image succeeded
+        RESULT=0
+        # TODO: Implement this using a function that uses curl to get the updates
+        #       from the web server to determine when system has rebooted
+        # Wait 10 minutes for the settings to be applied, updates installed, and
+        # the system to reboot      
+        sleep 600
+    fi
 
-	return $RESULT
+    return $RESULT
 }
