@@ -234,3 +234,46 @@ add_trace_close()
     # Create function call closure identifier
     TRACE_OUTPUT=("${TRACE_OUTPUT[@]}" "${TAB_DEPTH}<-${1}")
 }
+
+
+#****f* testsuite-trace/log_trace_output
+# NAME
+#   log_trace_output
+# DESCRIPTION
+#   Logs the trace output to the file specified
+# ARGUMENTS
+#   $1 - The name of the logfile to store the trace output
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   log_trace_output $TRACE_LOGFILE
+#***
+log_trace_output()
+{
+    # Log the data stored in TRACE_OUTPUT to file
+    for i in $(eval echo {0..$((${#TRACE_OUTPUT[@]} - 1))})
+    do
+        echo -e "${TRACE_OUTPUT[i]}" >> $1
+    done
+}
+
+
+#****f* testsuite-trace/create_trace_log
+# NAME
+#   create_trace_log
+# DESCRIPTION
+#   Creates a new trace log file with a title, the date, and basic info
+# ARGUMENTS
+#   $1 - The name of the trace log file to create
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   create_trace_log cernvm-trace.log
+#***
+create_trace_log()
+{
+    CURRENT_DATE=$(date)
+
+    # Create the trace log file
+    echo -e "Trace Log File - ${CURRENT_DATE}" > $1
+}
