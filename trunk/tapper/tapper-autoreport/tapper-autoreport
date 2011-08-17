@@ -179,11 +179,27 @@ require_amd_family_range () {
 
 # check sysfs whether cpu has L3 cache
 has_l3cache () {
-    if [ -d /sys/devices/system/cpu/cpu0/cache/index3 ] ; then
-        return 0
-    else
-        return 1
+    
+    RESULT=1
+
+    # Determine if CPU has L3 cache for linux systems
+    if [ "${OSTYPE}" == "linux" ]
+    then
+        if [ -d /sys/devices/system/cpu/cpu0/cache/index3 ]
+        then
+            RESULT=0
+        fi
+
+    # Determine CPU L3 cache for OS X system
+    elif [ "${OSTYPE}" == "osx" ]
+    then
+        if $(sysctl -a hw | grep -q -e "hw.l3cachesize") ; test "$?" -eq 0
+        then
+            RESULT=0
+        fi
     fi
+    
+    return $RESULT
 }
 
 # stops testscript if cpu does not have L3 cache
@@ -195,14 +211,30 @@ require_l3cache () {
     fi
 }
 
-# checks for a feature flag in /proc/cpuinfo
+# checks for a cpu feature flag
 has_cpufeature () {
+
     feature="${1:-UNKNOWNFEATURE}"
-    if cat /proc/cpuinfo | grep -E '^flags\W*:' | head -1 | grep -q "\<${feature}\>" 2>&1 ; then
-        return 0
-    else
-        return 1
+    RESULT=1
+
+    # Determine if CPU has feature for linux systems
+    if [ "${OSTYPE}" == "linux" ]
+    then
+        if cat /proc/cpuinfo | grep -E '^flags\W*:' | head -1 | grep -q "\<${feature}\>" 2>&1
+        then
+            RESULT=0
+        fi
+
+    # Determine if CPU has feature for OS X system
+    elif [ "${OSTYPE}" == "osx" ]
+    then
+        if $(sysctl -a hw | grep -q -e "${feature}") ; test "$?" -eq 0
+        then
+            RESULT=0
+        fi
     fi
+
+    return $RESULT
 }
 
 # stops testscript if a feature flag is not found in /proc/cpuinfo
