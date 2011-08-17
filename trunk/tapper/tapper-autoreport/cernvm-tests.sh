@@ -155,9 +155,9 @@ REPORT_SERVER="${CVM_TS_REPORT_SERVER}"     # Mandatory, Tapper server hostname/
 DOWNLOAD_PAGE="${CVM_TS_DOWNLOAD_PAGE}"     # Mandatory, a default url is provided in the configuration file
 
 ######### Mandatory CernVM Image Settings ##########
-HYPERVISOR="${CVM_VM_HYPERVISOR}"           # Mandatory, valid hypervisors are vmware,vbox,kvm
+HYPERVISOR="${CVM_VM_HYPERVISOR}"           # Mandatory, valid hypervisors are vmware,vbox,kvm,xen
 TEMPLATE="${CVM_VM_TEMPLATE}"               # Mandatory, the hypervisor template file in the templates folder
-NET_TEMPLATE="${CVM_VM_NET_TEMPLATE}"       # Mandatory, the network template file, only applies to kvm/virtualbox
+NET_TEMPLATE="${CVM_VM_NET_TEMPLATE}"       # Mandatory, the network template file, only applies to kvm/virtualbox/xen
 IMAGE_TYPE="${CVM_VM_IMAGE_TYPE}"           # Mandatory, currently only basic and desktop supported
 IMAGE_VERSION="${CVM_VM_IMAGE_VERSION}"     # Mandatory, version to download
 ARCH="${CVM_VM_ARCH}"                       # Mandatory, valid architectures are x86 and x86_64
@@ -191,10 +191,11 @@ HOSTNAME="${CVM_TS_HOSTNAME}"                           # Optional, set this to 
 ######### Optional CernVM Image Settings ##########
 IMAGE_RELEASE_ID="${CVM_VM_IMAGE_RELEASE_ID}" # Optional, used to narrow down testing of the same release version 
 NAME="${CVM_VM_NAME:-cernvm-${HYPERVISOR}-${IMAGE_VERSION}}" # Optional, default name based on hypervisor & version
-CPUS="${CVM_VM_CPUS}"                   # Optional, default in template used unless overriden
-MEMORY="${CVM_VM_MEMORY}"               # Optional, default in template used unless overriden
-VIDEO_MEMORY="${CVM_VM_VIDEO_MEMORY}"   # Optional, default in template used unless overriden
-NET_NAME="${CVM_VM_NET_NAME}"           # Optional, default in template used unless overriden
+CPUS="${CVM_VM_CPUS}"                       # Optional, default in template used unless overriden
+MEMORY="${CVM_VM_MEMORY}"                   # Optional, default in template used unless overriden
+VIDEO_MEMORY="${CVM_VM_VIDEO_MEMORY}"       # Optional, default in template used unless overriden
+NET_NAME="${CVM_VM_NET_NAME}"               # Optional, default in template used unless overriden
+MAC_ADDRESS="${CVM_VM_MAC_ADDRESS}"         # Optional, default in template used unless overriden
 
 
 ######### Optional Web Interface Settings ##########
@@ -356,9 +357,10 @@ ok $? "Precondition Test 10 - Verify that the mandatory configuration settings f
 network XML definition file have been provided and are valid"
 
 
-# Set the network name and IP address from the network xml definition file
-NET_NAME=$(get_net_name ${NET_XML_DEFINITION})
-IP_ADDRESS=$(get_ip_address ${NET_XML_DEFINITION})
+# Set the network name MAC address and IP address
+NET_NAME=$(get_net_name $HYPERVISOR ${NET_XML_DEFINITION})
+MAC_ADDRESS=$(get_mac_address ${VM_XML_DEFINITION})
+IP_ADDRESS=$(get_ip_address $HYPERVISOR ${MAC_ADDRESS} ${NET_XML_DEFINITION})
 
 
 # Precondition Test 11 - Verify that the virtual machine network has been created 

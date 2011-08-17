@@ -314,7 +314,8 @@ download_extract()
             then
                 # Get the location and name of the extracted CernVM image file
                 # which is either a hdd vmdk vdi or ext3 file
-                IMAGE_LOCATION=$(find_file $2 hdd ; find_file $2 vmdk ; find_file $2 vdi ; find_file $2 ext3)
+                IMAGE_LOCATION=$(find_file $2 hdd ; find_file $2 vmdk ; \
+                                 find_file $2 vdi ; find_file $2 ext3)
                 RESULT=0
             fi
         fi          
@@ -721,6 +722,14 @@ create_def()
         then
             # Override the default virtual network name
             sed -i -E "s|<source[[:space:]]*network='.*'|<source network='$NET_NAME'|" \
+            $DEFINITION_FILE
+        fi
+
+        # Virtual machine network MAC address
+        if [ "$MAC_ADDRESS" ]
+        then
+            # Override the default MAC address
+            sed -i -E "s|<mac[[:space:]]*address='.*'|<mac address='$MAC_ADDRESS'|" \
             $DEFINITION_FILE
         fi
 
