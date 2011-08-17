@@ -24,26 +24,102 @@
 
 # ==================== Utility functions =============================
 
-# gets vendor "AMD" or "Intel" from /proc/cpuinfo
+# gets vendor "AMD" or "Intel"
 get_vendor () {
-    vendor=$(echo $(grep vendor_id /proc/cpuinfo |head -1|cut -d: -f2|sed -e "s/Genuine\|Authentic//"))
+    
+    vendor=""
+
+    # Determine the CPU vendor for Linux systems
+    if [ "${OSTYPE}" == "linux" ]
+    then
+        vendor=$(echo $(grep vendor_id /proc/cpuinfo |head -1|cut -d: -f2|sed -e "s/Genuine\|Authentic//"))
+    
+    # If the system is OS X then it will always be Intel
+    elif [ "${OSTYPE}" == "osx" ]
+    then
+        vendor="Intel"
+    fi
     echo $vendor
 }
 
-# checks for vendor "Intel" in /proc/cpuinfo
+# checks for vendor "Intel" 
 vendor_intel () {
-    grep -Eq 'vendor_id.*:.*Intel' /proc/cpuinfo
+    
+    # Verify that CPU vendor is Intel for Linux systems
+    if [ "${OSTYPE}" == "linux" ]
+    then
+        grep -Eq 'vendor_id.*:.*Intel' /proc/cpuinfo
+        return $?
+
+    # If the system is OS X then it will always be Intel
+    elif [ "${OSTYPE}" == "osx" ]
+    then
+        return 0
+    fi
 }
 
-# checks for vendor "AMD" in /proc/cpuinfo
+# checks for vendor "AMD"
 vendor_amd () {
-    grep -Eq 'vendor_id.*:.*AMD' /proc/cpuinfo
+
+    # Verify that CPU vendor is AMD for Linux systems
+    if [ "${OSTYPE}" == "linux" ]
+    then
+        grep -Eq 'vendor_id.*:.*AMD' /proc/cpuinfo
+        return $?
+
+    # If the system is OS X then it will never be AMD
+    elif [ "${OSTYPE}" == "osx" ]
+    then
+        return 1
+    fi
 }
 
-# outputs cpu family from /proc/cpuinfo
+# outputs cpu family
 get_cpu_family () {
-    fam=$(echo $(grep family /proc/cpuinfo |head -1|cut -d: -f2))
-    echo $fam
+
+    CPU_FAMILY=""
+    
+    # Determine the CPU family for Linux systems
+    if [ "${OSTYPE}" == "linux" ]
+    then
+        CPU_FAMILY=$(echo $(grep family /proc/cpuinfo |head -1|cut -d: -f2))
+
+    # Determine CPU family for OS X system
+    elif [ "${OSTYPE}" == "osx" ]
+    then
+        CPU_FAMILY=$(sysctl -a hw | grep -i -e "hw.cputype" | \
+                     sed -E "s|^.*\:[[:space:]]*([[:digit:]]+)|\\1|")
+    fi
+
+    echo "${CPU_FAMILY}"
+}
+
+# outputs cpu info
+get_cpu_info () {
+
+    CPU=""
+    CPU_COUNT=0
+    CPU_INFO=""
+
+    # Determine the CPU info for Linux systems
+    if [ "${OSTYPE}" == "linux" ]
+    then
+        CPU=`grep 'model name' < /proc/cpuinfo | cut -d: -f2- | head -1 | sed -e "s/^ *//"`;
+        CPU_COUNT=`grep 'model name' < /proc/cpuinfo | wc -l`;
+        CPU_INFO="${CPU_COUNT} cores [${CPU}]"
+    
+    # Determine CPU info for OS X system
+    elif [ "${OSTYPE}" == "osx" ]
+    then
+        CPU="$(system_profiler SPHardwareDataType | grep -e "Processor Name:" | sed -E \
+            "s|^.*Name\:[[:space:]]*(.*)|\\1|") @ $(system_profiler SPHardwareDataType | \
+            grep -e "Processor Speed:" | sed -E "s|^.*Name\:[[:space:]]*(.*)|\\1|")"
+        CPU_COUNT=$(sysctl -a hw | grep -i -e "hw.ncpu" | \
+                     sed -E "s|^.*\:[[:space:]]*([[:digit:]]+)|\\1|")
+        CPU_INFO="${CPU_COUNT} cores [${CPU}]"
+    fi
+
+    echo "${CPU_INFO}"
 }
 
 # checks cpu family from /proc/cpuinfo against a minimum family
@@ -58,6 +134,27 @@ cpu_family_max () {
     max=${1:-0x999}
     fam=$(get_cpu_family)
     [ $(($fam)) -le $(($max)) ]
+}
+
+# Get the amount of memory the system has
+get_memory () {
+    
+    MEMORY=0
+
+    # Determine the memory for Linux systems
+    if [ "${OSTYPE}" == "linux" ]
+    then
+       MEMORY=$(free -m | grep -i mem: | awk '{print $2}'MB)
+
+    # Determine the memory for OS X system
+    elif [ "${OSTYPE}" == "osx" ]
+    then
+        MEMORY=$(sysctl -a hw | grep -i -e "hw.memsize:" | \
+                 sed -E "s|^.*\:[[:space:]]*([[:digit:]]+)|\\1|")
+        MEMORY=$((${MEMORY} / 1024**2))
+    fi
+
+    echo ${MEMORY}
 }
 
 autoreport_skip_all () {
