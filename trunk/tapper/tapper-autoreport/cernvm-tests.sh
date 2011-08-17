@@ -18,75 +18,75 @@
 # the results of test cases to be accurate
 #
 #
-# 	Precondition Test 0  - Verify that the download page exists and that there is a 
-#					  	   valid download url for the CernVM image specified, returns
-#					  	   the url to download the image
+#   Precondition Test 0  - Verify that the download page exists and that there is a 
+#                          valid download url for the CernVM image specified, returns
+#                          the url to download the image
 #
-# 	Precondition Test 1  - Download and extract the CernVM image, returns the location 
-#					  	   of the extracted cernvm image file
+#   Precondition Test 1  - Download and extract the CernVM image, returns the location 
+#                          of the extracted cernvm image file
 #
-# 	Precondition Test 2  - Create an XML definition file for the virtual machine based
-#						   on the template XML definition file and settings defined and
-#						   return the location of the final xml defintion file
+#   Precondition Test 2  - Create an XML definition file for the virtual machine based
+#                          on the template XML definition file and settings defined and
+#                          return the location of the final xml defintion file
 #
-#	Precondition Test 3	 - Verify that the virtual machine XML definition file exists
+#   Precondition Test 3  - Verify that the virtual machine XML definition file exists
 #
-#	Precondition Test 4	 - Verify that the XML definition file provided is valid
+#   Precondition Test 4  - Verify that the XML definition file provided is valid
 #
-# 	Precondition Test 5	 - Verify that the mandatory configuration settings for the
-#						   virtual machine XML definition file have been provided
-#						   and are valid
+#   Precondition Test 5  - Verify that the mandatory configuration settings for the
+#                          virtual machine XML definition file have been provided
+#                          and are valid
 #
-# 	Precondition Test 6  - Verify that the hypervisor for the current virtual machine
-#						   tested is accessible, set the URI as a global variable
+#   Precondition Test 6  - Verify that the hypervisor for the current virtual machine
+#                          tested is accessible, set the URI as a global variable
 #
-# 	Precondition Test 7  - Create an XML definition file for the virtual machine network
-#					  	   based on the template network XML definition file and settings 
-#					  	   defined and return the location of the created xml defintion file
+#   Precondition Test 7  - Create an XML definition file for the virtual machine network
+#                          based on the template network XML definition file and settings 
+#                          defined and return the location of the created xml defintion file
 #
-#	Precondition Test 8	 - Verify that the network XML definition file exists
+#   Precondition Test 8  - Verify that the network XML definition file exists
 #
-#	Precondition Test 9	 - Verify that the network XML definition file provided is valid
+#   Precondition Test 9  - Verify that the network XML definition file provided is valid
 #
-# 	Precondition Test 10 - Verify that the mandatory configuration settings for the
-#						   network XML definition file have been provided
-#						   and are valid
+#   Precondition Test 10 - Verify that the mandatory configuration settings for the
+#                          network XML definition file have been provided
+#                          and are valid
 #
-# 	Precondition Test 11 - Verify that the virtual machine network has been created 
-#					  	   from an xml file
+#   Precondition Test 11 - Verify that the virtual machine network has been created 
+#                          from an xml file
 #
-# 	Precondition Test 12 - Verify that virtual machine NAT network is active and 
-#						   set to autostart
+#   Precondition Test 12 - Verify that virtual machine NAT network is active and 
+#                          set to autostart
 #
-# 	Precondition Test 13 - Verify that virtual machine domain has been created 
-#						   from an xml file
+#   Precondition Test 13 - Verify that virtual machine domain has been created 
+#                          from an xml file
 #
-#	Precondition Test 14 - Verify that virtual machine can be started
+#   Precondition Test 14 - Verify that virtual machine can be started
 #
-#	Precondition Test 15 - Verify that virtual machine has been stopped
+#   Precondition Test 15 - Verify that virtual machine has been stopped
 #
-#	Precondition Test 16 - Verify that the virtual has console support
+#   Precondition Test 16 - Verify that the virtual has console support
 #
-#	Precondition Test 17 - Verify that virtual machine has web interface support
+#   Precondition Test 17 - Verify that virtual machine has web interface support
 #
-#	Precondition Test 18 - Verify that it is possible to login on web interface
+#   Precondition Test 18 - Verify that it is possible to login on web interface
 #
-# 	Precondition Test 19 - Setup and configure the initial CernVM image through the
-#					  	   web interface
+#   Precondition Test 19 - Setup and configure the initial CernVM image through the
+#                          web interface
 #
-# 	Precondition Test 20 - Verify that it is possible to login on web interface using
-#						   the new web interface administrator password
+#   Precondition Test 20 - Verify that it is possible to login on web interface using
+#                          the new web interface administrator password
 #
-# 	Precondition Test 21 - Enable automatic SSH login to the machine for the user
-#					       specified using keys instead of passwords, and verify that it
-#					       is possible to login automatically
+#   Precondition Test 21 - Enable automatic SSH login to the machine for the user
+#                          specified using keys instead of passwords, and verify that it
+#                          is possible to login automatically
 #
-# 	Precondition Test 22 - Set the root password using the CernVM web interface
+#   Precondition Test 22 - Set the root password using the CernVM web interface
 #
-# 	Precondition Test 23 - Enable automatic SSH login to the machine for the root
-#					       user using keys instead of passwords, and verify that it
-#					       is possible to login automatically
-#						  
+#   Precondition Test 23 - Enable automatic SSH login to the machine for the root
+#                          user using keys instead of passwords, and verify that it
+#                          is possible to login automatically
+#                         
 #
 #
 # CernVM Tests Cases
@@ -98,21 +98,21 @@
 # including an API reference for each test case
 #
 #
-#	CernVM Test Case 1 - Check login via ssh as user created through web interface
+#   CernVM Test Case 1 - Check login via ssh as user created through web interface
 #
-#	CernVM Test Case 2 - Check login via ssh as root
+#   CernVM Test Case 2 - Check login via ssh as root
 #
-#  	CernVM Test Case 3 - No error messages at boot
+#   CernVM Test Case 3 - No error messages at boot
 #
-#  	CernVM Test Case 4 - Check for correct time / running ntpd
+#   CernVM Test Case 4 - Check for correct time / running ntpd
 #
-#	CernVM Test Case 5 - Create a new user using the CernVM web interface
+#   CernVM Test Case 5 - Create a new user using the CernVM web interface
 #
-#	CernVM Test Case 6 - Verify that the user is created and can be accessed
-#						 from ssh login
+#   CernVM Test Case 6 - Verify that the user is created and can be accessed
+#                        from ssh login
 #
-#	CernVM Test Case 7 - Restart through the web interface and check that there
-#						 are no error messages at boot
+#   CernVM Test Case 7 - Restart through the web interface and check that there
+#                        are no error messages at boot
 #
 # =============================================================================
 
@@ -122,14 +122,13 @@
 . ./web-interface
 . ./cernvm-preconditions
 . ./cernvm-testcases
+. ./testsuite-trace
 
 TAP[0]="ok - autoreport selftest"
-#TAP[1]="ok - some other description"
-#append_tap "ok - the simplest of all tests"
 
-HEADERS[0]="# Tapper-KVM-Version: 4.0.1"
+HEADERS[0]="# Tapper-CernVM-Version: 4.0.1"
 HEADERS[1]="# Tapper-CernVM-Changeset: 1234"
-HEADERS[2]="# Tapper-KVM-Base-OS-description: CernVM 2.4.0"
+HEADERS[2]="# Tapper-CernVM-Description: CernVM Image Testing"
 
 OUTPUT[0]="Please review the attached files"
 OUTPUT[1]="for more information about"
@@ -150,18 +149,18 @@ append_tapdata "number_of_tap_reports: $(get_tap_counter)"
 ###
 
 ######### Mandatory Test Suite Settings ##########
-SUITENAME="${CVM_TS_SUITENAME}"				# Mandatory, the suite name for the tests
-SUITEVERSION="${CVM_TS_SUITEVERSION}"	# Mandatory, the suite version, use default value
-REPORT_SERVER="${CVM_TS_REPORT_SERVER}" 	# Mandatory, Tapper server hostname/ip to send reports to
-DOWNLOAD_PAGE="${CVM_TS_DOWNLOAD_PAGE}"		# Mandatory, a default url is provided in the configuration file
+SUITENAME="${CVM_TS_SUITENAME}"             # Mandatory, the suite name for the tests
+SUITEVERSION="${CVM_TS_SUITEVERSION}"   # Mandatory, the suite version, use default value
+REPORT_SERVER="${CVM_TS_REPORT_SERVER}"     # Mandatory, Tapper server hostname/ip to send reports to
+DOWNLOAD_PAGE="${CVM_TS_DOWNLOAD_PAGE}"     # Mandatory, a default url is provided in the configuration file
 
 ######### Mandatory CernVM Image Settings ##########
-HYPERVISOR="${CVM_VM_HYPERVISOR}"			# Mandatory, valid hypervisors are vmware,vbox,kvm
-TEMPLATE="${CVM_VM_TEMPLATE}"				# Mandatory, the hypervisor template file in the templates folder
-NET_TEMPLATE="${CVM_VM_NET_TEMPLATE}"		# Mandatory, the network template file, only applies to kvm/virtualbox
-IMAGE_TYPE="${CVM_VM_IMAGE_TYPE}"			# Mandatory, currently only basic and desktop supported
-IMAGE_VERSION="${CVM_VM_IMAGE_VERSION}"		# Mandatory, version to download
-ARCH="${CVM_VM_ARCH}"						# Mandatory, valid architectures are x86 and x86_64
+HYPERVISOR="${CVM_VM_HYPERVISOR}"           # Mandatory, valid hypervisors are vmware,vbox,kvm
+TEMPLATE="${CVM_VM_TEMPLATE}"               # Mandatory, the hypervisor template file in the templates folder
+NET_TEMPLATE="${CVM_VM_NET_TEMPLATE}"       # Mandatory, the network template file, only applies to kvm/virtualbox
+IMAGE_TYPE="${CVM_VM_IMAGE_TYPE}"           # Mandatory, currently only basic and desktop supported
+IMAGE_VERSION="${CVM_VM_IMAGE_VERSION}"     # Mandatory, version to download
+ARCH="${CVM_VM_ARCH}"                       # Mandatory, valid architectures are x86 and x86_64
 
 ###
 ###
@@ -177,19 +176,25 @@ ARCH="${CVM_VM_ARCH}"						# Mandatory, valid architectures are x86 and x86_64
 ### THAT WILL USE INTERNAL DEFAULTS IF NOT SPECIFIED 
 ###
 
+######### Optional Trace and Debugging Settings ##########
+TRACE_VERBOSITY="${CVM_TS_TRACE_VERBOSITY:-3}"            # Optional, trace verbosity valid values are 0 - 3
+TRACE_LOGFILE="${CVM_TS_TRACE_LOGFILE:-cernvm-trace.log}" # Optional, name of trace logfile
+
+
 ######### Optional Host Settings ##########
-IMAGES_DIR="${CVM_TS_IMAGES_DIR:-/usr/share/images}"	# Optional, root directory for cernvm images
-OSNAME="${CVM_TS_OSNAME:-$(cat /etc/redhat-release)}"	# Optional, configure this accordingly
-HOSTNAME="${CVM_TS_HOSTNAME:-$(hostname)}"				# Optional, set this to override the system hostname
+IMAGES_DIR="${CVM_TS_IMAGES_DIR:-/usr/share/images}"    # Optional, root directory for cernvm images
+OSTYPE="${CVM_TS_OSTYPE:-$(get_os_type)}"               # Optional, by default automatically determined by script 
+OSNAME="${CVM_TS_OSNAME:-$(get_os_name ${OSTYPE})}"     # Optional, by default automatically determined by script 
+HOSTNAME="${CVM_TS_HOSTNAME}"                           # Optional, set this to override the system hostname
 
 
 ######### Optional CernVM Image Settings ##########
 IMAGE_RELEASE_ID="${CVM_VM_IMAGE_RELEASE_ID}" # Optional, used to narrow down testing of the same release version 
 NAME="${CVM_VM_NAME:-cernvm-${HYPERVISOR}-${IMAGE_VERSION}}" # Optional, default name based on hypervisor & version
-CPUS="${CVM_VM_CPUS}"					# Optional, default in template used unless overriden
-MEMORY="${CVM_VM_MEMORY}"				# Optional, default in template used unless overriden
-VIDEO_MEMORY="${CVM_VM_VIDEO_MEMORY}"	# Optional, default in template used unless overriden
-NET_NAME="${CVM_VM_NET_NAME}"			# Optional, default in template used unless overriden
+CPUS="${CVM_VM_CPUS}"                   # Optional, default in template used unless overriden
+MEMORY="${CVM_VM_MEMORY}"               # Optional, default in template used unless overriden
+VIDEO_MEMORY="${CVM_VM_VIDEO_MEMORY}"   # Optional, default in template used unless overriden
+NET_NAME="${CVM_VM_NET_NAME}"           # Optional, default in template used unless overriden
 
 
 ######### Optional Web Interface Settings ##########
@@ -206,8 +211,8 @@ USER_GROUP="${CVM_WEB_USER_GROUP:-alice}"
 ROOT_PASS="${CVM_WEB_ROOT_PASS:-VM4l1f3}"
 
 # CernVM image desktop settings
-STARTXONBOOT="${CVM_WEB_STARTXONBOOT:-on}"		 # Start X on boot, either "on" or "off"
-RESOLUTION="${CVM_WEB_RESOLUTION:-1024x768}"	 # CernVM image desktop resolution
+STARTXONBOOT="${CVM_WEB_STARTXONBOOT:-on}"       # Start X on boot, either "on" or "off"
+RESOLUTION="${CVM_WEB_RESOLUTION:-1024x768}"     # CernVM image desktop resolution
 KEYBOARD_LOCALE="${CVM_WEB_KEYBOARD_LOCALE:-us}" # CernVM image keyboard locale
 
 # CernVM image primary group (experiment) settings
@@ -215,7 +220,7 @@ EXPERIMENT_GROUP="${CVM_WEB_EXPERIMENT_GROUP:-ALICE}" # Group name, should be al
 
 
 ######### Optional Test Case Settings ##########
-USER_NAME2="${CVM_TC_USER_NAME:-bob}"	# Best to leave as default as it does affect testing
+USER_NAME2="${CVM_TC_USER_NAME:-bob}"   # Best to leave as default as it does affect testing
 USER_PASS2="${CVM_TC_USER_PASS:-R00tM3}" # Best to leave as default as it does affect testing
 
 ###
@@ -234,22 +239,22 @@ USER_PASS2="${CVM_TC_USER_PASS:-R00tM3}" # Best to leave as default as it does a
 
 ######### Path Settings ##########
 TEMPLATE_DIR="$(pwd)/templates"
-IMAGE_FOLDER="$IMAGES_DIR/$HYPERVISOR/$IMAGE_VERSION/$ARCH"	# Unique image download location
+IMAGE_FOLDER="$IMAGES_DIR/$HYPERVISOR/$IMAGE_VERSION/$ARCH" # Unique image download location
 
 
 ######### CernVM Image Settings ##########
-IMAGE_URL=""						# Leave blank, url to download CernVM image
-CERNVM_IMAGE=""						# Leave blank, location of the CernVM image file
-VM_XML_DEFINITION=""				# Leave blank, the virtual machine definition file
-NET_XML_DEFINITION=""				# Leave blank, the network definition file
-IP_ADDRESS="" 						# DO NOT TOUCH, SPECIFYING CUSTOM IP ADDRESSES IS NOT SUPPORTED YET
-VM_UUID=$(uuid)						# Must be set as a valid uuid
-NET_UUID=$(uuid)					# Must be set as a valid uuid
+IMAGE_URL=""                        # Leave blank, url to download CernVM image
+CERNVM_IMAGE=""                     # Leave blank, location of the CernVM image file
+VM_XML_DEFINITION=""                # Leave blank, the virtual machine definition file
+NET_XML_DEFINITION=""               # Leave blank, the network definition file
+IP_ADDRESS=""                       # DO NOT TOUCH, SPECIFYING CUSTOM IP ADDRESSES IS NOT SUPPORTED YET
+VM_UUID=$(uuid)                     # Must be set as a valid uuid
+NET_UUID=$(uuid)                    # Must be set as a valid uuid
 
 
 ######### Auto-Tapper Report Settings ##########
 CHANGESET="0"
-REPORTGROUP=selftest-`date +%Y-%m-%d | md5sum | cut -d" " -f1`
+REPORTGROUP=selftest-$(date | md5sum | cut -d" " -f1)
 NOSEND=0
 NOUPLOAD=0
 
@@ -283,21 +288,21 @@ ok $? "The system is running Linux"
 
 
 # Precondition Test 0 - Verify that the download page exists and that there is a 
-#					  valid download url for the CernVM image specified, returns
-#					  the url to download the image
+#                     valid download url for the CernVM image specified, returns
+#                     the url to download the image
 IMAGE_URL=$(image_url $DOWNLOAD_PAGE $IMAGE_VERSION $HYPERVISOR $ARCH $IMAGE_TYPE)
 ok $? "Precondition Test 0 - Verify that the download page exists and that there is a \
 valid download url for the CernVM image specified, returns the url to download the image"
 
 
 # Precondition Test 1 - Download and extract the CernVM image, returns the location 
-#					  	of the extracted cernvm image file
+#                       of the extracted cernvm image file
 CERNVM_IMAGE=$(download_extract $IMAGE_URL $IMAGE_FOLDER cernvm_image_download.log)
 ok $? "Precondition Test 1 - Download and extract the CernVM image"
 
 
 # Precondition Test 2 - Create an XML definition file for the virtual machine based on 
-#				        the template XML definition file and settings provided
+#                       the template XML definition file and settings provided
 VM_XML_DEFINITION=$(create_def $TEMPLATE $IMAGE_FOLDER)
 ok $? "Precondition Test 2 - Create an XML definition file for the virtual machine \
 based on the template XML definition file and settings provided"
@@ -314,21 +319,21 @@ ok $? "Precondition Test 4  - Verify that the XML definition file provided is va
 
 
 # Precondition Test 5  - Verify that the mandatory configuration settings for the
-#						 virtual machine XML definition file have been provided and are valid
+#                        virtual machine XML definition file have been provided and are valid
 validate_def_settings ${VM_XML_DEFINITION}
 ok $? "Precondition Test 5  - Verify that the mandatory configuration settings for the \
 virtual machine XML definition file have been provided and are valid"
 
 
 # Precondition Test 6  - Verify that the hypervisor for the current virtual machine
-#						 tested is accessible, set the URI as a global variable
+#                        tested is accessible, set the URI as a global variable
 verify_hypervisor ${VM_XML_DEFINITION}
 ok $? "Precondition Test 6  - Verify that the hypervisor for the current virtual machine \
 tested is accessible, set the URI as a global variable"
 
 
 # Precondition Test 7 - Create an XML definition file for the virtual machine network
-#					    based on the template network XML definition file and settings defined
+#                       based on the template network XML definition file and settings defined
 NET_XML_DEFINITION=$(create_net_def $NET_TEMPLATE $IMAGE_FOLDER)
 ok $? "Precondition Test 7 - Create an XML definition file for the virtual machine network \
 based on the template network XML definition file and settings defined"
@@ -345,7 +350,7 @@ ok $? "Precondition Test 9 - Verify that the network XML definition file provide
 
 
 # Precondition Test 10 - Verify that the mandatory configuration settings for the
-#						 network XML definition file have been provided and are valid
+#                        network XML definition file have been provided and are valid
 validate_net_settings ${NET_XML_DEFINITION}
 ok $? "Precondition Test 10 - Verify that the mandatory configuration settings for the \
 network XML definition file have been provided and are valid"
@@ -357,21 +362,21 @@ IP_ADDRESS=$(get_ip_address ${NET_XML_DEFINITION})
 
 
 # Precondition Test 11 - Verify that the virtual machine network has been created 
-#					  	 from an xml file
+#                        from an xml file
 create_net ${NET_XML_DEFINITION} ${NET_NAME}
 ok $? "Precondition Test 11 - Verify that the virtual machine network has been \
 created from an xml file"
 
 
 # Precondition Test 12  - Verify that virtual machine network is active and 
-#						 set to autostart
+#                        set to autostart
 verify_vm_net ${NET_NAME}
 ok $? "Precondition Test 12  - Verify that virtual machine NAT network is active and \
 set to autostart"
 
 
 # Precondition Test 13 - Verify that virtual machine domain has been created 
-#						from an xml file
+#                       from an xml file
 create_vm ${VM_XML_DEFINITION} $NAME
 ok $? "Precondition Test 13 - Verify that virtual machine domain $VMNAME has been \
 created from an xml file"
@@ -407,14 +412,14 @@ add_file web_interface_login.log
 
 
 # Precondition Test 19 - Setup and configure the initial CernVM image through the
-#					  web interface
+#                     web interface
 configure_image_web ${IP_ADDRESS} $ADMIN_USERNAME $ADMIN_DEFAULT_PASS web_config_image.log
 ok $? "Precondition Test 19 - Setup and configure the initial CernVM image through \
 the web interface"
 
 
 # Precondition Test 20 - Verify that it is possible to login on web interface using
-#						 the new web interface administrator password
+#                        the new web interface administrator password
 web_check_login ${IP_ADDRESS} $ADMIN_USERNAME $ADMIN_PASS web_interface_login2.log
 ok $? "Precondition Test 20 - Verify that it is possible to login on web interface using \
 the new web interface administrator password"
@@ -422,8 +427,8 @@ add_file web_interface_login2.log
 
 
 # Precondition Test 21 - Enable automatic SSH login to the machine for the user
-#					     specified using keys instead of passwords, and verify that it
-#					     is possible to login automatically
+#                        specified using keys instead of passwords, and verify that it
+#                        is possible to login automatically
 verify_autologin_ssh ${IP_ADDRESS} $USER_NAME $USER_PASS
 ok $? "Precondition Test 21 - Enable automatic SSH login to the machine for the user
 specified using keys instead of passwords, and verify that it is possible to login automatically"
@@ -435,8 +440,8 @@ ok $? "Precondition Test 22 - Set the root password using the CernVM web interfa
 
 
 # Precondition Test 23 - Enable automatic SSH login to the machine for the root
-#					     user using keys instead of passwords, and verify that it
-#					     is possible to login automatically
+#                        user using keys instead of passwords, and verify that it
+#                        is possible to login automatically
 verify_autologin_ssh ${IP_ADDRESS} root $ROOT_PASS
 ok $? "Precondition Test 23 - Enable automatic SSH login to the machine for the root \
 user using keys instead of passwords, and verify that it is possible to login automatically"
@@ -477,20 +482,20 @@ add_file web_interface_newuser.log
 
 
 # Precondition Test - Enable automatic SSH login to the machine for the user
-#					  specified using keys instead of passwords, and verify that it
-#					  is possible to login automatically
+#                     specified using keys instead of passwords, and verify that it
+#                     is possible to login automatically
 verify_autologin_ssh ${IP_ADDRESS} $USER_NAME2 $USER_PASS2
 
 
 # CernVM Test Case 6 - Verify that the user is created and can be accessed
-#					   from ssh login
+#                      from ssh login
 check_ssh ${IP_ADDRESS} $USER_NAME2
 ok $? "CernVM Test Case 6 - Verify that the user is created and can be accessed \
 from ssh login"
 
 
 # CernVM Test Case 7 - Restart through the web interface and check that there
-#					   are no error messages at boot
+#                      are no error messages at boot
 check_web_restart ${IP_ADDRESS} web_interface_reboot.log web_restart_boot.log
 ok $? "CernVM Test Case 7 - Restart through the web interface and check that \
 there are no error messages at boot"
