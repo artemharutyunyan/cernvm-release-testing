@@ -333,13 +333,13 @@ append_comment () {
 # Add a file to the list of additional files to be uploaded
 add_file()
 {
-	if [ -e $1 ]
-	then
-		ADDITIONALFILES[$ADDITIONALCOUNT]=$1
-		let ADDITIONALCOUNT=ADDITIONALCOUNT+1
-	else
-		echo "The file $1 does not exist!" 1>&2
-	fi
+    if [ -e $1 ]
+    then
+        ADDITIONALFILES[$ADDITIONALCOUNT]=$1
+        let ADDITIONALCOUNT=ADDITIONALCOUNT+1
+    else
+        echo "The file $1 does not exist!" 1>&2
+    fi
 } 
 
 ok () {
@@ -380,9 +380,45 @@ get_random_number () {
     echo "$number"
 }
 
+# Get the changeset
+get_changeset () {
+    changeset=""
+    
+    # Determine the changeset 
+    if [ "${OSTYPE}" == "linux" ]
+    then
+        changeset=$(cat /proc/version | head -1)
+
+    # Determine changeset for OS X system
+    elif [ "${OSTYPE}" == "osx" ]
+    then
+        changeset=$(uname -r)
+    fi
+
+    echo $changeset
+}
+
 get_kernel_release_3 () {
     number=$(uname -r |sed 's/2\.6\.\([0-9]\+\).*/\1/')
     echo "$number"
+}
+
+get_kernel_flags () {
+    flags=""
+
+    # Determine flags for linux systems
+    if [ "${OSTYPE}" == "linux" ]
+    then
+        flags=$(cat /proc/cmdline)
+
+    # Determine the flags for OS X system
+    elif [ "${OSTYPE}" == "osx" ]
+    then
+        flags=$(cat /Library/Preferences/SystemConfiguration/com.apple.Boot.plist | \
+                grep -e "<string>" | sed -E "s|.*<string>(.*)</string>.*|\\1|")
+    fi
+
+    echo $flags
 }
 
 kernel_release_min () {
@@ -418,32 +454,22 @@ kernelrelease=`uname -r`
 
 # ===== suite name ==================
 
-SUITEKEYWORDS=$(for k in $KEYWORDS ; do echo $k ; done | sort | paste -sd-)
-myname=$(echo $(basename $0 | sed -e 's/\.\w*$//i')${SUITEKEYWORDS:+-$SUITEKEYWORDS} | sed -e "s/^tapper-//" | sed -e "s/^artemis-//" )
-
-SUITE=${myname:-autoreport}
+suite_name=${SUITENAME:-$(echo $SUITE)}
 VERSION=3.001
 
 # ===== other meta info ==================
 
-suite_name=${SUITENAME:-$(echo $SUITE)}
 suite_version=${SUITEVERSION:-$VERSION}
 hostname=${HOSTNAME:-$(hostname)}
 reportername=${REPORTERNAME:-$USER}
 
-osname=${OSNAME:-$(cat /etc/issue.net | head -1)}
-changeset=${CHANGESET:-$(cat /proc/version | head -1)}
-kernelflags=$(cat /proc/cmdline)
+osname=${OSNAME}
+changeset=${CHANGESET:-$(get_changeset)}
+kernelflags=$(get_kernel_flags)
 uname=$(uname -a)
-ram=$(free -m | grep -i mem: | awk '{print $2}'MB)
-starttime_test_program=$(date --rfc-2822)
-bogomips=$(echo $(cat /proc/cpuinfo | grep -i bogomips | head -1 | cut -d: -f2))
-cpuinfo=$(
-    cpu=`grep 'model name' < /proc/cpuinfo | cut -d: -f2- | head -1 | sed -e "s/^ *//"`;
-    cpucount=`grep 'model name' < /proc/cpuinfo | wc -l`;
-    echo "$cpucount cores [$cpu]";
-)
-# TODO: bogomips from /proc/cpuinfo
+ram=$(get_memory)
+starttime_test_program=$(date)
+cpuinfo=$(get_cpu_info)
 
 BOOTCONFIG="/boot/config-$kernelrelease"
 PROCCONFIG="/proc/config.gz"
@@ -459,7 +485,7 @@ planningid=${PLANNINGID:-""}
 # - cpuinfo
 # - kernel config
 reportgroup_testrun=${TAPPER_TESTRUN:-${ARTEMIS_TESTRUN:-}}
-reportgroup=${REPORTGROUP:-$((echo $HOSTNAME ; date +%Y-%m-%d ; uname -a ; cat /boot/config-`uname -r` ; cat /proc/cpuinfo | grep -v MHz | grep -vi bogomips ; cat $(ls -1 $BOOTCONFIG $PROCCONFIG 2> /dev/null | sort) ) | md5sum | cut -d" " -f1 )}
+reportgroup=${REPORTGROUP}
 
 if [ ! "$reportgroup_testrun" ] ; then
     reportgroup_arbitrary=${TAPPER_REPORT_GROUP:-$reportgroup}
@@ -575,9 +601,19 @@ fi
 # ===== /proc files ==================
 
 if [ ! "x1" = "x$DONTREPEATMETA" ] ; then
-    FILES[$FILECOUNT]="/proc/cpuinfo"; let FILECOUNT=FILECOUNT+1
-    FILES[$FILECOUNT]="/proc/devices"; let FILECOUNT=FILECOUNT+1
-    FILES[$FILECOUNT]="/proc/version"; let FILECOUNT=FILECOUNT+1
+    # Upload the appropriate file for a linux system
+    if [ "${OSTYPE}" == "linux" ]
+    then
+        FILES[$FILECOUNT]="/proc/cpuinfo"; let FILECOUNT=FILECOUNT+1
+        FILES[$FILECOUNT]="/proc/devices"; let FILECOUNT=FILECOUNT+1
+        FILES[$FILECOUNT]="/proc/version"; let FILECOUNT=FILECOUNT+1
+
+    # Upload the appropriate file for an OS X system
+    elif [ "${OSTYPE}" == "osx" ]
+    then
+        system_profiler -detailLevel full > system_info
+        FILES[$FILECOUNT]="system_info"; let FILECOUNT=FILECOUNT+1
+    fi
 fi
 
 # ===== utility functions ==================
@@ -597,8 +633,8 @@ append_files()
 {
     for f in $(eval echo {0..$(($ADDITIONALCOUNT - 1))}) ; do
         file="${ADDITIONALFILES[f]}"
-		FILES[$FILECOUNT]=$file
-		let FILECOUNT=FILECOUNT+1
+        FILES[$FILECOUNT]=$file
+        let FILECOUNT=FILECOUNT+1
     done
 }
 
@@ -726,7 +762,6 @@ else
     NETCAT=cat
 fi
 
-#echo "# NETCAT: $NETCAT"
 if [ -n "$REPORT_SERVER" ] ; then
     if [ ! "x1" = "x$NOSEND" ] ; then
         MYNETCAT="$NETCAT $REPORT_SERVER $TAPPER_REPORT_PORT"
