@@ -86,6 +86,92 @@ extract_file()
 }
 
 
+#****f* general-interface/get_os_name
+# NAME
+#   get_os_name
+# DESCRIPTION
+#   Simple function that returns the specific name or version of the OS
+# ARGUMENTS
+#   $1 - The type of OS
+# RETURN VALUE
+#   osname - The name of the OS
+# EXAMPLE
+#   OSNAME=$(get_os_name "linux")
+#***
+get_os_name()
+{
+    OS_NAME=""
+    
+    case "$1" in
+    "linux")
+        # If it is a Red Hat based system determine name and version
+        if file_exists /etc/redhat-release ; test "$?" -eq 0
+        then
+            OS_NAME=$(cat /etc/redhat-release)
+        
+        # If it is a Debian based system determine name and version
+        elif file_exists /etc/debian_version ; test "$?" -eq 0
+        then
+            OS_NAME="Debian $(cat /etc/debian_version)"
+        
+        # If it is a SuSE based system determine name and version
+        elif file_exists /etc/SuSE-release ; test "$?" -eq 0
+        then
+            OS_NAME=$(cat /etc/SuSE-release)
+        
+        # Set OS name as Linux and kernel version
+        else
+            OS_NAME="Linux $(uname -r)"
+        fi
+        ;;
+    "osx")
+        # Determine the OS name and version
+        OS_NAME=$(system_profiler SPSoftwareDataType | grep -e "System Version" \
+                  | sed -E "s|^.*Version\:[[:space:]]*(.*)|\\1|")
+        ;;
+    "windows")
+        OS_NAME="Windows"
+        ;;
+    *)
+       OS_NAME="Unknown"
+       ;;
+    esac
+
+    echo "${OS_NAME}"
+}
+
+
+#****f* general-interface/get_os_type
+# NAME
+#   get_os_type
+# DESCRIPTION
+#   Simple function that returns the type of OS such as linux or osx
+# RETURN VALUE
+#   ostype - The type of OS, either linux,osx, or windows
+# EXAMPLE
+#   OSTYPE=$(get_os_type)
+#***
+get_os_type()
+{
+    OS_TYPE=""
+    
+    # Determine if the os type is linux
+    if $(uname -a | grep -q Linux) ; test "$?" -eq 0
+    then
+        OS_TYPE="linux"
+    # Determine if the os type is OS X
+    elif $(uname -a | grep -q Darwin) ; test "$?" -eq 0
+    then
+        OS_TYPE="osx"
+    # The OS is Windows
+    else
+        OS_TYPE="windows"
+    fi
+
+    echo "${OS_TYPE}"
+}
+
+
 #****f* general-interface/filename_from_url
 # NAME
 #   filename_from_url
