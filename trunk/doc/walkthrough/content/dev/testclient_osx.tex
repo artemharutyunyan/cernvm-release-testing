@@ -159,15 +159,24 @@ $ virsh --connect vbox:///session
 $ kextstat | grep -i vmware
 \end{lstlisting}
 
-.\item      Finally, verify that VMware Fusion has been configured properly and that virsh supports the current version of VMware Fusion
-                installed by connecting to the virsh console for the VMware Fusion hypervisor.
+\item	Next, add VMware Fusion to the system PATH variable permanently so that VMware Fusion can be executed from the 
+			command line as well as accessed by virsh.
+
+\lstset{language=bash,caption=Add VMware Fusion to PATH}
+\begin{lstlisting}
+# Add VMware Fusion to PATH
+$ echo 'export PATH=/Library/Application\ Support/VMware\ Fusion/:$PATH' >> ~/.profile
+$ echo 'export PATH=/Applications/VMware\ Fusion.app/Contents/MacOS:$PATH' >> ~/.profile
+
+# Source the file, set PATH variable
+$ . ~/.profile
+\end{lstlisting}
+
+\item	Finally, verify that VMware Fusion has been configured properly and that virsh supports the current version of VMware Fusion
+            installed by connecting to the virsh console for the VMware Fusion hypervisor.
 
 \lstset{language=bash,caption=Verify VMware Fusion Works with Virsh}
 \begin{lstlisting}
-# Add VMware Fusion to PATH
-$ export PATH=/Library/Application\ Support/VMware\ Fusion/:$PATH
-$ export PATH=/Applications/VMware\ Fusion.app/Contents/MacOS:$PATH
-
 # Verify that virsh can connect to vmware fusion
 $ virsh --connect vmwarews:///session
 \end{lstlisting}
@@ -225,13 +234,38 @@ trunk/tapper/tapper-autoreport/ cernvm-testsuite
                 
 \lstset{language=bash,caption=Install Dependencies}
 \begin{lstlisting}
+# Update Homebrew
+$ brew update
+
 # Install the following dependencies
+$ brew install bash
+$ brew install bash-completion
 $ brew install ssh-copy-id
 $ brew install wget
 $ brew install ossp-uuid
 $ brew install spawn-fcgi
 $ brew install md5sha1sum
 $ brew install curl
+\end{lstlisting}
+
+\item	Next, set the default terminal as the newer version of bash that was installed with Homebrew and then verify that
+			the new version of bash has been properly configured as the default terminal.
+
+\lstset{language=bash,caption=Configure Bash}
+\begin{lstlisting}
+# Change to root account, enter password if prompted
+$ sudo su
+
+# Add the new bash shell to the list of acceptable shells
+$ echo '/usr/local/bin/bash' >> /etc/shells
+
+# For any account that the script will be executed on 
+# set the default shell as the new bash shell installed
+$ chsh -s /usr/local/bin/bash
+
+# Verify the new version of bash has been configured, check 
+# the version of bash installed matches "brew info bash" output
+$ echo $BASH_VERSION
 \end{lstlisting}
 
 \item	Now that cernvm-testsuite has been installed, configure the variables in the configuration file for the
