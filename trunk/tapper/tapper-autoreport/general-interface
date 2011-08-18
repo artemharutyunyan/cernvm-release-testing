@@ -407,6 +407,11 @@ get_ip_address()
     # Otherwise for vmware, network xml file not applicable, determine the
     # IP address of the virtual machine from the arp table
     else
+        # COMPATABILITY FIX: Have to chop the first three characters of the MAC address as
+        # the arp command on OS X only display one of the first mac address digits if
+        # the mac address starts with two zeros
+        MACADDRESS="${MACADDRESS:3:${#MACADDRESS}}"
+
         # Determine the IP address from the arp output
         IPADDRESS=$(arp -an | grep -E "^.*${MACADDRESS}" | sed -E \
                     "s|^.*\(([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})\).*|\\1|")
