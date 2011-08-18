@@ -141,9 +141,15 @@ create_vm_net()
 #***
 create_vm()
 {
-    virsh --connect $URI define $1
-    virsh --connect $URI list --all | grep -q $2
-    return $?
+    # If the URI is VMware, return as define does not work for VMware
+    if [ "$URI" == "vmwarews:///session" ]
+    then
+        return 0
+    else
+        virsh --connect $URI define $1
+        virsh --connect $URI list --all | grep -q $2
+        return $?
+    fi
 }
 
 
@@ -186,18 +192,27 @@ destroy_vm()
 # DESCRIPTION
 #   Start the virtual machine and verify it started
 # ARGUMENTS
-#   $1 - The name of the virtual machine
+#   $1 - The path to the virtual machine definition file
+#   $2 - The name of the virtual machine
 # RESULT
 #   exitstatus - Sets $? as a zero for success, otherwise sets an error code
 # EXAMPLE
 #   start_vm virt-machine
 #***
 start_vm()
-{   
-    virsh --connect $URI start $1
+{
+    # If URI is VMware, must start using create command
+    if [ "$URI" == "vmwarews:///session" ]
+    then
+        virsh --connect $URI create $1
+    else
+        virsh --connect $URI start $2
+    fi
+
     # Wait five minutes for virtual machine to start
     sleep 300
-    virsh --connect $URI list --all | egrep -q "^[[:space:]]*[[:digit:]]*[[:space:]]*$1[[:space:]]*running"
+    virsh --connect $URI list --all | egrep -q \
+    "^[[:space:]]*[[:digit:]]*[[:space:]]*$2[[:space:]]*running"
 
     return $?
 }

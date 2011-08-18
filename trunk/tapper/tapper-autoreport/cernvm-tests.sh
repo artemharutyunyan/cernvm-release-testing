@@ -385,7 +385,7 @@ created from an xml file"
 
 
 # Precondition Test 14 - Verify that virtual machine can be started
-start_vm $NAME
+start_vm ${VM_XML_DEFINITION} $NAME
 ok $? "Precondition Test 14 - Verify that virtual machine $VMNAME has been started"
 
 
@@ -396,7 +396,7 @@ ok $? "Precondition Test 15 - Verify that virtual machine $VMNAME has been stopp
 
 # Precondition Test 16 - Verify that the virtual machine has console support
 # Start the virtual machine and verify that it has console support
-start_vm $NAME
+start_vm ${VM_XML_DEFINITION} $NAME
 has_console_support $NAME
 ok $? "Precondition Test 16 - Verify that virtual machine $VMNAME has console support"
 
