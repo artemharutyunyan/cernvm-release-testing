@@ -1,5 +1,5 @@
 \chapter{\cernvmtestframework}
-\subsection{Framework Design Overview}
+\section{Framework Design Overview}
 \label{sec:frameworkoverview}
 
 The \cernvmtestframework\ was initially designed to facilitate the role of ``Test Suites'' within the \releasetesting~infrastructure, which would 
@@ -57,7 +57,7 @@ precondition tests which must be executed first and in the correct order before 
 
 
 
-\subsection{Precondition Tests}
+\section{Precondition Tests}
 \label{sec:preconditiontests}
 
 Precondition tests are the tests which fulfil the role of the ``Test Automation Framework'' referred to in the \tapper architecture
@@ -89,12 +89,22 @@ limited to configuring and controlling the \cernvm image through the web interfa
 
 
 
-\subsection{\cernvm Test Cases}
+\section{\cernvm Test Cases}
 \label{sec:cernvmtestcases}
 
+The \cernvm Test Cases are simply the tests which fulfil the role of the ``\cernvm Test Cases'', these tests are scripted
+implementations of the \cernvm Test Cases which would have otherwise been executed manually. As referred to in the
+Current \cernvmtestframework\ figure~\ref{fig:detailedarchitecture}. The \cernvm Test Cases are an essential component
+of the main ``cernvm-tests.sh'' script, and require both cernvm-preconditions tests as well as interface functions
+to execute the test cases. The cernvm-precondition functions are essential to executing test cases as the precondition tests
+are what initially set up and prepare the host environment for executing the actual test cases. In addition, the precondition
+tests can be used by the \cernvm Test Cases to ensure that the minimum dependencies are met before executing the test case,
+which allows for modular, or out-of-order testing. This enables a single test to be executed without having any prerequisites
+for a specific precondition test or test case to have been executed before.
 
-
-- They are the tests which are used to make the cernvm test cases modular and
-  independent of each other (ie. can execute boot errors test case before executing
-  the web restart test case)
- 
+Therefore, the \cernvm Test Cases differ fom precondition tests because they are merely tests which automate the otherwise
+manual process of executing the test cases and checking the \cernvm image. Unlike precondition tests, test cases are not required to
+pass in order for another \cernvm test case to be executed accurately, any dependencies required for a test case to execute
+accurately should be instead satisfied by a precondition test. Thus, the results of a test case should not have any
+influence on the results of another test case, unless they are part of an actual test dependency, any test case requirements
+such as having network support, or the virtual machine started and configured should be executed by precondition tests.
