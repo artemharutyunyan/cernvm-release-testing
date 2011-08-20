@@ -2,12 +2,14 @@
 .PHONY: clean
 SOURCES = developer-manual.tex atex.tex
 
-
-pdf: $(SOURCES) clean
-#	pdflatex -interaction=batchmode cvmfstech > /dev/null
-# 	Create the api reference using ROBODoc, requires full tree checkout
+apireference:
+#	Create the api reference using ROBODoc, requires full tree checkout
 	robodoc --src ../../tapper/tapper-autoreport/ --doc ./content/apireference --rc robodoc.rc
+#	Remove unnecessary \index from apireference
+	sed -i -E 's|^.*index$$||g' content/apireference.tex
 
+pdf: $(SOURCES) clean apireference
+#	pdflatex -interaction=batchmode cvmfstech > /dev/null
 	pdflatex -interaction=batchmode developer-manual	
 	bibtex developer-manual
 	makeindex developer-manual.idx

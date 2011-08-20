@@ -1,11 +1,11 @@
 % Document: ./content/apireference
 % Source: ./../../tapper/tapper-autoreport/
-% Generated with ROBODoc Version 4.99.38 (May  3 2009)
+% Generated with ROBODoc Version 4.99.41 (Aug 17 2011)
 \newpage
 \section{test-suite/cernvm-preconditions}
 \textsl{[ Generics ]}
 
-\label{ch:robo28}
+\label{ch:robo32}
 \label{ch:test_suite_cernvm_preconditions}
 \index{unsorted!cernvm-preconditions}\index{Generics!cernvm-preconditions}
 \textbf{NAME}
@@ -26,18 +26,18 @@
 \textbf{TODO}
 \begin{verbatim}
    CLEAN UP THE FOLLOWING PRECONDITON TESTS AND PLACE THEM IN THIS FILE
-       Precondition Test 2 - Verify that virtual machine domain has been created 
+   Precondition Test 2 - Verify that virtual machine domain has been created 
                          from an xml file
 
-       Precondition Test 3 - Verify that virtual machine can be started
+   Precondition Test 3 - Verify that virtual machine can be started
 
-       Precondition Test 4 - Verify that virtual machine has been stopped
+   Precondition Test 4 - Verify that virtual machine has been stopped
 
-       Precondition Test 5 - Verify that the virtual has console support
+   Precondition Test 5 - Verify that the virtual has console support
 
-       Precondition Test 6 - Verify that virtual machine has web interface support
+   Precondition Test 6 - Verify that virtual machine has web interface support
 
-       Precondition Test 7 - Verify that it is possible to login on web interface
+   Precondition Test 7 - Verify that it is possible to login on web interface
 \end{verbatim}
 \newpage
 \subsection{cernvm-preconditions/configure\_image\_web}
@@ -491,11 +491,47 @@
    verify_ssh_login 192.168.1.125 root
 \end{verbatim}
 \newpage
-\subsection{cernvm-preconditions/verify\_vm\_net}
+\subsection{cernvm-preconditions/verify\_virsh\_uri}
 \textsl{[ cernvm-preconditions ]}
 \textsl{[ Functions ]}
 
 \label{ch:robo14}
+\label{ch:cernvm_preconditions_verify_virsh_uri}
+\index{unsorted!verify\_virsh\_uri}\index{Functions!verify\_virsh\_uri}
+\textbf{NAME}
+\begin{verbatim}
+   verify_virsh_uri
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Precondition Test - Verify that the URI virsh is connected to matches the
+                       URI for the current hypervisor 
+\end{verbatim}
+\textbf{NOTES}
+\begin{verbatim}
+   This precondition test is useful for catching a potential libvirt or hypervisor error
+   that is not caught by the scripts or virsh, for example if virsh fails to connect properly
+   to the URI specified, the URI that is returned by virsh will be the default and not match
+   the URI for the current hypervisor being tested
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The URI of the hypervisor
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   verify_virsh_uri vmwarews:///session
+\end{verbatim}
+\newpage
+\subsection{cernvm-preconditions/verify\_vm\_net}
+\textsl{[ cernvm-preconditions ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo15}
 \label{ch:cernvm_preconditions_verify_vm_net}
 \index{unsorted!verify\_vm\_net}\index{Functions!verify\_vm\_net}
 \textbf{NAME}
@@ -523,7 +559,7 @@
 \section{test-suite/cernvm-testcases}
 \textsl{[ Generics ]}
 
-\label{ch:robo29}
+\label{ch:robo33}
 \label{ch:test_suite_cernvm_testcases}
 \index{unsorted!cernvm-testcases}\index{Generics!cernvm-testcases}
 \textbf{NAME}
@@ -564,7 +600,7 @@
 \textsl{[ cernvm-testcases ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo15}
+\label{ch:robo16}
 \label{ch:cernvm_testcases_check_boot_error}
 \index{unsorted!check\_boot\_error}\index{Functions!check\_boot\_error}
 \textbf{NAME}
@@ -593,7 +629,7 @@
 \textsl{[ cernvm-testcases ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo16}
+\label{ch:robo17}
 \label{ch:cernvm_testcases_check_ssh}
 \index{unsorted!check\_ssh}\index{Functions!check\_ssh}
 \textbf{NAME}
@@ -622,7 +658,7 @@
 \textsl{[ cernvm-testcases ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo17}
+\label{ch:robo18}
 \label{ch:cernvm_testcases_check_time}
 \index{unsorted!check\_time}\index{Functions!check\_time}
 \textbf{NAME}
@@ -650,7 +686,7 @@
 \textsl{[ cernvm-testcases ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo18}
+\label{ch:robo19}
 \label{ch:cernvm_testcases_check_web_restart}
 \index{unsorted!check\_web\_restart}\index{Functions!check\_web\_restart}
 \textbf{NAME}
@@ -680,7 +716,7 @@
 \section{test-suite/general-interface}
 \textsl{[ Generics ]}
 
-\label{ch:robo30}
+\label{ch:robo34}
 \label{ch:test_suite_general_interface}
 \index{unsorted!general-interface}\index{Generics!general-interface}
 \textbf{NAME}
@@ -703,7 +739,7 @@
 \textsl{[ general-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo19}
+\label{ch:robo20}
 \label{ch:general_interface_extract_file}
 \index{unsorted!extract\_file}\index{Functions!extract\_file}
 \textbf{NAME}
@@ -731,7 +767,7 @@
 \textsl{[ general-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo20}
+\label{ch:robo21}
 \label{ch:general_interface_file_exists}
 \index{unsorted!file\_exists}\index{Functions!file\_exists}
 \textbf{NAME}
@@ -759,7 +795,7 @@
 \textsl{[ general-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo21}
+\label{ch:robo22}
 \label{ch:general_interface_filename_from_header}
 \index{unsorted!filename\_from\_header}\index{Functions!filename\_from\_header}
 \textbf{NAME}
@@ -788,7 +824,7 @@
 \textsl{[ general-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo22}
+\label{ch:robo23}
 \label{ch:general_interface_filename_from_url}
 \index{unsorted!filename\_from\_url}\index{Functions!filename\_from\_url}
 \textbf{NAME}
@@ -816,7 +852,7 @@
 \textsl{[ general-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo23}
+\label{ch:robo24}
 \label{ch:general_interface_find_file}
 \index{unsorted!find\_file}\index{Functions!find\_file}
 \textbf{NAME}
@@ -850,7 +886,7 @@
 \textsl{[ general-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo24}
+\label{ch:robo25}
 \label{ch:general_interface_get_hash}
 \index{unsorted!get\_hash}\index{Functions!get\_hash}
 \textbf{NAME}
@@ -880,7 +916,7 @@
 \textsl{[ general-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo25}
+\label{ch:robo26}
 \label{ch:general_interface_get_ip_address}
 \index{unsorted!get\_ip\_address}\index{Functions!get\_ip\_address}
 \textbf{NAME}
@@ -889,11 +925,13 @@
 \end{verbatim}
 \textbf{DESCRIPTION}
 \begin{verbatim}
-   Simple function that returns the ip address from the xml network definition file
+   Simple function that returns the ip address of a virtual machine
 \end{verbatim}
 \textbf{ARGUMENTS}
 \begin{verbatim}
-   $1 - The network XML definition file
+   $1 - The current hypervisor for the virtual machine network
+   $2 - The MAC address of the virtual machine network connection
+   $3 - The network XML definition file, not applicable for VMware
 \end{verbatim}
 \textbf{RETURN VALUE}
 \begin{verbatim}
@@ -905,14 +943,47 @@
 \end{verbatim}
 \textbf{EXAMPLE}
 \begin{verbatim}
-   IP_ADDRESS=$(get_ip_address ./network-definition.xml)
+   IP_ADDRESS=$(get_ip_address kvm 52:54:00:7B:30:75 ./network-definition.xml)
+   IP_ADDRESS=$(get_ip_address vmware 00:50:56:C0:00:01)
+\end{verbatim}
+\newpage
+\subsection{general-interface/get\_mac\_address}
+\textsl{[ general-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo27}
+\label{ch:general_interface_get_mac_address}
+\index{unsorted!get\_mac\_address}\index{Functions!get\_mac\_address}
+\textbf{NAME}
+\begin{verbatim}
+   get_mac_address
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Simple function that returns the mac address from the virtual machine definition file
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The virtual machine XML definition file
+\end{verbatim}
+\textbf{RETURN VALUE}
+\begin{verbatim}
+   macaddress - The mac address defined in the xml definition file
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   MAC_ADDRESS=$(get_mac_address ./kvm-definition.xml)
 \end{verbatim}
 \newpage
 \subsection{general-interface/get\_net\_name}
 \textsl{[ general-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo26}
+\label{ch:robo28}
 \label{ch:general_interface_get_net_name}
 \index{unsorted!get\_net\_name}\index{Functions!get\_net\_name}
 \textbf{NAME}
@@ -921,11 +992,12 @@
 \end{verbatim}
 \textbf{DESCRIPTION}
 \begin{verbatim}
-   Simple function that returns the network name from xml network definition file
+   Simple function that returns the network name for a virtual machine
 \end{verbatim}
 \textbf{ARGUMENTS}
 \begin{verbatim}
-   $1 - The network XML definition file
+   $1 - The current hypervisor for the virtual machine network
+   $2 - The network XML definition file, not applicable for VMware
 \end{verbatim}
 \textbf{RETURN VALUE}
 \begin{verbatim}
@@ -937,14 +1009,67 @@
 \end{verbatim}
 \textbf{EXAMPLE}
 \begin{verbatim}
-   NET_NAME=$(get_net_name ./network-definition.xml)
+   NET_NAME=$(get_net_name kvm ./network-definition.xml)
+   NET_NAME=$(get_net_name vmware)
+\end{verbatim}
+\newpage
+\subsection{general-interface/get\_os\_name}
+\textsl{[ general-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo29}
+\label{ch:general_interface_get_os_name}
+\index{unsorted!get\_os\_name}\index{Functions!get\_os\_name}
+\textbf{NAME}
+\begin{verbatim}
+   get_os_name
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Simple function that returns the specific name or version of the OS
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The type of OS
+\end{verbatim}
+\textbf{RETURN VALUE}
+\begin{verbatim}
+   osname - The name of the OS
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   OSNAME=$(get_os_name "linux")
+\end{verbatim}
+\newpage
+\subsection{general-interface/get\_os\_type}
+\textsl{[ general-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo30}
+\label{ch:general_interface_get_os_type}
+\index{unsorted!get\_os\_type}\index{Functions!get\_os\_type}
+\textbf{NAME}
+\begin{verbatim}
+   get_os_type
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Simple function that returns the type of OS such as linux or osx
+\end{verbatim}
+\textbf{RETURN VALUE}
+\begin{verbatim}
+   ostype - The type of OS, either linux,osx, or windows
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   OSTYPE=$(get_os_type)
 \end{verbatim}
 \newpage
 \subsection{general-interface/ssh\_autologin}
 \textsl{[ general-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo27}
+\label{ch:robo31}
 \label{ch:general_interface_ssh_autologin}
 \index{unsorted!ssh\_autologin}\index{Functions!ssh\_autologin}
 \textbf{NAME}
@@ -970,10 +1095,355 @@
    ssh_autologin 192.168.1.125 root password
 \end{verbatim}
 \newpage
+\section{test-suite/testsuite-trace}
+\textsl{[ Generics ]}
+
+\label{ch:robo35}
+\label{ch:test_suite_testsuite_trace}
+\index{unsorted!testsuite-trace}\index{Generics!testsuite-trace}
+\textbf{NAME}
+\begin{verbatim}
+   testsuite-trace
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   This script contains several trace and debugging functions that
+   provide an easy and effective way to log the execution of CernVM
+   test cases, precondition tests, and any other function which
+   enables trace and debugging support.
+
+   These functions are well suited for debugging precondition tests
+   and CernVM test cases, to enable debugging of a function simply
+   call the function using "call", to enable more verbose debugging
+   set the trace verbosity level.
+\end{verbatim}
+\newpage
+\subsection{testsuite-trace/add\_trace\_close}
+\textsl{[ testsuite-trace ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo38}
+\label{ch:testsuite_trace_add_trace_close}
+\index{unsorted!add\_trace\_close}\index{Functions!add\_trace\_close}
+\textbf{NAME}
+\begin{verbatim}
+   add_trace_close
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Adds the closing marker for the trace of the function call
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The name of the function that was called
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   add_trace_close connect_virsh
+\end{verbatim}
+\newpage
+\subsection{testsuite-trace/add\_trace\_output}
+\textsl{[ testsuite-trace ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo39}
+\label{ch:testsuite_trace_add_trace_output}
+\index{unsorted!add\_trace\_output}\index{Functions!add\_trace\_output}
+\textbf{NAME}
+\begin{verbatim}
+   add_trace_output
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Adds the data specified to the trace output, which will be logged to file
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $@ - The data to add to the trace output
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   TRACE_OUTPUT - Adds the data speficied to TRACE_OUTPUT global variable
+   INDEX        - Sets the global variable index as the next index element of TRACE_OUTPUT
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   add_trace_output "${TRACE_TEMPLATE[@]}"
+\end{verbatim}
+\newpage
+\subsection{testsuite-trace/add\_trace\_results}
+\textsl{[ testsuite-trace ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo40}
+\label{ch:testsuite_trace_add_trace_results}
+\index{unsorted!add\_trace\_results}\index{Functions!add\_trace\_results}
+\textbf{NAME}
+\begin{verbatim}
+   add_trace_results
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Adds the results from a traced function call back to the TRACE_OUTPUT heading for the function 
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The RETURN VALUE from the function called
+   $2 - The RESULT from the function called
+   $3 - The index of the heading in TRACE_OUTPUT for the function called
+   $4 - The length of the heading for the function called 
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   add_trace_results $FUNCTION_RETURN_VALUE $FUNCTION_RESULT 0 12
+\end{verbatim}
+\newpage
+\subsection{testsuite-trace/add\_trace\_template}
+\textsl{[ testsuite-trace ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo41}
+\label{ch:testsuite_trace_add_trace_template}
+\index{unsorted!add\_trace\_template}\index{Functions!add\_trace\_template}
+\textbf{NAME}
+\begin{verbatim}
+   add_trace_template
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Adds the contents of the global TRACE_TEMPLATE to TRACE_OUTPUT, this allows the
+   TRACE_TEMPLATE file to be dynamically re-generated if "call" is used recursively
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   TRACE_OUTPUT - Adds the contents of TRACE_TEMPLATE to the TRACE_OUTPUT global variable
+   INDEX        - Sets the global variable INDEX as the next index element of TRACE_OUTPUT
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   add_trace_template
+\end{verbatim}
+\newpage
+\subsection{testsuite-trace/call}
+\textsl{[ testsuite-trace ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo42}
+\label{ch:testsuite_trace_call}
+\index{unsorted!call}\index{Functions!call}
+\textbf{NAME}
+\begin{verbatim}
+   call
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   The core of the trace functionality, to register the function with trace
+   and enable debug and logging support prefix the name of the function and
+   its arguments with the trace function "call". This executes the function
+   in the trace debugging environment and logs the results based on the 
+   trace verbosity level specified, the trace function "call" is transparent
+   and returns the same exitstatus and return values as the function called.
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The name of the function to call with trace/debugging support
+   $@ - The arguments to the function that is being called
+\end{verbatim}
+\textbf{RETURN VALUE}
+\begin{verbatim}
+   value - The value returned by the function called if applicable
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets the exitstatus as what is returned by the function
+                called, $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   call download_extract http://cern.ch/cernvm-img.tar.gz /usr/share/image logfile.log
+\end{verbatim}
+\newpage
+\subsection{testsuite-trace/create\_trace\_log}
+\textsl{[ testsuite-trace ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo43}
+\label{ch:testsuite_trace_create_trace_log}
+\index{unsorted!create\_trace\_log}\index{Functions!create\_trace\_log}
+\textbf{NAME}
+\begin{verbatim}
+   create_trace_log
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Creates a new trace log file with a title, the date, and basic info
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The name of the trace log file to create
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   create_trace_log cernvm-trace.log
+\end{verbatim}
+\newpage
+\subsection{testsuite-trace/error\_msg}
+\textsl{[ testsuite-trace ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo44}
+\label{ch:testsuite_trace_error_msg}
+\index{unsorted!error\_msg}\index{Functions!error\_msg}
+\textbf{NAME}
+\begin{verbatim}
+   error_msg
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Message to report in the trace log file if a function has an error
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The error message to report
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   error_msg "The function had an unknown error"
+\end{verbatim}
+\newpage
+\subsection{testsuite-trace/generate\_trace\_template}
+\textsl{[ testsuite-trace ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo45}
+\label{ch:testsuite_trace_generate_trace_template}
+\index{unsorted!generate\_trace\_template}\index{Functions!generate\_trace\_template}
+\textbf{NAME}
+\begin{verbatim}
+   generate_trace_template
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Generate a template for the trace log file output
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The name of the function currently being traced
+   $@ - The arguments to the function that is being called
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   TRACE_TEMPLATE - Generates a trace template for current function
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   generate_trace_template create_net ./network-definition.xml default
+\end{verbatim}
+\newpage
+\subsection{testsuite-trace/generic\_msg}
+\textsl{[ testsuite-trace ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo46}
+\label{ch:testsuite_trace_generic_msg}
+\index{unsorted!generic\_msg}\index{Functions!generic\_msg}
+\textbf{NAME}
+\begin{verbatim}
+   generic_msg
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   A generic message to report in the trace log file
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - A generic message to report
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   generic_msg "Waiting for the CernVM image to start"
+\end{verbatim}
+\newpage
+\subsection{testsuite-trace/log\_trace\_output}
+\textsl{[ testsuite-trace ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo47}
+\label{ch:testsuite_trace_log_trace_output}
+\index{unsorted!log\_trace\_output}\index{Functions!log\_trace\_output}
+\textbf{NAME}
+\begin{verbatim}
+   log_trace_output
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Logs the trace output to the file specified
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The name of the logfile to store the trace output
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   log_trace_output $TRACE_LOGFILE
+\end{verbatim}
+\newpage
+\subsection{testsuite-trace/success\_msg}
+\textsl{[ testsuite-trace ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo48}
+\label{ch:testsuite_trace_success_msg}
+\index{unsorted!success\_msg}\index{Functions!success\_msg}
+\textbf{NAME}
+\begin{verbatim}
+   success_msg
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Message to report in the trace log file if a function executes successfully
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The success message to report
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   success_msg "The function executed successfully"
+\end{verbatim}
+\newpage
 \section{test-suite/virt-interface}
 \textsl{[ Generics ]}
 
-\label{ch:robo31}
+\label{ch:robo36}
 \label{ch:test_suite_virt_interface}
 \index{unsorted!virt-interface}\index{Generics!virt-interface}
 \textbf{NAME}
@@ -995,7 +1465,7 @@
 \textsl{[ virt-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo33}
+\label{ch:robo49}
 \label{ch:virt_interface_connect_virsh}
 \index{unsorted!connect\_virsh}\index{Functions!connect\_virsh}
 \textbf{NAME}
@@ -1010,6 +1480,10 @@
 \begin{verbatim}
    $1 - The URI of the hypervisor
 \end{verbatim}
+\textbf{RETURN VALUE}
+\begin{verbatim}
+   URI - The actual URI of the hypervisor that virsh is connected to
+\end{verbatim}
 \textbf{RESULT}
 \begin{verbatim}
    exitstatus - Sets $? as a zero for success, otherwise sets an error code
@@ -1023,7 +1497,7 @@
 \textsl{[ virt-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo34}
+\label{ch:robo50}
 \label{ch:virt_interface_create_vm}
 \index{unsorted!create\_vm}\index{Functions!create\_vm}
 \textbf{NAME}
@@ -1052,7 +1526,7 @@
 \textsl{[ virt-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo35}
+\label{ch:robo51}
 \label{ch:virt_interface_create_vm_net}
 \index{unsorted!create\_vm\_net}\index{Functions!create\_vm\_net}
 \textbf{NAME}
@@ -1081,7 +1555,7 @@
 \textsl{[ virt-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo36}
+\label{ch:robo52}
 \label{ch:virt_interface_destroy_vm}
 \index{unsorted!destroy\_vm}\index{Functions!destroy\_vm}
 \textbf{NAME}
@@ -1114,7 +1588,7 @@
 \textsl{[ virt-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo37}
+\label{ch:robo53}
 \label{ch:virt_interface_destroy_vm_net}
 \index{unsorted!destroy\_vm\_net}\index{Functions!destroy\_vm\_net}
 \textbf{NAME}
@@ -1147,7 +1621,7 @@
 \textsl{[ virt-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo38}
+\label{ch:robo54}
 \label{ch:virt_interface_has_console_support}
 \index{unsorted!has\_console\_support}\index{Functions!has\_console\_support}
 \textbf{NAME}
@@ -1181,7 +1655,7 @@
 \textsl{[ virt-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo39}
+\label{ch:robo55}
 \label{ch:virt_interface_start_vm}
 \index{unsorted!start\_vm}\index{Functions!start\_vm}
 \textbf{NAME}
@@ -1194,7 +1668,8 @@
 \end{verbatim}
 \textbf{ARGUMENTS}
 \begin{verbatim}
-   $1 - The name of the virtual machine
+   $1 - The path to the virtual machine definition file
+   $2 - The name of the virtual machine
 \end{verbatim}
 \textbf{RESULT}
 \begin{verbatim}
@@ -1209,7 +1684,7 @@
 \textsl{[ virt-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo40}
+\label{ch:robo56}
 \label{ch:virt_interface_stop_vm}
 \index{unsorted!stop\_vm}\index{Functions!stop\_vm}
 \textbf{NAME}
@@ -1237,7 +1712,7 @@
 \textsl{[ virt-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo41}
+\label{ch:robo57}
 \label{ch:virt_interface_vm_net_active}
 \index{unsorted!vm\_net\_active}\index{Functions!vm\_net\_active}
 \textbf{NAME}
@@ -1265,7 +1740,7 @@
 \textsl{[ virt-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo42}
+\label{ch:robo58}
 \label{ch:virt_interface_vm_net_autostart}
 \index{unsorted!vm\_net\_autostart}\index{Functions!vm\_net\_autostart}
 \textbf{NAME}
@@ -1292,7 +1767,7 @@
 \section{test-suite/web-interface}
 \textsl{[ Generics ]}
 
-\label{ch:robo32}
+\label{ch:robo37}
 \label{ch:test_suite_web_interface}
 \index{unsorted!web-interface}\index{Generics!web-interface}
 \textbf{NAME}
@@ -1313,7 +1788,7 @@
 \textsl{[ web-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo43}
+\label{ch:robo59}
 \label{ch:web_interface_generate_header}
 \index{unsorted!generate\_header}\index{Functions!generate\_header}
 \textbf{NAME}
@@ -1340,7 +1815,7 @@
 \textsl{[ web-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo44}
+\label{ch:robo60}
 \label{ch:web_interface_generate_template_header}
 \index{unsorted!generate\_template\_header}\index{Functions!generate\_template\_header}
 \textbf{NAME}
@@ -1373,7 +1848,7 @@
 \textsl{[ web-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo45}
+\label{ch:robo61}
 \label{ch:web_interface_web_apply_settings}
 \index{unsorted!web\_apply\_settings}\index{Functions!web\_apply\_settings}
 \textbf{NAME}
@@ -1403,7 +1878,7 @@
 \textsl{[ web-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo46}
+\label{ch:robo62}
 \label{ch:web_interface_web_check_interface}
 \index{unsorted!web\_check\_interface}\index{Functions!web\_check\_interface}
 \textbf{NAME}
@@ -1432,7 +1907,7 @@
 \textsl{[ web-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo47}
+\label{ch:robo63}
 \label{ch:web_interface_web_check_login}
 \index{unsorted!web\_check\_login}\index{Functions!web\_check\_login}
 \textbf{NAME}
@@ -1463,7 +1938,7 @@
 \textsl{[ web-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo48}
+\label{ch:robo64}
 \label{ch:web_interface_web_config_desktop}
 \index{unsorted!web\_config\_desktop}\index{Functions!web\_config\_desktop}
 \textbf{NAME}
@@ -1495,7 +1970,7 @@
 \textsl{[ web-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo49}
+\label{ch:robo65}
 \label{ch:web_interface_web_config_group}
 \index{unsorted!web\_config\_group}\index{Functions!web\_config\_group}
 \textbf{NAME}
@@ -1529,7 +2004,7 @@
 \textsl{[ web-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo50}
+\label{ch:robo66}
 \label{ch:web_interface_web_config_password}
 \index{unsorted!web\_config\_password}\index{Functions!web\_config\_password}
 \textbf{NAME}
@@ -1559,7 +2034,7 @@
 \textsl{[ web-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo51}
+\label{ch:robo67}
 \label{ch:web_interface_web_config_proxy}
 \index{unsorted!web\_config\_proxy}\index{Functions!web\_config\_proxy}
 \textbf{NAME}
@@ -1592,7 +2067,7 @@
 \textsl{[ web-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo52}
+\label{ch:robo68}
 \label{ch:web_interface_web_create_user}
 \index{unsorted!web\_create\_user}\index{Functions!web\_create\_user}
 \textbf{NAME}
@@ -1629,7 +2104,7 @@
 \textsl{[ web-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo53}
+\label{ch:robo69}
 \label{ch:web_interface_web_restart}
 \index{unsorted!web\_restart}\index{Functions!web\_restart}
 \textbf{NAME}
@@ -1658,7 +2133,7 @@
 \textsl{[ web-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo54}
+\label{ch:robo70}
 \label{ch:web_interface_web_root_password}
 \index{unsorted!web\_root\_password}\index{Functions!web\_root\_password}
 \textbf{NAME}
@@ -1684,4 +2159,4 @@
 \begin{verbatim}
  web_root_password 192.168.1.125 newpass currentpass root-password.log
 \end{verbatim}
-\printindex
+
