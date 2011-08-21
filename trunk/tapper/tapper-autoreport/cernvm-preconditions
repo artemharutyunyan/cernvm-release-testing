@@ -387,7 +387,14 @@ verify_virsh_uri()
 verify_vm_net()
 {
     RESULT=1
-
+    
+    # Fix, because virsh does not have VMware network support
+    if [ "$HYPERVISOR" == "vmware" ]
+    then
+        RESULT=0
+        return $RESULT
+    fi 
+    
     # Verify that the network is set as active
     if vm_net_active $1 ; test "$?" -eq 0
     then
@@ -769,7 +776,7 @@ create_net_def()
     RESULT=1
     TEMPLATE_FILE="$TEMPLATE_DIR/$1"
     DEFINITION_FILE=""
-    
+ 
     # Precondition - Verify that the template file and destination directory exist
     if verify_exists $TEMPLATE_FILE ; test "$?" -eq 0 \
     && verify_exists $2 ; test "$?" -eq 0
@@ -831,6 +838,13 @@ create_net_def()
 create_net()
 {
     RESULT=1
+    
+    # Fix, because virsh does not have VMware network support
+    if [ "$HYPERVISOR" == "vmware" ]
+    then
+        RESULT=0
+        return $RESULT
+    fi
 
     # Remove previously existing networks with the same name
     if destroy_vm_net $2 ; test "$?" -eq 0

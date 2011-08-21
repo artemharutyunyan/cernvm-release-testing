@@ -357,10 +357,9 @@ ok $? "Precondition Test 10 - Verify that the mandatory configuration settings f
 network XML definition file have been provided and are valid"
 
 
-# Set the network name MAC address and IP address
-NET_NAME=$(get_net_name $HYPERVISOR ${NET_XML_DEFINITION})
-MAC_ADDRESS=$(get_mac_address ${VM_XML_DEFINITION})
-IP_ADDRESS=$(get_ip_address $HYPERVISOR ${MAC_ADDRESS} ${NET_XML_DEFINITION})
+# Set the network name, for VMware it is only a pseudo network name
+# because libvirt/virsh does not support VMware networking currently
+NET_NAME=$(get_net_name ${NET_XML_DEFINITION})
 
 
 # Precondition Test 11 - Verify that the virtual machine network has been created 
@@ -399,6 +398,11 @@ ok $? "Precondition Test 15 - Verify that virtual machine $VMNAME has been stopp
 start_vm ${VM_XML_DEFINITION} $NAME
 has_console_support $NAME
 ok $? "Precondition Test 16 - Verify that virtual machine $VMNAME has console support"
+
+
+# Set the network MAC address and IP address
+MAC_ADDRESS=$(get_mac_address ${VM_XML_DEFINITION})
+IP_ADDRESS=$(get_ip_address $HYPERVISOR ${MAC_ADDRESS} ${NET_XML_DEFINITION})
 
 
 # Precondition Test 17 - Verify that virtual machine has web interface support
