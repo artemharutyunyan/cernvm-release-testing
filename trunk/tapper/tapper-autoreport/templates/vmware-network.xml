@@ -1,0 +1,12 @@
+<network>
+  <name>vmwarenet0</name>
+  <uuid></uuid>
+  <forward mode='bridge'/>
+  <bridge name='vmnet1' stp='on' delay='0' />
+  <mac address='00:50:56:C0:00:01'
+  <ip address='172.16.105.1' netmask='255.255.255.0'>
+    <dhcp>
+      <range start='172.16.105.5' end='172.16.105.5' />
+    </dhcp>
+  </ip>
+</network>
