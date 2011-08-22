@@ -1,0 +1,543 @@
+\section{Red Hat Based Test Client Setup}
+\subsection{Installing the system}
+\label{sec:rhinstall}
+\flushleft
+\begin{enumerate}
+\item First, begin by booting the fedora CD and when it boots into the desktop environment click the icon on the desktop which says
+	  ``Install to hard drive''.
+	  
+\item	For the first steps of installer, when it asks for the language settings just leave it as the default (english)
+
+\item 	At the next menu option, for the type of device the installation will involve, leave the default option ``Basic Storge Devices''
+
+\item 	At the next menu, where you have to select the drive to install the operating system on, select your hard drive from the list
+	  	\emph{you can usually determine which drive to use based on the model and capacity columns}\footnote{ The device naming convention
+	  	for Linux usually labels a hard drive starting with the first two characters as `sd' or `hd', and a third character from a to z 
+	  	( sd[a-z] or hd[a-z] )} then click ``next''.
+	  
+\item 	When prompted to enter the hostname for the computer, enter a relevant hostname for the machine based on the hardware or operating
+		system it is running; the hostname should be relevant and unique as \tapper will use this hostname to identify the system. A good naming
+		convention should refer to the hardware or operating system and call it a host to differentiate from the virtual machine that will be
+		running as a guest\footnote{This will make more sense later when you have to create and configure CernVM images}, for example a hostname such
+		as \emph{cernvm-redhat5-host} could be used, {\bf whatever convention you use make sure it is consistent}.
+		
+\item	Next, select the appropriate city/timezone from the list and ensure that the option ``system clock uses UTC'' is selected
+
+\item	When prompted to enter the password for the root password, set the root password to something you will not forget and is fairly
+		difficult with numbers and letters. {\bf Again, whatever password you use,  make sure it's consistent as you will frequently
+		use this account}.
+		
+\item	Next, for the installation type, select ``Use All Space'' to have the installer format the drive and automatically partition/configure
+		the drive for you, {\bf do not use this option if you have data on the hard drive as everything will be deleted}. Furthermore, if you
+		want to manually configure the partitions, or don't want to use LVM\footnote{Logical Volume Manager, it is very beneficial for complex
+		disk configurations and arrays, but for our needs is nothing more than a headache} (I don't) then select ``Create Cusom Layout''
+		and follow the instructions below.
+		
+\begin{itemize}
+\label{sec:rhmanualdrive}
+\item[a.]	From the list select your hard drive (it should be sda) and click create to create a new partition. Select a ``Standard Partition''
+			and click create.
+
+\item[b.]	For the ``Mount Point'' option select from the drop down list, `/' and for the ``File System Type'' select ext4. Then for the 
+			``Size (MB)'' option set the size (in megabytes) as the size of the free space on the hard drive minus double the amount of RAM 
+			installed on the system\footnote{This is a general rule of thumb to create a swap partition twice the size of your RAM}. For 
+			example, if you	have 2GB of RAM installed on the system, then you would subtract 4096 from the size of the hard drive. 
+			Finally, select the option ``Force to be primary partition'' and click OK.
+
+\item[c.]	From the list select the remaining free space and click create, then select a ``Standard Partition'' and click create
+
+\item[d.]	For the "File system type" select swap and then select the options ``Fill to maximum allowable size'' and ``Force to be primary
+			partition'' and click OK.
+			
+\item[e.]	Now, back at the menu select ``next'' and the partitions will now be created
+\end{itemize}
+
+\item	At the next stage in the installer, ensure that the option ``Install boot loader on /dev/\ldots'' is selected as this will install
+		the boot loader to the MBR\footnote{Master Boot Record, normally it is the first 512 bytes located at the first sector of a hard 
+		drive}, and click ``next''.
+		
+\item	After the installation has completed, reboot the machine and make sure to remove the installation CD before the computer boots.
+
+\item	Now, when the computer boots with the installation CD removed, you will begin the final stages of the installation procedure.
+		
+\item	When prompted to enter a username for the new user to be created on the system, set the username as something simple and relevant
+		such as \emph{cernvm} and the password to something you will not forget and is fairly complex with numbers and letters. But, most 
+		importantly {\bf keep this username and password consistent across all systems created as part of the infrastructure} as it makes 
+		administration and everything else much easier.
+		
+\item	At the next stage, for setting the date and time, enable the option ``sychronize date and time over the network'' to use an NTP
+		server\footnote{Network Time Protocol, this is very important and required for keeping all the test clients, CernVM images,
+		and test results synchronized}, and select one of the NTP servers listed, or add one of the \cern dedicated NTP servers.
+		
+\item	Click finish, and if you are prompted to send a profile, and wish to assist the developers select ``send profile''.
+\end{enumerate}
+
+
+
+
+\subsection{Configuring the system}
+\label{sec:rhconfig}
+\begin{enumerate}
+\item 	After the system has booted remove the follow unnecessary startup applications by selecting from the menu  
+		\verb|System -> Preferences -> Startup Applications|
+\begin{itemize}
+\item	bluetooth
+\item	evolution alarm
+\item	Gnome Login Sound
+\item	PackageKit Update Applet
+\item	print queue
+\item	screensaver
+\item	visual assistance/aid
+\item	volume control
+\item	any others you think are unnecessary based on your own discretion
+\end{itemize}
+
+\item	Next enable and configure the remote desktop from the menu \verb|System -> Preferences| \verb| -> Remote Desktop| 
+		and ensure that the following options are configured	
+\begin{itemize}
+\item	Enable the option ``Allow others to view your desktop''
+\item	Enable the option ``Allow other users to control your desktop''
+\item	Disable the option ``You must confirm access to this machine''
+\end{itemize}
+			
+\item	Next enable SSH access to the machine, in order for SSH and VNC access to work the firewall will have to be disabled
+\begin{itemize}
+\item[a.]	First disable the firewall from the menu \verb|System -> Adminisration -> Firewall| and click the ``Disable'' 
+			button and then click ``Apply'' to apply the changes! {\bf This is a quick solution for now because it's too 
+			much work to configure the firewall for VNC, SSH, Apache, MySQL, PHPMyAdmin, MCP, and all the other network 
+			daemons and should not be a problem if this is just being accessed internally}.
+
+\item[b.]	Now that the firewall is disabled, configure sshd, the ssh daemon, to run on startup
+
+\begin{lstlisting}
+$ su -c "chkconfig --level 345 sshd on"
+\end{lstlisting}
+\end{itemize}
+
+\item	Next, configure the system to login automatically at boot
+\begin{itemize}
+\item[a.]	Edit the login screen configuration file for gdm using the following command
+\begin{lstlisting}
+$ su -c "gedit /etc/gdm/custom.conf"
+\end{lstlisting}
+
+\item[b.]	Then in the custom.conf file, put the following under the heading [daemon], which will automatically
+			log the system in as the user you created, \emph{make sure you replace the user cernvm with the user
+			that you created}.
+
+\lstset{language=bash,caption=Configure Automatic Login}
+\begin{lstlisting}
+AutomaticLoginEnable=true
+AutomaticLogin=cernvm
+\end{lstlisting}		
+\end{itemize}
+
+\item	Next, configure the screen saver from the menu \verb|System -> Preferences -> Screensaver| and ensure that
+		the following options are configured
+\begin{itemize}
+\item	Disable the option ``Lock screen when screensaver active''
+\end{itemize}
+
+\item	Now, reboot the machine, and ensure that the following work
+\begin{itemize}
+\item	It automatically boots up into the full desktop environment without having to login
+\item	You have access to the machine using SSH and can login on the root account
+\item	You have VNC access to the machine and can control the system using VNC	
+\end{itemize}
+
+\item	Finally, update the system from the menu \verb|System -> Administration -> Software Update| and after it has 
+		completed the updates reboot the system
+\end{enumerate}
+
+
+
+
+\subsection{Installing libvirt and virsh}
+\label{sec:rhvirsh}
+\begin{enumerate}
+\item	The virtualization API libvirt and the command line tool virsh~\cite{libvirt} are the essential components required 
+		for setting up a test client and must be installed and properly configured before any testing can begin. Ensure that
+		you follow the proceeding directions carefully and validate that virsh is working properly before proceeding to 
+		install and configure the various hypervisors.
+		
+\item	First, begin by reviewing the release news listed on the libvirt website, \url{http://libvirt.org/news.htm} and read 
+		through the release notes for the latest version released to make sure that there are no regressions or deprecated 
+		support for the platforms you wish to support. If you intend to set up an entire infrastructure and support all of the
+		\cernvm virtualization platforms, which would include \emph{Xen, KVM, VirtualBox, and VMware}, then you must download
+		a version later than \emph{0.8.7} as there was no support for VMware prior to that release.
+
+\item	Next, download the latest release that is a {\bf tar.gz} file from the libvirt release server, 
+		\url{http://libvirt.org/sources/} based on the latest release which does not have any regressions or deprecations for
+		the virtualization platforms you wish to support~\footnote{This shouldn't be an issue but just in case there is a 
+		newer version in which Xen support is deprecated, then you would need to use the last release which has Xen support}.
+		As of this date, the latest release of libvirt is version 0.9.2, this is the release that will be used for the
+		following instructions and examples.
+		
+\item	Next, install the following dependencies which are required to build libvirt from source, \emph{from now on execute all 
+			commands as root}.
+		
+\lstset{language=bash,caption=Install Dependencies}
+\begin{lstlisting}
+# Change to root account, enter password if prompted
+$ su
+
+# Install dependencies for building from source
+$ yum install gnutls-devel numactl numactl-devel python-devel libnl-devel \
+libxml2-devel device-mapper-libs device-mapper-devel
+
+# Install GCC
+$ yum install gcc make
+\end{lstlisting}
+
+\item	Next, install software for managing and viewing virtual machines, \emph{it is imperative that these applications are
+			installed before compiling and installing libvirt otherwise there will be conflicts}.
+
+\lstset{language=bash,caption=Install Virtual Machine Management Software}
+\begin{lstlisting}
+# Change to root account, enter password if prompted
+$ su
+
+# Install management software
+$ yum install virt-manager python-virtinst virt-viewer
+\end{lstlisting}
+	
+\item	Next extract the files and execute configure with the following options, then finally compile and install libvirt.
+
+\lstset{language=bash,caption=Compile and Install libvirt}
+\begin{lstlisting}
+# Change to root account, enter password if prompted
+$ su
+
+# Extract and execute configure
+$ tar -xvvzf libvirt-*.tar.gz
+$ cd libvirt-*/
+$ ./configure --prefix=/usr --disable-silent-rules --disable-shared \
+--enable-static --enable-dependency-tracking --with-qemu \
+--with-vmware --with-libssh2 --with-vbox --with-test --with-remote \
+--with-libvirtd --with-numactl --with-network --with-storage-dir
+
+# Compile and install libvirt
+$ make 
+$ make install	
+\end{lstlisting}
+	
+\item 	Finally, verify that the the service libvirtd can start, because it is required for libvirt to function,  and then
+			configure libvirtd to start automatically at boot. As well, ensure that virsh installed correctly and is running by 
+			connecting to the test hypervisor and ensuring that the test virtual machine, named ``test'' is running.
+
+\lstset{language=bash,caption=Verify virsh was Installed Properly}
+\begin{lstlisting}
+# Change to root account, enter password if prompted
+$ su
+
+# Verify libvirtd starts, set to start automatically at boot
+$ service libvirtd start
+$ chkconfig --level 2345 libvirtd on
+
+# Verify vitual machine "test" running
+$ virsh -c test:///default list --all
+\end{lstlisting}
+\end{enumerate}
+
+
+
+
+\subsection{Installing and configuring KVM}
+\label{sec:rhkvm}
+\begin{enumerate}
+\item	The first step is to start by installing the KVM package, KVM may have alrready been installed by default, If
+			you receive a message that a package is already installed then simply continue.
+
+\lstset{language=bash,caption=Install KVM}
+\begin{lstlisting}
+$ yum install qemu-kvm
+\end{lstlisting}
+
+\item	Next, verify the location of the qemu-kvm binary, at the moment virsh still expects that the binary is located
+			in \verb|/usr/bin|, but since Red Hat 6, the binary has been moved into the directory \verb|/usr/libexec|.
+			To resolve the issue simply create a symbolic link to the binary if qemu-kvm does not exist.
+			
+\lstset{language=bash,caption=Symbolic Link to qemu-kvm}
+\begin{lstlisting}
+# If qemu-kvm does not exist create symbolic link
+$ ln -s /usr/libexec/qemu-kvm /usr/bin/qemu-kvm
+\end{lstlisting}
+
+\item	Next, verify that KVM has been installed properly and that virsh can connect to the KVM hypervisor using the
+			following commands, if you are able to connect to the virsh console without any errors then virsh is able
+			to connect to the KVM hypervisor.
+
+\lstset{language=bash,caption=Verify that virsh can Access KVM}
+\begin{lstlisting}
+$ su
+$ virsh -c qemu:///session
+\end{lstlisting}
+
+\item 	Next, to ensure that KVM is properly configured and installed, follow this guide provided on the CernVM website
+			\url{http://cernvm.cern.ch/portal/kvm} {\bf except, do not create a kvm definition file as the xml template file
+			is provided by the test suite scripts} and verify that you are able to connect to the libvirtd kvm system session.
+		
+\lstset{language=bash,caption=Verify that KVM is Properly Configured}
+\begin{lstlisting}
+$ su
+$ virsh -c qemu:///system 
+\end{lstlisting}
+
+\item	Finally, ensure that you are able to connect to the QEMU/KVM hypervisor using the virtual machine manager, as it 
+			is necessary to view the status of the CernVM images and must be installed to troubleshoot and view the CernVM 
+			images. Simply launch the virtual machine manager application from \verb|Applications -> System Tools| 
+			\verb| -> Virtual Machine Manager| and {\bf if you are prompted to install libvirt, select ``No'' } as a 
+			custom version of libvirt was installed previously.
+\end{enumerate}
+
+
+
+
+\subsection{Installing and configuring VirtualBox}
+\label{sec:rhvbox}
+\begin{enumerate}
+\item	First, begin by downloading and installing a version of VirtualBox supported by libvirt from the VirtualBox download 
+			page, it is best to download the latest version within the series \emph{that has been available for at least a month 
+			prior to the release of the version of libvirt installed}. VirtualBox can be downloaded from the following location,  
+			\url{http://www.virtualbox.org/wiki/Downloads} ensure that you select the appropriate Red Hat based distribution, 
+			version and architecture for your system. The following instructions for this section of the guide uses VirtualBox 
+			4.0.12 for Red Hat 6, AMD64.
+		 	
+\item	Before installing VirtualBox, install the dependencies required to build the VirtualBox kernel modules.
+
+\lstset{language=bash,caption=Install VirtualBox Dependencies}
+\begin{lstlisting}
+$ su
+$ yum install kernel-headers kernel-devel
+\end{lstlisting}
+		 	
+\item	Next, after downloading the latest version of VirtualBox for your distribution and installing the dependencies 
+			install VirtualBox as the root account using the following command.
+			
+\begin{lstlisting}
+# Enter the root password when prompted
+$ su
+$ rpm -iv VirtualBox-*.rpm
+\end{lstlisting}	
+
+\item	Next, in order to use VirtualBox and have full access to the drivers needed, ensure that the root
+			account belongs to the group ``vboxusers''. Add the root account to the group ``vboxusers'' using
+			the following command.
+
+\lstset{language=bash,caption=Add root to vboxusers}
+\begin{lstlisting}
+$ su
+$ usermod -a -G vboxusers root
+\end{lstlisting}
+		
+\item	Due to an issue with VirtualBox\footnote{The issues is that VirtualBox looks for virtual machine configuration files (*.vbox)
+		in the ``VirtualBox VMs'' folder of the user that launched VirtualBox. The issue is worsened by the fact that there can
+		only be one ``VirtualBox VMs'' folder which causes conflicts with multiple users.}, in order for it to work with virsh 
+		the virtual machine(s) must be created and configured as the root account, otherwise when you try to connect or start a 
+		VirtualBox virtual machine with virsh you will get an ``unknown error'', which is obviously very vague and difficult to 
+		resolve. {\bf Therefore ALWAYS start VirtualBox as the root account using the following procedure}.
+
+\lstset{language=bash,caption=Always Start VirtualBox as Root}
+\begin{lstlisting}
+# Switch to the root account, enter root password
+$ su
+
+# Start VirtualBox as root
+$ virtualbox
+\end{lstlisting}
+
+\item	Finally, verify that VirtualBox has been installed properly and that virsh can connect to the VirtualBox hypervisor, 
+		verify that the VirtualBox module, \emph{vboxdrv} has been loaded and that you are able to connect to the virsh console 
+		without any errors.
+
+\lstset{language=bash,caption=Verify that virsh can Access VirtualBox}
+\begin{lstlisting}
+$ su
+
+# Verify that the vboxdrv module is loaded
+$ lsmod | grep -i vboxdrv
+
+# Verify that virsh can connect to virtualbox
+$ virsh -c vbox:///session
+\end{lstlisting}
+\end{enumerate}
+
+
+
+
+\subsection{Installing and configuring VMware}
+\label{sec:rhvmware}
+\begin{enumerate}
+\item	First, begin by downloading the latest version of VMware Workstation or VMware Player  from the VMware product 
+			page, \url{http://www.vmware.com/products/}, VMware Player is free, whereas VMware Workstation requires a
+			license. So if you decide to use VMware Workstation instead of VMware Player you will have to purchase a license
+			for it in order to continue.
+
+\item	Before installing VMware, install the dependencies required to build the VMware kernel modules.
+
+\lstset{language=bash,caption=Install VMware Dependencies}
+\begin{lstlisting}
+$ su
+$ yum install kernel-headers kernel-devel
+\end{lstlisting}
+		
+\item 	Next, to install VMware simply set the bundle file as executable and execute the file as root.
+\lstset{language=bash,caption=Install VMware}
+\begin{lstlisting}
+$ su
+$ chmod +x VMware*.bundle
+$ ./VMware*.bundle
+\end{lstlisting}
+
+\item	Next, launch VMware as root and wait for it to compile the kernel modules, then verify that the following VMware 
+			kernel modules are loaded, currently virsh has support to connect to the VMware hypervisor, but there are some minor
+			issues such as a lack of support for VMware network configurations, currently only ``bridged'' mode is supported.
+		
+\begin{itemize}
+\item        vmnet
+\item        vmblock
+\item        vmci
+\item        vmmon
+
+\end{itemize}
+
+\lstset{language=bash,caption=Verify VMware Kernel Modules Loaded}
+\begin{lstlisting}
+# Launch VMware as root, this will build kernel modules
+$ su
+$ vmware
+
+# Verify that the kernel extentsions are loaded
+$ lsmod | grep -i vm
+\end{lstlisting}
+
+.\item      Finally, verify that VMware has been configured properly and that virsh supports the current version of VMware 
+                installed by connecting to the virsh console for the VMware hypervisor.
+
+\lstset{language=bash,caption=Verify VMware Works with Virsh}
+\begin{lstlisting}
+# Verify that virsh can connect to vmware
+$ virsh --connect vmwarews:///session
+\end{lstlisting}
+
+\item	If everything so far has worked, then libvirt, virsh, and the hypervisors have been installed and configured properly,
+			if you have any outstanding issues solve them before proceeding further, or go to the section ``Server Platform 		
+			Setup''~\ref{sec:serversetup} as the \tapper~server does not require libvirt, virsh, or hypervisor configuration.
+		
+\end{enumerate}
+
+
+
+
+\subsection{Setting up the Tapper Test Suite}
+\label{sec:rhtestsuite}
+\begin{enumerate}
+\item 	{\bf Before proceeding any further ensure that you have all other test clients set up this far, and then proceed
+		to follow the instructions for setting up and configuring the \tapper~server in the section ``Server Platform Setup''}		
+		~\ref{sec:serversetup}.
+		
+\item 	Now that the \tapper~server has been installed and configured and the \tapper web interface and database have proven
+		to be working, the next step is to verify that the test client can actually send a report to the \tapper~server in
+		the form of a TAP file. After sending the TAP report to the server, ensure that the test client is working by viewing 
+		the tapper reports in your browser at the following url: \url{http:/<tapper\_server>/tapper/reports}. You should now see a 
+		report from the test client, there should be a report from a system named whatever the ``Tapper-Machine-Name'' in 
+		demo\_report.tap was set as. \emph{For the example demo\_report.tap provided below it would be cernvm-rhtestclient}.
+		\footnote{This is why a consistent hostname convention was emphasized earlier, as reports are often sorted and organized 
+		based on hostnames}.
+		
+\lstset{language=bash,caption=Send a Basic Report to the \tapper~Server}
+\begin{lstlisting}
+# Save the following in a file named demo_report.tap
+
+	1..2
+	# Tapper-Suite-Name: Tapper-Deployment
+	# Tapper-Suite-Version: 1.001
+	# Tapper-Machine-Name: cernvm-rhtestclient
+	ok - Hello World
+	ok - Just another description
+
+# Send the report to the tapper server using netcat
+$ cat demo_report.tap | nc -w10 cernvm-server 7357
+\end{lstlisting}
+
+\item 	Next, download a copy of the CernVM Test Suite and the CernVM Test Cases from the Google Code svn repository
+		\cite{GCreleasetesting} and install the the following dependencies.
+		
+\lstset{language=bash,caption=Install CernVM Test Suite and Dependencies}
+\begin{lstlisting}
+# Install subversion, required to checkout auto-tapper
+$ yum install subversion
+
+# Checkout a copy of cernvm testsuite and cernvm testcases
+$ svn checkout http://cernvm-release-testing.googlecode.com/svn/\
+trunk/tapper/tapper-autoreport/ cernvm-testsuite
+
+# Install the missing dependencies
+$ yum install prove
+$ yum install uuid
+$ yum install spawn
+$ yum install expect
+$ yum install expectk
+$ yum install nmh
+
+# Run install-mh and accept the defaults
+$ install-mh
+\end{lstlisting}
+
+\item	Now that cernvm-testsuite has been installed, configure the variables in the configuration file for the
+			hypervisors you want to test and according to your \tapper infrastructure setup. Sample configuration files are provided
+			in the {\bf config} folder, all of the settings provided in the configuration files by default are the {\bf mandatory, minimum 
+			configuration options} and in most cases the	defaults should be sufficient for testing, the only mandatory settings that are
+			not provided by default {\bf and must be configured manually are CVM\_TS\_REPORT\_SERVER and 
+			CVM\_VM\_IMAGE\_VERSION }. Please refer to the developer manual for a more complete detailed list of the mandatory and 
+			optional configuration settings.
+
+\begin{description}
+\item[CVM\_TS\_SUITENAME]	Must ALWAYS be set, the default suite name in the configuration file should be suitable
+
+	  		  
+\item[CVM\_TS\_SUITEVERSION] 	Must ALWAYS be set, reflects the release version number of the test suite framework, the  default
+								version given in the configuration should only be changed if you customize/update the scripts
+
+\item[CVM\_TS\_REPORT\_SERVER]	Must ALWAYS be set, this is the ip address or hostname of the Tapper report server which the reports
+      							from the test results are sent to
+		
+\item[CVM\_TS\_DOWNLOAD\_PAGE]	Must ALWAYS be set, normally the default url provided in the configuration file is accurate, but in the
+								event that the internal \cernvm image release page is relocated then this url must be changed.
+
+\item[CVM\_VM\_HYPERVISOR]	Must ALWAYS be set, should not have to change the defaul hypervisor in the configuration files, valid values 
+							(case sensitive) are {\bf kvm,vbox,vmware}
+
+\item[CVM\_VM\_TEMPLATE]		Must ALWAYS be set, normally the default template provided in the configuration file should not be changed,
+								only change this to use a custom template file. The custom template file \emph{must be placed within the
+								templates folder}
+
+\item[CVM\_VM\_NET\_TEMPLATE]	Must ALWAYS be set, normally the default network template provided in the configuration file should not be
+	 							changed, only change this to use a custom network template file for the \cernvm image,  {\bf only applies to kvm
+	 							and virtualbox}. The custom network template file \emph{must be placed within the templates folder}
+
+\item[CVM\_VM\_IMAGE\_VERSION]	Must ALWAYS be set, specifies the version of the CernVM image to use from the release page
+	
+\item[CVM\_VM\_IMAGE\_TYPE]		Must ALWAYS be set,  specifies the type of CernVM image, valid image types supported, (case sensitive) are 
+								{\bf basic and desktop}
+
+\item[CVM\_VM\_ARCH]		Must ALWAYS be set, specifies the architecture of the \cernvm image, valid architectures (case sensitive) are {\bf 
+							x86 and x86\_64}
+\end{description}	
+
+\item	Finally, now that cernvm-testsuite has been installed and configured on the test client and the test client and \tapper~Server
+			have proven to be working, the next step is to verify that cernvm-testsuite works correctly and can actually send a report to 	
+			the \tapper~server in the form of a TAP file. To execute the \cernvm Test Cases script, ``cernvm-tests.sh'' simply source
+			the configuration file you wish to use and execute the script. Once the script has completed and sent a TAP report to the server, 
+			ensure that the test client is working by viewing the tapper reports in your browser at the  following 
+			url: \url{http:/<tapper\_server>/tapper/reports}. You should now see a new report from the test client, there should be a 
+			report from a system with the same hostname.\footnote{This is why a consistent hostname convention was emphasized earlier, as 
+			reports are often sorted and organized based on hostnames}.
+
+\lstset{language=bash,caption=Execute CernVM Test Cases Script}
+\begin{lstlisting}
+# Simply source the configuration file, and execute the script
+$ . ./config/<configuration_file>
+$ ./cernvm-tests.sh
+\end{lstlisting}
+\end{enumerate}

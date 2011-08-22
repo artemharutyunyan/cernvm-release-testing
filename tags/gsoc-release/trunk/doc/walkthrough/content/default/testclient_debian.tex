@@ -1,0 +1,696 @@
+\section{Debian Based Test Client Setup}
+\subsection{Installing the system}
+\label{sec:debianinstall}
+\flushleft
+\begin{enumerate}
+\item 	First, begin by loading the Debian Squeeze CD and select the first `install' option at the initial boot menu.
+
+\item	For the first few installation options, such as default language and keyboard layout simply leave the default values
+		and press enter unless you have different requirements than the default options.
+
+\item	When prompted to enter the hostname for the computer, enter a relevant hostname for the machine based on the hardware or 
+		operating system it is running; the hostname should be relevant and unique as \tapper will use this hostname to identify the 
+		system. A good naming convention should refer to the hardware or operating system and call it a host to differentiate from the 
+		virtual machine that will be running as a guest\footnote{This will make more sense later when you have to create and configure 
+		CernVM images}, for example a hostname such as \emph{cernvm-debian6-host} could be used, {\bf whatever convention you use make 
+		sure it is consistent}.
+the following
+\item	Next, you will be prompted to enter a domain name, delete the preset domain name ``local'' and leave it blank, \emph{unless
+		your network environment has specific domain name requirements}.
+
+\item	Next, when prompted to enter the root password, set the root password to something you will not forget and is
+		fairly difficult with numbers and letters. {\bf Again, whatever password you use,  make sure it's consistent as you will 	
+		frequently use this account}.
+
+\item 	Next, when prompted to enter a username for the new user to be created on the system, set the username as something simple and 
+		relevant such as \emph{cernvm} and the password to something you will not forget and is fairly complex with numbers and letters. 
+		But, most importantly {\bf keep this username and password consistent across all systems created as part of the infrastructure} 
+		as it makes administration and everything else much easier.
+
+\item 	When prompted for the timezone simply configure the timezone according to your local time zone, such as CEST
+
+\item	Now, when prompted by the installer to configure the partitioning layout, if there are other operating systems installed on the 
+		system select the ``Guided - use entire disk'' option, and if available select the option ``Use Remaining Free Space''. 
+		Otherwise, if there are no other operating system installed on the hard drive select the ``Manual'' option, \emph{beware that 
+		doing so will risk erasing everything on the hard drive if you create a new partition table}. Using the manual option, create 
+		two primary partitions, with the first taking up the size of the hard drive minus twice the size of the amount of RAM installed, 
+		and the second primary partition as a SWAP file using the remaining free space. The following is an example of what the partiton 
+		layout would look like for a 40.0 GB hard drive with 2GB of ram.
+
+\lstset{language=bash,caption=Manual Partition Layout Example}
+\begin{lstlisting}
+#1	PRIMARY	36.0 GB		B f	 EXT4	/
+#2	PRIMARY	4.0  GB		  f	 SWAP	SWAP
+\end{lstlisting}
+
+\item 	When prompted to scan another CD or DVD, select {\bf No} unless the system does not have access to the internet, as all the 
+		packages will be installed using a network mirror.
+
+\item	When prompted to use a network mirror, select {\bf Yes} and select a mirror near your location and in a country with a reputable 
+		connection/internet infrastructure such as (USA, Netherlands, Germany, France).
+
+\item 	When prompted to choose software to install, select the following
+\begin{itemize}
+\item 	Graphical desktop environment
+\item 	SSH Server
+\item	Standard system utilities
+\end{itemize}
+
+\item 	When prompted to install the GRUB boot loader to the master boot record, select {\bf Yes}
+
+\item	After that the system should soon complete the installation, after the installation has finished ensure that you reboot the 
+		system and remove the CD so that the system does not load the CD again when it starts.
+\end{enumerate}
+
+
+
+
+\subsection{Configuring the system}
+\label{sec:debianconfig}
+\begin{enumerate}
+\item	After the system has booted remove the follow unnecessary startup applications by selecting from the menu  
+		\verb|System -> Preferences -> Startup Applications|
+\begin{itemize}
+\item	bluetooth
+\item	evolution alarm
+\item	Gnome Login Sound
+\item	print queue
+\item	screensaver
+\item	update notifier
+\item	visual assistance/aid
+\item	volume control
+\item	any others you think are unnecessary based on your own discretion
+\end{itemize}
+
+\item Remove the follow unnecessary services by selecting from the menu \verb|System -> Administration -> Services|
+\begin{itemize}
+\item	alsa utils
+\item	bluetooth
+\item	CUPS
+\item	exim4
+\item	any others you think are unnecessary based on your own discretion
+\end{itemize}
+
+\item Next enable and configure remote desktop from the menu \verb|System -> Preferences -> Remote Desktop| and ensure
+that the following options are configured
+\begin{itemize}
+\item	Enable the option ``Allow others to view your desktop''
+\item	Enable the option ``Allow other users to control your desktop''
+\item	Disable the option ``You must confirm access to this machine''
+\end{itemize}
+
+\item Next configure the system to login automatically at boot from the menu select \verb|System -> Administration -> Login Screen|
+and then set it to login to the user account you created previously (such as cernvm) automatically.
+
+\item Next, remove cd-rom support from sources.list, which is used by Debian for updates \footnote{And is a nuisance for any new user
+as it forces you to find the CD and put it in the computer for the update to continue}, execute the following command with root privileges
+and comment out any lines that start with ``deb cdrom'' by using a \#
+
+\lstset{language=bash,caption=Removing CD-ROM Requirement for Updates}
+\begin{lstlisting}
+$ su -c "gedit /etc/apt/sources.list"
+\end{lstlisting}
+
+\item	Again, continue to edit /etc/apt/sources.list still with root privileges and ensure that each line ends with ``main 
+		contrib non-free'', then save the file and do the following command with root privileges.
+
+\lstset{language=bash,caption=Updating the System}
+\begin{lstlisting}
+$ su -c "apt-get update"
+\end{lstlisting}
+
+\item Next, configure the screen saver from the menu \verb|System -> Preferences -> Screensaver| and ensure that the following options are 
+configured
+\begin{itemize}
+\item	Disable the option ``Lock screen when screensaver active''
+\end{itemize}
+
+\item 	The following instructions involve enabling headless support so that you can remote desktop to the machine without having a 
+		monitor connected to the computer
+\begin{itemize}
+\item[a.] Edit the xorg.conf file and put the following in it
+
+\lstset{language=bash,caption=Configuring Xorg for Headless Support}
+\begin{lstlisting}
+$ su -c "gedit /etc/X11/xorg.conf"
+
+Section "Device"
+Identifier "VNC Device"
+Driver "vesa"
+EndSection
+
+Section "Screen"
+Identifier "VNC Screen"
+Device "VNC Device"
+Monitor "VNC Monitor"
+SubSection "Display"
+Modes "1280x1024"
+EndSubSection
+EndSection
+
+Section "Monitor"
+Identifier "VNC Monitor"
+HorizSync 30-70
+VertRefresh 50-75
+EndSection
+\end{lstlisting}
+	
+\item[b.] Then edit grub and set the option ``nomodeset'', and proceed to update grub and reboot
+
+\lstset{language=bash,caption=Configuring Grub for Headless Support}
+\begin{lstlisting}
+$ su -c "gedit /etc/default/grub"
+
+GRUB_CMDLINE_LINUX="nomodeset"
+
+$ su -c "update-grub"
+\end{lstlisting}
+\end{itemize}
+
+\item	Now, reboot the machine, and ensure that the following work
+\begin{itemize}
+\item	It automatically boots up into the full desktop environment without having to login
+\item	You have access to the machine using SSH and can login on the root account
+\item	You have VNC access to the machine and can control the system using VNC	
+\end{itemize}
+
+\item	Finally, update the system from the menu \verb|System -> Administration -> Update Manager| and after it has 
+		completed the updates reboot the system
+\end{enumerate}
+
+
+
+
+\subsection{Installing libvirt and virsh}
+\label{sec:debianvirsh}
+\begin{enumerate}
+\item	The virtualization API libvirt and the command line tool virsh~\cite{libvirt} are the essential components required 
+		for setting up a test client and must be installed and properly configured before any testing can begin. Ensure that
+		you follow the proceeding directions carefully and validate that virsh is working properly before proceeding to 
+		install and configure the various hypervisors.
+		
+\item	First, begin by reviewing the release news listed on the libvirt website, \url{http://libvirt.org/news.htm} and read 
+		through the release notes for the latest version released to make sure that there are no regressions or deprecated 
+		support for the platforms you wish to support. If you intend to set up an entire infrastructure and support all of the
+		\cernvm virtualization platforms, which would include \emph{Xen, KVM, VirtualBox, and VMware}, then you must download
+		a version later than \emph{0.8.7} as there was no support for VMware prior to that release.
+
+\item	Next, download the latest release that is a {\bf tar.gz} file from the libvirt release server, 
+		\url{http://libvirt.org/sources/} based on the latest release which does not have any regressions or deprecations for
+		the virtualization platforms you wish to support~\footnote{This shouldn't be an issue but just in case there is a 
+		newer version in which Xen support is deprecated, then you would need to use the last release which has Xen support}.
+		As of this date, the latest release of libvirt is version 0.9.2, this is the release that will be used for the
+		following instructions and examples.
+		
+\item	Next, install the following dependencies which are required to install the libvirt files from the source files
+			that were downloaded, \emph{from now on execute all commands as root}.
+
+\lstset{language=bash,caption=Install Dependencies}
+\begin{lstlisting}
+$ su
+$ apt-get install libxen-dev gnutls-dev libnuma-dev \
+libdevmapper-dev python-dev libnl-dev libxml2 \
+libxml2-dev libgnutls-dev 
+
+# Install GCC
+$ apt-get install gcc make build-essential
+\end{lstlisting}
+
+\item	Next, install software for managing and viewing virtual machines.
+
+\lstset{language=bash,caption=Install Virtual Machine Management Software}
+\begin{lstlisting}
+# Change to root account, enter password if prompted
+$ su
+$ apt-get install virt-manager virtinst virt-viewer
+\end{lstlisting}
+		
+\item	Next extract the files and execute configure with the following options, then finally compile and install libvirt.
+
+\lstset{language=bash,caption=Compile and Install libvirt}
+\begin{lstlisting}
+# Extract and execute configure
+$ tar -xvvzf libvirt-*.tar.gz
+$ cd libvirt-*/
+$ ./configure --prefix=/usr --disable-silent-rules --disable-shared \
+--enable-static --enable-dependency-tracking --with-xen \
+--with-xen-inotify --with-qemu --with-vmware --with-libssh2 \
+--with-vbox --with-test --with-remote --with-libvirtd --with-numactl \
+--with-network --with-storage-dir
+
+# Compile and install libvirt
+$ make 
+$ make install
+\end{lstlisting}
+
+\item 	Finally ensure that virsh installed correctly and is running by connecting to the test hypervisor and ensuring 
+			that the test virtual machine, named ``test'' is running.
+
+\lstset{language=bash,caption=Verify virsh was Installed Properly}
+\begin{lstlisting}
+# Change to root account, enter password if prompted
+$ su
+
+# Verify virsh is working, test should be running
+$ virsh -c test:///default list --all
+\end{lstlisting}
+\end{enumerate}
+
+
+
+
+\subsection{Installing and configuring KVM}
+\label{sec:debiankvm}
+\begin{enumerate}
+\item	The first step is to install the KVM hypervisor, start by installing KVM and the other additional packages such
+		as virt-manager, which is a graphical management tool and virt-install, which is a command line interface (CLI)
+		virtual machine creation/installation/configuration tool using the following commands with root privileges. If
+		you receive a message that a package is already installed then simply continue.
+
+\lstset{language=bash,caption=Installing KVM and Other Related Programs}
+\begin{lstlisting}
+$  su
+$ apt-get install qemu-kvm
+\end{lstlisting}
+
+\item	Next, verify that KVM has been installed properly and that virsh can connect to the KVM hypervisor using the
+		following commands, if you are able to connect to the virsh console without any errors then virsh is able
+		to connect to the KVM hypervisor.
+
+\lstset{language=bash,caption=Verify that virsh can Access KVM}
+\begin{lstlisting}
+$ su
+$ virsh -c qemu:///session
+\end{lstlisting}
+
+\item 	Next, to ensure that KVM is properly configured and installed, follow this guide provided on the CernVM website
+			\url{http://cernvm.cern.ch/portal/kvm} {\bf except, do not create a kvm definition file as the xml template file
+			is provided by the test suite scripts} and verify that you are able to connect to the libvirtd kvm system session.
+		
+\lstset{language=bash,caption=Verify that KVM is Properly Configured}
+\begin{lstlisting}
+$ su
+$ virsh -c qemu:///system 
+\end{lstlisting}
+
+\item	Finally, ensure that you are able to connect to the QEMU/KVM hypervisor using the virtual machine manager, as it 
+			is necessary to view the status of the CernVM images and must be installed to troubleshoot and view the CernVM 
+			images. Simply launch the virtual machine manager application from 
+			\verb|Applications -> System Tools -> Virtual Machine Manager| and{\bf if you are prompted to install libvirt, 
+			select ``No'' } as a custom version of libvirt was installed previously.
+\end{enumerate}
+
+
+
+
+\subsection{Installing and configuring VirtualBox}
+\label{sec:debianvbox}
+\begin{enumerate}
+\item	First, begin by downloading and installing a version of VirtualBox supported by libvirt from the VirtualBox download 
+		page, it is best to download the latest version within the series \emph{that has been available for at least a month 
+		prior to the release of the version of libvirt installed}. VirtualBox can be downloaded from the following location,  
+		\url{http://www.virtualbox.org/wiki/Downloads} ensure that you select the appropriate Debian based distribution, 
+		version and architecture for your system. The following instructions for this section of the guide uses VirtualBox 
+		4.0.12 for Debian Squeeze, AMD64.
+		
+\item	Before installing VirtualBox, install the dependencies for executing VirtualBox as well as the dependencies 
+			required to build the VirtualBox kernel modules.
+
+\lstset{language=bash,caption=Install VirtualBox Dependencies}
+\begin{lstlisting}
+$ su
+$ apt-get install libqt4-network libqt4-opengl libqtcore4 libqtgui4
+$ apt-get install linux-headers-$(uname -r)
+\end{lstlisting}
+		 	
+\item	Next, after downloading the latest version of VirtualBox for your distribution and installing the dependencies 
+			install VirtualBox as the root account using the following command.
+\item	Next, after downloading the latest version of VirtualBox for your distribution install VirtualBox as the root
+		account using the following command.
+\begin{lstlisting}
+# Enter the root password when prompted
+$ su
+$ dpkg -i virtualbox-*.deb
+\end{lstlisting}	
+
+\item	Next, in order to use VirtualBox and have full access to the drivers needed for USB support, ensure that the root
+			account belongs to the group ``vboxusers'' using the following command.
+		
+\lstset{language=bash,caption=Add root to VirtualBox Group}
+\begin{lstlisting}
+$ su -c "usermod -a -G vboxusers root"
+\end{lstlisting}	
+		
+\item	Due to an issue with VirtualBox\footnote{The issues is that VirtualBox looks for virtual machine configuration files (*.vbox)
+		in the ``VirtualBox VMs'' folder of the user that launched VirtualBox. The issue is worsened by the fact that there can
+		only be one ``VirtualBox VMs'' folder which causes conflicts with multiple users.}, in order for it to work with virsh 
+		the virtual machine(s) must be created and configured as the root account, otherwise when you try to connect or start a 
+		VirtualBox virtual machine with virsh you will get an ``unknown error'', which is obviously very vague and difficult to 
+		resolve. {\bf Therefore ALWAYS start VirtualBox as the root account using the following procedure}.
+
+\lstset{language=bash,caption=Always Start VirtualBox as Root}
+\begin{lstlisting}
+# Switch to the root account, enter root password
+$ su
+
+# Start VirtualBox as root
+$ virtualbox
+\end{lstlisting}
+
+\item	Finally, verify that VirtualBox has been installed properly and that virsh can connect to the VirtualBox hypervisor, 
+		verify that the VirtualBox module, \emph{vboxdrv} has been loaded and that you are able to connect to the virsh console 
+		without any errors.
+
+\lstset{language=bash,caption=Verify that virsh can Access VirtualBox}
+\begin{lstlisting}
+$ su
+
+# Verify that the vboxdrv module is loaded
+$ lsmod | grep -i vboxdrv
+
+# Verify that virsh can connect to virtualbox
+$ virsh -c vbox:///session
+\end{lstlisting}
+\end{enumerate}
+
+
+
+
+\subsection{Installing and configuring VMware}
+\label{sec:debianvmware}
+\begin{enumerate}
+\item	First, begin by downloading the latest version of VMware Workstation or VMware Player  from the VMware product 
+			page, \url{http://www.vmware.com/products/}, VMware Player is free, whereas VMware Workstation requires a
+			license. So if you decide to use VMware Workstation instead of VMware Player you will have to purchase a license
+			for it in order to continue.
+
+\item	Before installing VMware, install the dependencies required to build the VMware kernel modules.
+
+\lstset{language=bash,caption=Install VMware Dependencies}
+\begin{lstlisting}
+$ su
+$ apt-get install linux-headers-$(uname -r)
+\end{lstlisting}
+		
+\item 	Next, to install VMware simply set the bundle file as executable and execute the file as root.
+\lstset{language=bash,caption=Install VMware}
+\begin{lstlisting}
+$ su
+$ chmod +x VMware*.bundle
+$ ./VMware*.bundle
+\end{lstlisting}
+
+\item	Next, launch VMware as root and wait for it to compile the kernel modules, then verify that the following VMware 
+			kernel modules are loaded, currently virsh has support to connect to the VMware hypervisor, but there are some minor
+			issues such as a lack of support for VMware network configurations, currently only ``bridged'' mode is supported.
+		
+\begin{itemize}
+\item        vmnet
+\item        vmblock
+\item        vmci
+\item        vmmon
+
+\end{itemize}
+
+\lstset{language=bash,caption=Verify VMware Kernel Extensions Loaded}
+\begin{lstlisting}
+# Launch VMware as root, this will build kernel modules
+$ su
+$ vmware
+
+# Verify that the kernel extentsions are loaded
+$ lsmod | grep -i vm
+\end{lstlisting}
+
+\item      Finally, verify that VMware has been configured properly and that virsh supports the current version of VMware 
+                installed by connecting to the virsh console for the VMware hypervisor.
+
+\lstset{language=bash,caption=Verify VMware Works with Virsh}
+\begin{lstlisting}
+# Verify that virsh can connect to vmware
+$ virsh --connect vmwarews:///session
+\end{lstlisting}
+
+\item	If everything so far has worked, then libvirt, virsh, and the hypervisors have been installed and configured properly,
+		if you have any outstanding issues solve them before proceeding further, or go to the section ``Server Platform 		
+		Setup''~\ref{sec:serversetup} as the \tapper~server does not require libvirt, virsh, or hypervisor configuration.
+		
+\end{enumerate}
+
+
+
+
+\subsection{Installing and configuring Xen}
+\label{sec:debianxen}
+\begin{enumerate}
+
+\item	At the moment Xen is not natively supported on Red Hat based platforms, therefore the instructions provided
+			are specific to Debian Squeeze and currently Debian provides the only option for testing CernVM Xen images.
+			The following instructions are specific to Debian Squeeze, Xen support on Lenny is much more difficult and
+			only support for Xen 3.x, which is much older than the latest version of Xen which is provided by
+			default on Debian Squeeze. The following instructions are for Xen 4.0, which is currently the latest version of
+			Xen.
+			
+\item	{\bf Before proceeding any further ensure that Xen is not installed on a system which has any of the other 
+			hypervisors installed as it will cause severe instability}. It is best to create a new installation for the Xen
+			hypervisor only, with libvirt installed as installing Xen on a system with any other hypervisor installed
+			causes severe instability and either makes the system kernel panic or causes other failures. 
+			
+\item	Now that you have a dedicated system for Xen, begin by installing the Xen package and Xen Linux 
+			kernel with dom0 support.
+
+\lstset{language=bash,caption=Installing Xen Package and Kernel}
+\begin{lstlisting}
+$ su
+$ apt-get install xen-linux-system
+\end{lstlisting}
+
+\item	Next, install the packages required by Xen for Hardware Virtual Machine (HVM) which is required to run the
+			\cernvm image.\footnote{This is because the \cernvm image for Xen currently requires a fully virtualized environment,
+			(HVM) rather than a paravirtualized environment}
+
+\lstset{language=bash,caption=Installing Packages for HVM Support}
+\begin{lstlisting}
+$ su
+$ apt-get install xen-qemu-dm-4.0
+\end{lstlisting}
+
+\item	Next, install the following tools for Xen, which make managing virtual machine and interfacting with the Xen
+			dom0 hypervisor much easier.
+
+\lstset{language=bash,caption=Installing Xen Tools}
+\begin{lstlisting}
+$ apt-get install xen-watch xen-tools
+\end{lstlisting}
+
+\item 	Next, configure GRUB to support booting from the Xen kernel by default, otherwise you may reboot and determine
+			the Xen entry from the boot menu and then modify the value of GRUB\_DEFAULT in the file /etc/default/grub. The
+			easiest method is provided, which is to simply boot the Xen kernel by default, {\bf please note that you may not be
+			able to run or test \cernvm images on any hypervisor other than Xen if you boot the Xen kernel}. If you need to use
+			KVM/VMware/VirtualBox then you will have to use a separate system or installation and boot the regular Linux
+			kernel instead of the Xen kernel.
+			
+\lstset{language=bash,caption=Configure Booting the Xen Kernel}
+\begin{lstlisting}
+# Set Xen kernel to boot by default
+$ su
+$ mv /etc/grub.d/10_linux /etc/grub.d/50_linux
+\end{lstlisting}
+
+\item	Next, before rebooting the system, configure Xen to shutdown the virtual machines when the host system 
+			shuts down instead of attempting to save the state of the virtual machine. Edit the file \verb|/etc/default/xendomains|
+			and configure the two settings XENDOMAINS\_RESTORE and XENDOMAINS\_SAVE as follows.
+
+\lstset{language=bash,caption=Configure Xen Virtual Machine Shutdown}
+\begin{lstlisting}
+$ su -c "gedit /etc/default/xendomains"
+
+# Configure the settings in the file as follows
+XENDOMAINS_RESTORE=false
+XENDOMAINS_SAVE=""
+\end{lstlisting}
+
+\item	Next, enable a bridged network to the Xen virtual machine by editting the file \verb|/etc/xen/xend-config.sxp| and
+			uncommenting the lines {\bf (network-script network-bridge)} and {\bf (vif-script vif-bridge)}.
+	
+\item	Next, configure the memory for the Xen dom0 and disable dom0 memory ballooning, the minimal memory 
+			set for this guide is 1024, but you may increase or lower the amount, 512 should still be an acceptable amount.
+			
+\lstset{language=bash,caption=Configure Xen Memory Use}
+\begin{lstlisting}
+$ su -c "gedit /etc/xen/xend-config.sxp"
+
+# Uncomment and configure the following options
+(dom0-min-mem 1024)
+(enable-dom0-ballooning no)
+\end{lstlisting}
+			
+\item	In addition to configuring the 	the memory for the Xen dom0 in the xend configuration file, the Xen dom0 minimal
+			memory must also be set as a GRUB boot paramater, \emph{otherwise dom0 will use all available memory making it
+			impossible to boot virtual machines}. The memory set for this guide is 1024, but you may increase or lower the 
+			amount, 512 should still be an acceptable amount.
+
+\lstset{language=bash,caption=Configure Xen Memory Use as GRUB Boot Paramater}
+\begin{lstlisting}
+# Edit /etc/default/grub
+$ su
+$ gedit /etc/default/grub
+# Add the following line to the grub configuration file
+# Xen boot parameters for all Xen boots
+GRUB_CMDLINE_XEN="dom0_mem=1024M"
+ 		
+# update grub with new configurations
+$ update-grub
+\end{lstlisting}
+
+\item	Finally, enable the Xen unix daemon, which is a mandatory requirement for executing tests and using libvirt with Xen. Simply 	
+			uncomment the following line, {\bf (xend-unix-server no)} and change the value to {\bf yes}. 
+
+\item	Now that Xen has been properly configured reboot the system and wait for it to boot the Xen kernel with dom0
+			support, it may take several minutes for the system to boot Xen. {\bf Please note, that if you intend
+			on using any of the other hypervisors you must use a completely separate system or installation}.\footnote{This
+			is because the Xen dom0 and kernel conflicts with the other hypervisors}.
+
+\item	After the system has booted, first verify that the Xen kernel has loaded properly and that the Xen kernel has booted
+			correctly with Domain-0 (dom0) support, which is required in order for the Xen hypervisor to function. \footnote{Booting
+			the Xen kernel does nothing unless the kernel has booted with Xen dom0 support} {\bf If you receive any errors for the 
+			follow procedure try waiting 5 minutes for the xen daemon (xend) to start, it can often take several minutes to start}.
+
+\lstset{language=bash,caption=Verify Xen Booted Correctly}
+\begin{lstlisting}
+# Verify the kernel, it should contain "xen"
+$ su
+$ uname -r
+
+# Verify that Xen has Domain-0 running
+$ xm list
+\end{lstlisting}
+
+\item	Finally, if Xen kernel has booted correctly and the system is also running with Xen Domain-0 support, verify that it is
+			possible to connect to the Xen hypervisor with virsh. If virsh is able to connect to the Xen hypervisor then the Xen dom0, 
+			Domain-0 should be seen running by executing``list --all''.
+			
+\lstset{language=bash,caption=Verify virsh can Connect to Xen Hypervisor}
+\begin{lstlisting}
+# Connect to Xen hypervisor
+$ su
+$ virsh -c xen:///
+
+# Domain-0 must be running for Xen support
+$ list --all
+\end{lstlisting}
+\end{enumerate}
+
+
+
+
+\subsection{Setting up the Tapper Test Suite}
+\label{sec:debiantestsuite}
+\begin{enumerate}
+\item 	{\bf Before proceeding any further ensure that you have all other test clients set up this far, and then proceed
+		to follow the instructions for setting up and configuring the \tapper~server in the section ``Server Platform Setup''}		
+		~\ref{sec:serversetup}.
+		
+\item 	Now that the \tapper~server has been installed and configured and the \tapper web interface and database have proven
+		to be working, the next step is to verify that the test client can actually send a report to the \tapper~server in
+		the form of a TAP file. After sending the TAP report to the server, ensure that the test client is working by viewing 
+		the tapper reports in your browser at the following url: \url{http:/<tapper\_server>/tapper/reports}. You should now see a 
+		report from the test client, there should be a report from a system named whatever the ``Tapper-Machine-Name'' in 
+		demo\_report.tap was set as. \emph{For the example demo\_report.tap provided below it would be cernvm-rhtestclient}.
+		\footnote{This is why a consistent hostname convention was emphasized earlier, as reports are often sorted and organized 
+		based on hostnames}.
+		
+\lstset{language=bash,caption=Send a Basic Report to the \tapper~Server}
+\begin{lstlisting}
+# Save the following in a file named demo_report.tap
+
+	1..2
+	# Tapper-Suite-Name: Tapper-Deployment
+	# Tapper-Suite-Version: 1.001
+	# Tapper-Machine-Name: cernvm-rhtestclient
+	ok - Hello World
+	ok - Just another description
+
+# Send the report to the tapper server using netcat
+$ cat demo_report.tap | nc -w10 cernvm-server 7357
+\end{lstlisting}
+
+\item 	Next, download a copy of the CernVM Test Suite and the CernVM Test Cases from the Google Code svn repository
+		\cite{GCreleasetesting} and install the the following dependencies.
+		
+\lstset{language=bash,caption=Install CernVM Test Suite and Dependencies}
+\begin{lstlisting}
+# Install subversion, required to checkout auto-tapper
+$ yum install subversion
+
+# Checkout a copy of cernvm testsuite and cernvm testcases
+$ svn checkout http://cernvm-release-testing.googlecode.com/svn/\
+trunk/tapper/tapper-autoreport/ cernvm-testsuite
+
+# Install the missing dependencies
+$ apt-get install curl
+$ apt-get install wget
+$ apt-get install uuid
+$ apt-get install spawn-fcgi
+$ apt-get install expect
+$ apt-get install expectk
+$ apt-get install nmh
+\end{lstlisting}
+
+\item	Now that cernvm-testsuite has been installed, configure the variables in the configuration file for the
+			hypervisors you want to test and according to your \tapper infrastructure setup. Sample configuration files are provided
+			in the {\bf config} folder, all of the settings provided in the configuration files by default are the {\bf mandatory, minimum 
+			configuration options} and in most cases the	defaults should be sufficient for testing, the only mandatory settings that are
+			not provided by default {\bf and must be configured manually are CVM\_TS\_REPORT\_SERVER and 
+			CVM\_VM\_IMAGE\_VERSION }. Please refer to the developer manual for a more complete detailed list of the mandatory and 
+			optional configuration settings.
+
+\begin{description}
+\item[CVM\_TS\_SUITENAME]	Must ALWAYS be set, the default suite name in the configuration file should be suitable
+
+	  		  
+\item[CVM\_TS\_SUITEVERSION] 	Must ALWAYS be set, reflects the release version number of the test suite framework, the  default
+								version given in the configuration should only be changed if you customize/update the scripts
+
+\item[CVM\_TS\_REPORT\_SERVER]	Must ALWAYS be set, this is the ip address or hostname of the Tapper report server which the reports
+      							from the test results are sent to
+		
+\item[CVM\_TS\_DOWNLOAD\_PAGE]	Must ALWAYS be set, normally the default url provided in the configuration file is accurate, but in the
+								event that the internal \cernvm image release page is relocated then this url must be changed.
+
+\item[CVM\_VM\_HYPERVISOR]	Must ALWAYS be set, should not have to change the defaul hypervisor in the configuration files, valid values 
+							(case sensitive) are {\bf kvm,vbox,vmware}
+
+\item[CVM\_VM\_TEMPLATE]		Must ALWAYS be set, normally the default template provided in the configuration file should not be changed,
+								only change this to use a custom template file. The custom template file \emph{must be placed within the
+								templates folder}
+
+\item[CVM\_VM\_NET\_TEMPLATE]	Must ALWAYS be set, normally the default network template provided in the configuration file should not be
+	 							changed, only change this to use a custom network template file for the \cernvm image,  {\bf only applies to kvm
+	 							and virtualbox}. The custom network template file \emph{must be placed within the templates folder}
+
+\item[CVM\_VM\_IMAGE\_VERSION]	Must ALWAYS be set, specifies the version of the CernVM image to use from the release page
+	
+\item[CVM\_VM\_IMAGE\_TYPE]		Must ALWAYS be set,  specifies the type of CernVM image, valid image types supported, (case sensitive) are 
+								{\bf basic and desktop}
+
+\item[CVM\_VM\_ARCH]		Must ALWAYS be set, specifies the architecture of the \cernvm image, valid architectures (case sensitive) are {\bf 
+							x86 and x86\_64}
+\end{description}	
+
+\item	Finally, now that cernvm-testsuite has been installed and configured on the test client and the test client and \tapper~Server
+			have proven to be working, the next step is to verify that cernvm-testsuite works correctly and can actually send a report to 	
+			the \tapper~server in the form of a TAP file. To execute the \cernvm Test Cases script, ``cernvm-tests.sh'' simply source
+			the configuration file you wish to use and execute the script. Once the script has completed and sent a TAP report to the server, 
+			ensure that the test client is working by viewing the tapper reports in your browser at the  following 
+			url: \url{http:/<tapper\_server>/tapper/reports}. You should now see a new report from the test client, there should be a 
+			report from a system with the same hostname.\footnote{This is why a consistent hostname convention was emphasized earlier, as 
+			reports are often sorted and organized based on hostnames}.
+
+\lstset{language=bash,caption=Execute CernVM Test Cases Script}
+\begin{lstlisting}
+# Simply source the configuration file, and execute the script
+$ . ./config/<configuration_file>
+$ ./cernvm-tests.sh
+\end{lstlisting}
+\end{enumerate}

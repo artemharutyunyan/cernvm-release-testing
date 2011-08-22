@@ -1,0 +1,7 @@
+#! tt <<EOTEMPLATE
+[% res = reportdata '{ "suite.name" => "Tapper-Starterkit" } :: //tap/tests_planned' %]
+Planned tests:
+[% FOREACH r = res.all %]
+  [% $_ %]
+[% END %]
+EOTEMPLATE

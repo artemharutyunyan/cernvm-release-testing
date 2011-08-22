@@ -1,0 +1,61 @@
+=head1 NAME
+
+Tapper::Doc - Tapper - Central documentation hub
+
+=head1 ABOUT
+
+This module is a documentation hub for all kinds of documentation
+about C<Tapper> - a B<Modular Test Infrastructure, inclusive Operating
+System and Virtualization support>.
+
+=head1 AVAILABLE DOCUMENTATION
+
+=over 4
+
+=item * L<Tapper::Doc::Start::StepByStep|Tapper::Doc::Start::StepByStep>
+
+Installation guide to setup a complete infrastructure with Web
+frontend, reports receiver, client libs and automation layer.
+
+=item * L<Tapper::Doc::FactSheet|Tapper::Doc::FactSheet>
+
+Very high level feature overview.
+
+=back
+
+=head1 GENERAL TAPPER SUPPORT
+
+=head2 IRC
+
+Via IRC you can contact us in channel
+
+ #tapper
+
+on
+
+  irc.freenode.net
+
+
+=head2 Mailing List
+
+There is a mailing list L<tapper@amd64.org|http://www.amd64.org/mailman/listinfo/tapper/>.
+
+
+=head1 AUTHOR
+
+AMD OSRC Tapper Team, C<< <tapper at amd64.org> >>
+
+=head1 BUGS
+
+Please report any bugs or feature requests to C<bug-tapper-doc at
+rt.cpan.org>, or through the web interface at
+L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Tapper-Doc>.  I will
+be notified, and then you'll automatically be notified of progress on
+your bug as I make changes.
+
+=head1 COPYRIGHT & LICENSE
+
+Copyright 2008-2011 AMD OSRC Tapper Team, all rights reserved.
+
+This program is released under the following license: freebsd
+

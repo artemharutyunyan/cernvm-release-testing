@@ -1,0 +1,139 @@
+@numchapentry{Synopsis}{1}{Synopsis}{1}
+@numsecentry{Tapper infrastructure}{1.1}{Tapper infrastructure}{1}
+@numsecentry{Vocabulary}{1.2}{Vocabulary}{1}
+@numsubsecentry{Master Control Program (MCP)}{1.2.1}{Vocabulary - Master Control Program (MCP)}{1}
+@numsubsecentry{Program Run Control (PRC)}{1.2.2}{Vocabulary - Program Run Control (PRC)}{1}
+@numsubsecentry{Reports Receiver}{1.2.3}{Vocabulary - Reports Receiver}{1}
+@numsubsecentry{Reports API}{1.2.4}{Vocabulary - Reports API}{2}
+@numsubsecentry{Web User Interface}{1.2.5}{Vocabulary - Web User Interface}{2}
+@numsubsecentry{Reports DB}{1.2.6}{Vocabulary - Reports DB}{2}
+@numsubsecentry{Testrun DB}{1.2.7}{Vocabulary - Testrun DB}{2}
+@numsubsecentry{Testrun}{1.2.8}{Vocabulary - Testrun}{2}
+@numsubsecentry{Preconditions}{1.2.9}{Vocabulary - Preconditions}{2}
+@numsubsecentry{Report}{1.2.10}{Vocabulary - Report}{2}
+@numsubsecentry{Test Anything Protocol (TAP)}{1.2.11}{Vocabulary - Test Anything Protocol (TAP)}{2}
+@numsubsecentry{TAP archives}{1.2.12}{Vocabulary - TAP archive}{2}
+@numchapentry{Technical Infrastructure}{2}{Technical Infrastructure}{3}
+@numsecentry{Adding a new host into automation}{2.1}{Adding a new host into automation}{3}
+@numsubsecentry{Make machine remote hard resetable}{2.1.1}{Make machine remote hard resetable}{3}
+@numsubsecentry{Make machine PXE boot aware}{2.1.2}{Make machine PXE boot aware}{3}
+@numsubsecentry{Configure TFTP on central MCP machine}{2.1.3}{Configure TFTP on central MCP machine}{4}
+@numsubsecentry{Make the hosts known in the TestrunDB}{2.1.4}{Make the hosts known in the TestrunDB}{4}
+@numsubsecentry{Optionally: enable @samp {temare} to generate tests for this host}{2.1.5}{Optionally enable temare to generate tests for this host}{4}
+@numchapentry{Test Protocol}{3}{Test Protocol}{7}
+@numsecentry{Test Anything Protocol (TAP)}{3.1}{Test Anything Protocol (TAP)}{7}
+@numsecentry{Tutorial}{3.2}{Tutorial}{7}
+@numsubsecentry{Just plan and success}{3.2.1}{Just plan and success}{7}
+@numsubsecentry{Succession numbers}{3.2.2}{Succession numbers}{7}
+@numsubsecentry{Test descriptions}{3.2.3}{Test descriptions}{7}
+@numsubsecentry{Mark tests as TODO}{3.2.4}{Mark tests as TODO}{8}
+@numsubsecentry{Comment TODO tests with reason}{3.2.5}{Comment TODO tests with reason}{8}
+@numsubsecentry{Mark tests as SKIP (with reason)}{3.2.6}{Mark tests as SKIP (with reason)}{8}
+@numsubsecentry{Diagnostics}{3.2.7}{Diagnostics}{8}
+@numsubsecentry{YAML Diagnostics}{3.2.8}{YAML Diagnostics}{8}
+@numsubsecentry{Meta information headers for reports}{3.2.9}{Meta information headers for reports}{9}
+@numsubsecentry{Report sections}{3.2.10}{Report sections}{10}
+@numsubsecentry{Meta information headers for report sections}{3.2.11}{Meta information headers for report sections}{10}
+@numsubsecentry{Meta information structure summary}{3.2.12}{Meta information structure summary}{11}
+@numsubsecentry{Explicit section markers with lazy plans}{3.2.13}{Explicit section markers with lazy plans}{12}
+@numsubsecentry{Developing with TAP}{3.2.14}{Developing with TAP}{13}
+@numsubsecentry{TAP tips}{3.2.15}{TAP tips}{13}
+@numsecentry{Particular use-cases}{3.3}{Particular use-cases}{14}
+@numsubsecentry{Report Groups}{3.3.1}{Report Groups}{14}
+@numsubsubsecentry{Report grouping by same testrun}{3.3.1.1}{Report grouping by same testrun}{14}
+@numsubsubsecentry{Report grouping by arbitrary idenitifier}{3.3.1.2}{Report grouping by arbitrary idenitifier}{14}
+@numsecentry{TAP Archives}{3.4}{TAP Archives}{14}
+@numsecentry{Reporting TAP to the reports receiver}{3.5}{Reporting TAP to the reports receiver}{14}
+@numsubsecentry{Submitting raw TAP}{3.5.1}{Submitting raw TAP}{14}
+@numsubsecentry{Submitting TAP Archives}{3.5.2}{Submitting TAP Archives}{15}
+@numchapentry{Test Suite Wrappers}{4}{Test Suite Wrappers}{17}
+@numsecentry{Available test suite wrappers}{4.1}{}{17}
+@numsubsecentry{tapper-testsuite-autotest}{4.1.1}{}{17}
+@numsecentry{Environment variables}{4.2}{}{17}
+@numchapentry{Preconditions}{5}{Preconditions}{19}
+@numsecentry{SYNOPSIS}{5.1}{}{19}
+@numsecentry{Layers of preconditions}{5.2}{}{19}
+@numsubsecentry{Normal preconditions}{5.2.1}{}{19}
+@numsubsecentry{Macro preconditions}{5.2.2}{}{19}
+@numsecentry{Precondition repository}{5.3}{}{19}
+@numsecentry{Overview: Precondition Types}{5.4}{}{20}
+@numsubsecentry{Overview: Action precondition types}{5.4.1}{}{20}
+@numsubsecentry{Overview: Highlevel precondition types}{5.4.2}{}{20}
+@numsecentry{Details: Precondition Types}{5.5}{}{21}
+@numsubsecentry{installer_stop}{5.5.1}{}{21}
+@numsubsecentry{grub}{5.5.2}{}{21}
+@numsubsecentry{package}{5.5.3}{}{21}
+@numsubsecentry{copyfile}{5.5.4}{}{21}
+@numsubsecentry{fstab}{5.5.5}{}{22}
+@numsubsecentry{image}{5.5.6}{}{22}
+@numsubsecentry{repository}{5.5.7}{}{22}
+@numsubsecentry{type: prc}{5.5.8}{}{23}
+@numsubsecentry{type: exec}{5.5.9}{}{23}
+@numsubsecentry{type: hint}{5.5.10}{}{23}
+@numsubsecentry{quote subtleties}{5.5.11}{}{24}
+@numsubsecentry{type: reboot}{5.5.12}{}{24}
+@numsubsecentry{type: autoinstall}{5.5.13}{}{24}
+@numsubsecentry{type: testprogram}{5.5.14}{}{25}
+@numsubsecentry{type: virt}{5.5.15}{}{25}
+@numsubsecentry{General precondition keys ``mountfile''}{5.5.16}{}{26}
+@numsecentry{Macro Preconditions}{5.6}{Macro Preconditions}{26}
+@numsubsecentry{A real live example - kernel boot test}{5.6.1}{A real live example - kernel boot test}{27}
+@numsecentry{Precondition Producers}{5.7}{}{28}
+@numsubsecentry{Lazy precondition}{5.7.1}{}{29}
+@numsubsecentry{Producer API}{5.7.2}{}{29}
+@numsubsecentry{Existing producers}{5.7.3}{}{29}
+@numsubsecentry{Example: ``Kernel'' precondition producer}{5.7.4}{}{29}
+@numsubsubsecentry{Lazy precondition}{5.7.4.1}{}{30}
+@numsubsubsecentry{Resulting preconditions}{5.7.4.2}{}{30}
+@numchapentry{Command line interface}{6}{Command line interface}{31}
+@numsecentry{Commandline Synopsis}{6.1}{Commandline Synopsis}{31}
+@numsecentry{Scheduling}{6.2}{Scheduling}{31}
+@numsubsecentry{Create new queue and new host and bind both together}{6.2.1}{Create new queue and new host and bind both together}{31}
+@numsubsecentry{Change queue priority}{6.2.2}{Change queue priority}{32}
+@numsubsecentry{requested features}{6.2.3}{requested features}{32}
+@numsubsecentry{Cancel current testrun on host}{6.2.4}{Cancel current testrun on host}{33}
+@numchapentry{Web User Interface}{7}{Web User Interface}{35}
+@numsecentry{Usage}{7.1}{}{35}
+@numsecentry{Understanding Tapper Details}{7.2}{}{35}
+@numsubsecentry{Part 1 Overview}{7.2.1}{}{35}
+@numsubsecentry{Part 2 Details}{7.2.2}{}{35}
+@numsubsecentry{Part 3 Testrun}{7.2.3}{}{36}
+@numchapentry{Reports API}{8}{Reports API}{39}
+@numsecentry{Overview}{8.1}{Overview}{39}
+@numsecentry{Raw API Commands}{8.2}{Raw API Commands}{39}
+@numsubsecentry{upload aka. attach a file to a report}{8.2.1}{upload aka. attach a file to a report}{39}
+@numsubsubsecentry{upload Synopsis}{8.2.1.1}{upload Synopsis}{39}
+@numsubsubsecentry{Parameters}{8.2.1.2}{Parameters}{39}
+@numsubsubsecentry{upload Payload}{8.2.1.3}{upload Payload}{39}
+@numsubsubsecentry{upload Example usage}{8.2.1.4}{upload Example usage}{39}
+@numsubsecentry{download - download a file which is attached to a report}{8.2.2}{download - download a file which is attached to a report}{39}
+@numsubsubsecentry{download Synopsis}{8.2.2.1}{download Synopsis}{40}
+@numsubsubsecentry{download Parameters}{8.2.2.2}{download Parameters}{40}
+@numsubsubsecentry{download Example usage}{8.2.2.3}{download Example usage}{40}
+@numsubsecentry{mason - Render templates with embedded query language}{8.2.3}{mason - Render templates with embedded query language}{40}
+@numsubsubsecentry{mason Synopsis}{8.2.3.1}{mason Synopsis}{40}
+@numsubsubsecentry{mason Parameters}{8.2.3.2}{mason Parameters}{40}
+@numsubsubsecentry{mason Payload}{8.2.3.3}{Payload}{40}
+@numsubsubsecentry{Example usage}{8.2.3.4}{Example usage}{40}
+@numsecentry{Query language DPath}{8.3}{Query language DPath}{41}
+@numsubsecentry{Reports Filter (SQL-Abstract)}{8.3.1}{Reports Filter (SQL-Abstract)}{41}
+@numsubsubsecentry{SQL::Abstract expressions}{8.3.1.1}{SQL-Abstract expressions}{41}
+@numsubsubsecentry{The data structure}{8.3.1.2}{The data structure}{42}
+@numsubsecentry{Data Filter}{8.3.2}{Data Filter}{42}
+@numsubsubsecentry{Data-DPath expressions}{8.3.2.1}{Data-DPath expressions}{42}
+@numsubsecentry{Optimizations}{8.3.3}{Optimizations}{42}
+@numsecentry{Client Utility tapper-api}{8.4}{Client Utility tapper-api}{42}
+@numsubsecentry{help}{8.4.1}{help}{42}
+@numsubsecentry{upload}{8.4.2}{upload}{42}
+@numsubsecentry{mason}{8.4.3}{mason}{42}
+@numchapentry{Complete Use Cases}{9}{Complete Use Cases}{43}
+@numsecentry{Automatic Xen testing}{9.1}{}{43}
+@numsubsecentry{Paths}{9.1.1}{}{43}
+@numsubsecentry{Choose an image for Dom0 and images for each guest}{9.1.2}{}{43}
+@numsubsecentry{PRC configuration}{9.1.3}{}{44}
+@numsubsubsecentry{Guest Start Configuration}{9.1.3.1}{}{44}
+@numsubsubsecentry{Testsuite Configuration}{9.1.3.2}{}{44}
+@numsubsecentry{Preconditions}{9.1.4}{}{45}
+@numsubsecentry{Resulting YAML config}{9.1.5}{}{45}
+@numsubsecentry{Grub}{9.1.6}{}{46}
+@numsubsecentry{Order Testrun}{9.1.7}{}{47}

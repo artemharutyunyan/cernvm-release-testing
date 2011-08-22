@@ -1,0 +1,169 @@
+\section{Red Hat Based Server Setup}
+\subsection{Installing and Configuring the system}
+\flushleft
+\begin{enumerate}
+\item 	For installing a Red Hat based server, follow the instructions outlined in the sections ``Installing the 
+		system''~\ref{sec:rhinstall} and ``Configuring the system''~\ref{sec:rhconfig} for installation and configuration 
+		instructions with the only exception being that the hostname should be something unique such as \emph{cernvm-redhat5-server}, to 
+		indicate that it is running the \tapper server, {\bf again keep the hostname convention consistent}.
+\end{enumerate}
+
+
+\newpage
+\subsection{Installing the Tapper Server}
+\label{installtapserver}
+\begin{enumerate}
+\item 	Next, execute the following commands to install necessary dependencies, \emph{from now on all commands require root privileges}.
+
+\lstset{language=bash,caption= Install Dependencies}
+\begin{lstlisting}
+$ yum install make
+$ yum install subversion
+\end{lstlisting}
+
+\item 	Now, download the latest copy of the Tapper-Deployment, which is an installer for \tapper from the \cernvmreleasetesting 
+		Google Code Project page
+
+\lstset{language=bash,caption= Download Tapper-Deployment}
+\begin{lstlisting}
+$ svn checkout http://cernvm-release-testing.googlecode.com/svn/trunk/\
+installer/tapper-deployment
+\end{lstlisting}
+
+\item 	Now edit the Makefile in the Tapper-Deployment installer folder and configure variable TAPPER\_SERVER which 
+		is the hostname of the machine that is currently installing the starter-kit. For now disregard the TESTMACHINE 
+		variables, you should have something similar to this in the Makefile.
+
+\lstset{language=bash,caption= Makefile Configuration}
+\begin{lstlisting}
+# initial machine names
+TAPPER_SERVER=cernvm-server
+TESTMACHINE1=johnconnor
+TESTMACHINE2=sarahconnor
+TESTMACHINE3=bullock
+\end{lstlisting}
+
+\item 	After you have configured the Makefile in the installer folder, install Tapper-Deployment by executing the
+		following command, for any prompts during the installation leave them as default and press enter. {\bf During
+		the installation, you will be prompted for the mysql password, DO NOT ENTER a password here UNLESS you already have an
+		existing MySQL installation/database with a password set for the ``root'' account}. Finally, if you have any errors or
+		other issues during the installation, please contact us with a summary of the problem and send us a copy of the installation 
+		log ``install.log''.
+
+\begin{comment}
+%
+% THIS SECTION NEEDS TO BE VERIFIED AND TESTED, THESE PROCEDURES MOST LIKELY DON'T WORK FOR ALL RED HAT SYSTEMS
+%
+
+\lstset{language=bash,caption= Install Tapper-Deployment}
+\begin{lstlisting}
+$ cd installer/
+$ make localsetup 2>&1 | tee install.log
+\end{lstlisting}
+\end{enumerate}
+
+
+\newpage
+\subsection{Setting up Tapper Web Interface and Database}
+\label{tapperwebdb}
+\begin{enumerate}
+\item 	Next you need to set a password for the root account of the mysql database\footnote{This will eventually be implemented in the 
+		makefile}
+
+\lstset{language=bash,caption= Set MySQL Root Password}
+\begin{lstlisting}
+# Example: mysqladmin -u root password abc123
+$ mysqladmin -u root password <newpassword>
+\end{lstlisting}
+
+\item 	Now that the installion has completed and the security issue has been dealt with, ensure that you can access the tapper web
+		interface and that it is working by viewing it in your browser using the url, \url{http://localhost/tapper}\footnote{This can be accessed
+		locally and remotely from other systems using the server hostname or IP address}
+
+\item 	Next, install PHPMyAdmin so that it's easy to administrate and configure the Tapper databases, when prompted to select the
+		``Web server to reconfigure automatically'' select apache2 by pressing the space bar and press enter. \emph{If you are 
+		prompted to ``configure databases for phpmyadmin with dbconfig-common'' select {\bf NO} }.
+
+\lstset{language=bash,caption= Install PHPMyAdmin}
+\begin{lstlisting}
+# When prompted for the server to reconfigure automatically select apache2
+# when prompted to configure the database with dbconfig-common select NO
+$ yum install phpmyadmin
+\end{lstlisting}
+
+\item	Verify that PHPMyAdmin has been installed and configured correctly and that you can access the tapper web
+		interface by viewing it in your browser using the url, \url{http://localhost/phpmyadmin}. Login to the PHPMyAdmin
+		web interface using the \emph{username root and the MySQL root password you set earlier using mysqladmin}.
+
+\item 	Now, add all of the configured test machines created in the ``Test Client Platform Setup'' section to the
+		\tapper database and set the test clients as active, then add the hardware specifications for each test client
+		to the database. This example is just using a single generic test machine, you will have to repeat these commands
+		for each test client and change the hostname \emph{cernvm-host} and the values for mem, core,vendor, and has\_ecc 
+		as needed; the vendor can be AMD or Intel.
+		
+\lstset{language=bash,caption= Adding Test Clients to Tapper Database}
+\begin{lstlisting}
+# Add the hostname of the test client to database
+$ tapper-testrun newhost --name cernvm-host --active
+
+# Add the hardware specifications for the test client
+$ mysql testrundb -utapper -ptapper
+$ insert into host_feature(host_id, entry, value)  values \
+((select id from host where name = 'cernvm-host'),     'mem',  4096);
+$ insert into host_feature(host_id, entry, value)  values \
+((select id from host where name = 'cernvm-host'),   'cores',     4);
+$ insert into host_feature(host_id, entry, value)  values \
+((select id from host where name = 'cernvm-host'),  'vendor', 'AMD');
+$ insert into host_feature(host_id, entry, value)  values \
+((select id from host where name = 'cernvm-host'), 'has_ecc',     0);
+\end{lstlisting}
+
+
+\item 	Next, send a sample test report to the tapper server, to ensure that the web interface, MCP, database, and reports
+		framework are all working by viewing the tapper reports in your browser at the following url, 
+		\url{http://localhost/tapper/reports} You should now see a report from whatever the ``Tapper-Machine-Name'' in 
+		demo\_report.tap was set as. \emph{For the example demo\_report.tap provided below it would be cernvm-server}.
+
+\lstset{language=bash,caption= Send a Report from the \tapper~Server to Itself}
+\begin{lstlisting}
+# Save the following in a file named demo_report.tap
+$ vi demo_report.tap
+
+	1..2
+	# Tapper-Suite-Name: Tapper-Deployment
+	# Tapper-Suite-Version: 1.001
+	# Tapper-Machine-Name: cernvm-server
+	ok - Hello test world
+	ok - Just another description
+
+# Send the report to the tapper server using netcat
+$ cat demo_report.tap | netcat -q7 -w1 cernvm-server 7357
+\end{lstlisting}
+
+\item 	Finally, ssh login to one of the test machine that was set up earlier, \emph{in our examples, cernvm-host} and send another 
+		sample test report to the tapper server, to ensure that the web interface, MCP, database, and reports framework are all working 
+		by viewing the tapper reports in your browser at the following url: \url{http://localhost/tapper/reports} You should now see a
+		report from whatever the ``Tapper-Machine-Name'' in demo\_report.tap was set as. \emph{For the example demo\_report.tap provided 
+		below it would be cernvm-testclient}.
+
+\lstset{language=bash,caption= Send a Report to the \tapper~Server from a Test Client}
+\begin{lstlisting}
+# Save the following in a file named demo_report.tap
+$ vi demo_report.tap
+
+	1..2
+	# Tapper-Suite-Name: Tapper-Deployment
+	# Tapper-Suite-Version: 1.001
+	# Tapper-Machine-Name: cernvm-testclient
+	ok - Hello test world
+	ok - Just another description
+
+# Send the report to the tapper server using netcat
+$ cat demo_report.tap | netcat -q7 -w1 cernvm-server 7357
+\end{lstlisting}
+
+\item	Now that it has been verified that the tapper server, including the web interface, MCP, database, and reports framework 
+		are all working; return to the sections titled ``Setting up the Tapper Test Suite''	for each of the test client, as 
+		there are unique instructions for each operating system.
+\end{comment}
+\end{enumerate}

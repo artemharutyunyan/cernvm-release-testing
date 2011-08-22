@@ -1,0 +1,202 @@
+\section{Windows 7 Test Client Setup}
+\subsection{Installing the system}
+\label{sec:windows7install}
+\flushleft
+\begin{enumerate}
+\item	First, begin by booting the computer with the Windows 7 installation CD and when it boots to the installation screen leave the default
+		settings as ``English'' and the keyboard as ``US'' and click ``Next'' to continue the installation.
+		
+\item	At the next screen, click the ``Install now'' button to begin the installation, if you prefer to read the pre-installation 
+		instructions click the  ``What to know before installing Windows'' to find out more.
+		
+\item	Next, you must read through and agree to the End User License Agreement, \emph{make sure you read through the EULA and agree to
+		the terms}, then select the option ``I accept the license agreement'' and click ``Next'' to continue the installation.
+		
+\item	At the next stage of the installation, titled ``Which type of installation do you want?'' click the second option
+		``Custom (advanced)'' to begin a custom installation.
+		
+\item	At the next stage of the installation, titled ``Where do you want to install Windows?'', if you only have one drive, which is
+		empty simply click on the drive in the list which you want to install Windows 7 on. Otherwise, if you have more complex
+		configurations, such as other Windows partitions click the option ``Drive options (advanced)'' and select the appropriate
+		partition and drive to install Windows 7 on. \emph{If you have other partitions with Linux or other non-Windows operating
+		systems, you will no longer be able to boot from those partitions}. This is because the Master Boot Record will overwritten
+		by the Windows 7 boot loader and in in most cases this will involve reinstalling GRUB, which is beyond the scope of this 
+		document.
+	  
+\item	The next part of the installation is automatic, Windows 7 will now begin copying the files to the system, rebooting when 
+		necessary, and execute almost the entire Windows 7 installation automatically.
+		
+\item	Now, after most of the installation has completed automatically, you will now be at the final stages of the installation,
+		which begins by asking for a ``user name'' and ``computer name'' for the computer. Enter a user name that is simple
+		and relevant such as \emph{cernvm} and enter a relevant computer name for the machine based on the hardware or operating system 
+		it is running. The computer name should be relevant and unique to better identify the system, a good naming convention should refer
+		to the hardware or operating system and call it a host to differentiate from the virtual machine that will be running as a guest, 
+		for example a hostname such as \emph{cernvm-win7-host} could be used, {\bf whatever convention you use make sure it is consistent}.
+
+\item	Now, at the next stage of the installation, titled ``Set a password for your account'' set the password to something
+		you will not forget and is fairly complex with numbers and letters. But, most importantly {\bf keep the username and password 
+		consistent across all systems created as part of the infrastructure} as it makes administration and everything else 
+		much easier.
+	  
+\item	At the next stage of the installation, titled ``Type your product key for activation'', enter your product key for Windows 7
+		and enable the option ``Automatically activate Windows 7 when I'm online''. Alternatively, if you do not have a license for
+		Windows 7 you may leave the product key blank, and disable the option ``Automatically activate Windows 7 when I'm online'',
+		this will allow for a 30 day trial of Windows 7, {\bf but is not advisable as the system will be not be suitable as a 
+		test client after the trial expires}.
+		
+\item	At the next stage of the installation, titled ``Help protect your computer and improve Windows automatically'', select the option
+		``Ask me later'', \emph{this is important as we will configure the system later for manual control of updates, and to remove
+		security and error reporting prompts, which is necessary for setting up a test client}.
+		 
+\item	Next, at the installation stage titled ``Review your time and date settings'' select the correct time zone from the drop down menu,
+		such as CEST, and enable the option ``Automatically adjust clock for Daylight Saving Time'', and finally, ensure that the date
+		and time are correct for the system.
+		
+
+\item	Finally, at the last stage of the installation titled, ``Select your computer's current location'' select the option ``Work 
+		network'',\emph{this is very important for networking configurations and virtual machine networking}.
+\end{enumerate}
+
+
+\newpage
+\subsection{Configuring the system}
+\label{sec:windows7config}
+\begin{enumerate}
+\item	Now that the Windows 7 installation has completed the first step in configuring the system is to remove unnecessary prompts,
+		which is necessary for setting up a test client. Begin by going to the control panel from \verb|Windows Logo -> Control Panel|
+		and set the ``View by:'' option to ``Small icons'' as this will make it easier to find configuration options.
+		
+\item	Next, begin by disabling User Account Control (UAC)\footnote{UAC is the annoying prompt which asks you to authenticate certain
+		actions and must be removed for services such as VNC, SSH, and running tests to work} from the control panel select ``User Accounts''.
+		Then select the option ``Change user account control settings'' and slide the bar down to the bottom, this turns UAC off, then click
+		``OK'' to apply the changes.
+		
+\item	Next, disable automatic updates to prevent updates conflicting with testing and to provide control over when to apply Windows 7 updates,
+		go to the control panel and select ``Windows Update'', then select the option "Change settings" and then from the drop down select the 
+		option ``Never check updates'' then click ``OK'' to apply the changes.
+		
+\item	Next, disable Windows Defender, which will conflict with testing and cause other issues, begin by going to the control panel and 
+		selecting ``Windows Defender'', then click ``Tools'', \emph{if for some reason you cannot access the ``Tools'' option for
+		Windows Defender then ignore this step and continue}. Otherwise, click ``Options'', under ``Administrator options'', select or clear 
+		the ``Use Windows Defender'' check box and click ``Save'' to apply the changes. You may be prompted for an administrator password or 	
+		confirmation, simply type the password or provide confirmation.
+		
+\item	Next, disable the Windows Firewall, which will conflict with testing and cause issues such as blocking virtual machine connections 
+		and testing services\footnote{This may seem like an unwise security decision, but this guide assumes that the test client has been
+		setup in a work environment, which should already have an industry grade firewall that is far superior to Windows Firewall}.
+		Begin by navigating to the control panel and select ``Windows Firewall'', then click the option ``Turn Windows Firewall on
+		or off'' and for each available firewall configuration, ensure that the option ``Notify me when Windows Firewall blocks a new
+		program'' is unchecked and that the option ``Turn off Windows Firewall (not recommended)'' is selected, then click ``OK'' to
+		apply the changes.
+		
+\item	Next, disable Action Center prompts which conflict with testing, begin by going to the control panel and selecting ``Action Center''
+		then select the option ``Change Action Center settings''. This will bring up the option to turn messages on or off, {\bf uncheck all of 
+		the ``Security messages'' and ``Maintencance messages''} such as ``Windows Update'' and ``Virus Backup'', then click ``OK'' to apply
+		the changes.
+		
+\item	Next, disable error reporting and customer experience improvement messages by again going to the control panel and selecting 
+		``Action Center'' then select the option ``Change Action Center settings''. This will bring up the previous menu from the last
+		previous step, this time under the section ``Related settings'' do the following.
+\begin{itemize}	
+\item[a.]	Click ``Customer Experience Improvement Program settings'' and ensure that it is set to ``No, I don't want to participate in
+			the program'' and then click ``Save Changes'', you may be prompted for an administrator password or confirmation, simply type
+			the password or provide confirmation.
+			
+\item[b.]	Next, click ``Problem reporting settings'' and ensure that it is set to ``Never check for solutions (not recommended)'' and
+			then click ``Change report settings for all users'' and ensure that it is set to ``Never check for solutions (not recommended)''
+			as well and click ``OK''. You may be prompted for an administrator password or confirmation, simply type the password or provide
+			confirmation.
+\end{itemize}	
+
+\item	Now that Windows 7 has been configured to remove unnecessary prompts, the next steps involve performance enhancements and installing
+		and configuring necessary software, begin by going to the control panel and select ``Power Options'' then select the option 
+		``High Performance''. Next click the option ``Change plan settings'' and ensure that the option ``Put the computer to sleep'' is
+		set to `Never'' then click ``Change advanced power settings'' and ensure that the following options are set.
+\begin{itemize}
+\item	Disable require password on wakeup
+\item	Set hard disk to never turn off
+\item	Ensure that the options ``Enable wakeup timers'' is enabled
+\item	Ensure that the option ``hibernate'' is enabled
+\item	Ensure that computer never hibernates
+\item	Allow hybrid sleep
+\end{itemize}
+
+\item	Next, disable search indexing\footnote{Which does have an impact on disk I/O and is important to virtualized testing where you have
+		several virtual machines running using the same physical disk}, begin my clicking \verb|Start -> Computer| and then right click 
+		on the 	``Local Disk (C:)'' drive and select ``Properties'' and then uncheck the option ``Allow files on this drive to have contents
+		indexed\ldots{}'' and click ``Apply'' to apply the changes, it may take several minutes for the indexes to be removed.
+		
+\item	Next, from the control panel select ``Administrative Tools'' and click ``Services'' to launch the Windows services administration tool,
+		then disable the following unnecessary services by double clicking on each entry, setting the ``Startup type:'' to ``Disabled'' and
+		clicking ``Apply''.
+\begin{itemize}
+\item	BitLocker Drive Encryption Service
+\item	Bluetooth Support Service
+\item	Remote Registry
+\item	Tablet PC Input Service
+\item	Windows Biometric Services
+\item	Windows Defender
+\item	All Windows Media services
+\item	Windows Search
+\end{itemize}
+
+\item	Next, since this is a test client and Windows Aero and other Windows aesthetic effects are not needed, disable graphics effects and
+		enhancements. Begin by going to the control panel and select ``Performance Information and Tools'' and select the option ``Adjust
+		visual effects'', then select the option ``Adjust for best performance'' and click ``Apply'' to apply the changes.
+		
+\item	Next, since some of the necessary drivers for graphics support and other devices may have not been installed automatically begin
+		by updating the system, from the control panel select ``Windows Update'', then click the button ``Check for updates'' to check
+		for the latest updates, including driver updates. Select from both the regular and recommended updates available any drivers
+		listed as they are specific to the system, also if you wish to install updates for the system now, select the updates from the
+		list {\bf EXCEPT for update KB971033 which is known to cause issues even with genuine copies of Windows}. Then click ``Apply'' 
+		to apply the updates and restart the system after the updates have completed, if you wish to install the latest Windows 7 Service
+		Pack you will have to repeat the update procedure after the system restarts.
+		
+\item	Now that the necessary drivers for the system have been installed, and perhaps the updates as well, the next step is to disable
+		Windows 7 from automatically selecting the drivers for the system, which can conflict with the drivers installed by the
+		virtualization hypervisors. Begin by going to the control panel and select ``System'' then select the option ``Advanced
+		system settings'' and in then click the ``Hardware'' tab. Now, click the ``Device Installation Settings'' button and
+		set only the following two options ``No, let me choose what to do'' and ``Never install driver software from Windows
+		Update'' then click ``Save Changes''. You may be prompted for an administrator password or confirmation, simply 
+		type the password or provide confirmation.
+		
+		
+\item	Next, since not all versions of Windows 7 include remote desktop support, TightVNC Server will be used instead, begin
+		by navigating to control panel and select ``System'' then the option ``Remote settings'' ensure that the option
+		``Allow Remote Assistance connections to this computer'' is disabled and that the option ``Don't allow connections
+		to this computer'' then click ``Apply''.
+		
+\item	Now, download the latest version of TightVNC for Windows from the following location:\url{http://www.tightvnc.com/download.php}
+		and ensure that you download the ``Self-installing package''. Next, execute the installer and simply click ``Next'' and agree
+		to the license agreement, then at the ``Choose Components'' stage of the installation select only ``TightVNC Server'' from
+		the list and click ``Next'' until you get to the ``Select Additional Tasks'' stage of the installer and ensure that the
+		option ``Set passwords for the service before finishing the installation'' is disabled.
+		
+\item	Finally, configure Windows 7 to login automatically on start, begin by click the Windows logo and typing ``run'' and then press
+		enter in the search box, next in the ``Run'' dialog box, type in \emph{\bf control userpasswords2} and press enter. This will
+		display the ``User Accounts'' window, uncheck the option ``Users must enter a user name and password to use this computer''
+		and click ``OK''. You will then be prompted to enter the current password and confirm it, after doing so, you will no longer 
+		be prompted to enter your password to login on the system.
+
+\item	Now that the system has finally been configured for testing\footnote{Hey, it's Windows, you didn't expect this to be a cakewalk
+		did you?} reboot the system and ensure that the following work.
+\begin{itemize}
+\item	It automatically boots up into the full desktop environment without having to login
+\item	You have VNC access to the machine and can control the system using VNC	
+\end{itemize}
+\end{enumerate}
+
+
+%\newpage
+%\subsection{Installing and configuring the hypervisors}
+%\subsection{Configuring the CernVM Image}
+%\subsection{Installing and configuring Cygwin}
+%TODO: ADD INSTRUCTIONS FOR SETTING UP CYGWIN ENVIRONMENT, WHICH IS NECESSARY TO RUN TEST SUITE
+%		THE CYGWIN ENVIRONMENT REQUIRES THE FOLLOWING TO RUN TEST SUITES
+%		-> BASH
+%		-> ALL UNIX UTILITIES (GREP, WGET, CURL, SSH, AWK, SED, NETCAT, TEST, FIND, ...)
+%		-> PERL, THE ISSUE WILL BE TO USE STRAWBERRY PERL (WINDOWS ENVIRONMENT) OR PERL 5
+%			RUNNING IN THE CYGWIN ENVIRONMENT
+%
+%TODO:	ADD INSTRUCTIONS FOR SETTING UP SSH ON WINDOWS (THROUGH CYGWIN)
+%\subsection{Setting up the Tapper Test Suite}

@@ -1,0 +1,62 @@
+Tapper-Starterkit
+=================
+
+A starter kit for setting up a central Tapper server based on
+Debian/Squeeze.
+
+* Download frontend makefile:
+
+  $ curl -k -L http://xrl.us/tapperstarterkit -o Makefile
+
+* Run installation:
+
+  $ make it so
+
+
+This will download subsequent starterkit files, install Debian
+packages, create intermediate chroots, pack images, install and setup
+/etc/init.d services and the web frontend, install Perl and CPAN
+packages and much more. Only for setting up the automation you will
+need some manual DHCP config and console and hardware reset
+installation.
+
+* Alternatively without the automation:
+
+  $ make localsetup
+
+That's recommended for easier starting - it sets up the local reports
+framework, consisting of the reports receiver, the reports evaluation
+api and the web gui.
+
+                                 ***
+
+Whenever you need help, ask us in the mailing list or irc channel.
+
+
+About Tapper
+============
+
+Tapper is an infrastructure for all aspects of testing 
+inclusive Operating Systems and Virtualization.
+
+Tapper contains
+
+ - Automation
+ - Machine Scheduling
+ - Command line utils
+ - Web Frontend application
+ - Support for writing tests
+ - Powerful result evaluation API
+ - Testplan support with TaskJuggler
+ - Many use-cases from tracking test results to
+   benchmarking to full OS testing including virtualization
+
+More information about Tapper:
+
+ - https://github.com/amd/Tapper-Doc/
+ - http://search.cpan.org/~amd/Tapper-Doc/
+
+Other Tapper subprojects:
+
+ - https://github.com/amd
+ - http://search.cpan.org/~amd

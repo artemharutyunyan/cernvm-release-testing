@@ -1,0 +1,78 @@
+#! /bin/bash
+
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo "********** WORKAROUND in prepare-clientpkg-in-chroot: ************"
+echo "**********   DELETE THE apt-get line once you did     ************"
+echo "**********   $ make baseimages clientpkgs             ************"
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
+apt-get --yes --allow-unauthenticated install libyaml-dev
+
+# ===========================================================
+
+set -x
+
+export TAPPERFROMGIT
+export GITPREFIXTAPPERLIBS
+export GITPREFIXTESTSUITES
+export PYTHONSTATICTWEAKS
+
+# ===========================================================
+
+# Perl libs
+/tmp/tapper-starterkit/utils/prepare-perlmodule \
+ Tapper::PRC \
+ Tapper::Installer \
+ Tapper::TestSuite::AutoTest \
+ Tapper::TestSuite::HWTrack
+
+# ==================== Python test suites ====================
+
+PYTHONPREFIX=/opt/tapper/python
+
+# Python libs
+/tmp/tapper-starterkit/utils/prepare-pythonmodule \
+ TestSuite-PyTAP \
+ TestSuite-Metainfo \
+ TestSuite-dom0-meta \
+ TestSuite-Check-CPU-features \
+ TestSuite-L3CID \
+ TestSuite-AIM-Python \
+ TestSuite-AutoTestWrapper-Python \
+ TestSuite-CPUFreq-Python \
+ TestSuite-CStates-Python \
+ TestSuite-CTCS-Python \
+ TestSuite-DIY-Python \
+ TestSuite-HackBench-Python \
+ TestSuite-HostCPUTest-Python \
+ TestSuite-HTS-Python \
+ TestSuite-KernBench-Python \
+ TestSuite-KVM-Passthrough-Python \
+ TestSuite-LLCBench-Python \
+ TestSuite-LmBench-Python \
+ TestSuite-LTP-Python \
+ TestSuite-ParseLogs-Python \
+ TestSuite-Phoronix-Python \
+ TestSuite-RHV7-Python \
+ TestSuite-SLBench-Python \
+ TestSuite-StressAppTest-Python \
+ TestSuite-SysBench-Python \
+ TestSuite-TIOBench-Python \
+ TestSuite-KvmUnitTests-Python \
+ Tapper-Data-Python \
+ TestSuite-Topology-Python
+
+# TestSuite-TSMaster-Python
+
+# ===========================================================
+
+/tmp/tapper-starterkit/utils/create-symlinks

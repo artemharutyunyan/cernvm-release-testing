@@ -1,0 +1,21 @@
+#! /bin/bash
+
+export TAPPERFROMGIT
+export GITPREFIXTAPPERLIBS
+export GITPREFIXTESTSUITES
+export PYTHONSTATICTWEAKS
+
+BIN=/opt/tapper/bin
+mkdir -p $BIN
+
+# Perl
+
+for f in $(find /opt/tapper/perl/perls/current/bin/ -name "tapper*") ; do
+    ln -sf $f $BIN/
+done
+
+# Python
+
+for f in $(find /opt/tapper/python/bin/ -name "tapper*") ; do ln -sf $f $BIN/ ; done
+for f in $(find /opt/tapper/python/bin/ -name "py_*") ; do ln -sf $f $BIN/ ; done
+for f in temare metainfo ; do ln -sf /opt/tapper/python/bin/$f $BIN/ ; done

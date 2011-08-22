@@ -1,0 +1,547 @@
+#! /bin/bash
+
+# =============================================================================
+#
+#****** test-suite/general-interface
+# NAME
+#   general-interface
+#
+# DESCRIPTION
+#   This script contains general interface functions that interface with 
+#   the host system and provide generic functionality such as checking the
+#   host architecture, getting the host operating system, checking if a file
+#   exists, etc.
+#
+#   These functions can be utilized to create precondition tests and test 
+#   cases which require generic functionality that is not part of the
+#   virt or web interface functions
+#***
+#
+# =============================================================================
+
+
+#****f* general-interface/file_exists
+# NAME
+#   file_exists
+# DESCRIPTION
+#   Simple function that checks if a file/folder exists
+# ARGUMENTS
+#   $1 - The location and name of the file
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   file_exists ./template.xml
+#***
+file_exists()
+{
+    RESULT=1
+    if [ -e "$1" ]
+    then
+        RESULT=0
+    fi
+
+    return $RESULT
+}
+
+
+#****f* general-interface/extract_file
+# NAME
+#   extract_file
+# DESCRIPTION
+#   Extracts a file based on extension within the directory it is located in
+# ARGUMENTS
+#   $1 - The location and name of the file
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   extract_file /root/file.tar.gz
+#***
+extract_file()
+{
+    RESULT=1
+    
+    # Set the root directory to extract the file within
+    FOLDER=$(echo $1 | sed -E "s/^(\/.*)+\/.*\..*/\\1/")
+    
+    # Determine the extension of the file
+    EXTENSION=$(echo $1 | sed -E "s/^.*\.(.*\..*)/\\1/")
+    
+    # Extract the file based on extension
+    case "${EXTENSION}" in
+    "tar.gz")
+      tar -xvzf $1 -C ${FOLDER} > /dev/null 2>&1
+      ;;
+    *.gz)
+      # cd to folder and extract file
+      FILE=$(echo $1 | sed -E "s/^\/.*\/(.*\.gz)/\\1/")
+      cd ${FOLDER} ; gunzip -vd ${FILE} > /dev/null 2>&1
+      ;;
+    *)
+      return $RESULT
+      ;;
+    esac
+
+    RESULT="$?"
+    return $RESULT
+}
+
+
+#****f* general-interface/enable_network_if
+# NAME
+#   enable_network_if
+# DESCRIPTION
+#   Simple function which enables a network interface
+# ARGUMENTS
+#   $1 - The name of the network interface
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   enable_network_if eth0
+#***
+enable_network_if()
+{
+    # Enable the network interface
+    ifconfig $1 up
+    return $?
+}
+
+
+#****f* general-interface/disable_network_if
+# NAME
+#   disable_network_if
+# DESCRIPTION
+#   Simple function which disables a network interface
+# ARGUMENTS
+#   $1 - The name of the network interface
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   disable_network_if eth0
+#***
+disable_network_if()
+{
+    # Enable the network interface
+    ifconfig $1 down
+    return $?
+}
+
+
+#****f* general-interface/get_os_name
+# NAME
+#   get_os_name
+# DESCRIPTION
+#   Simple function that returns the specific name or version of the OS
+# ARGUMENTS
+#   $1 - The type of OS
+# RETURN VALUE
+#   osname - The name of the OS
+# EXAMPLE
+#   OSNAME=$(get_os_name "linux")
+#***
+get_os_name()
+{
+    OS_NAME=""
+    
+    case "$1" in
+    "linux")
+        # If it is a Red Hat based system determine name and version
+        if file_exists /etc/redhat-release ; test "$?" -eq 0
+        then
+            OS_NAME=$(cat /etc/redhat-release)
+        
+        # If it is a Debian based system determine name and version
+        elif file_exists /etc/debian_version ; test "$?" -eq 0
+        then
+            OS_NAME="Debian $(cat /etc/debian_version)"
+        
+        # If it is a SuSE based system determine name and version
+        elif file_exists /etc/SuSE-release ; test "$?" -eq 0
+        then
+            OS_NAME=$(cat /etc/SuSE-release)
+        
+        # Set OS name as Linux and kernel version
+        else
+            OS_NAME="Linux $(uname -r)"
+        fi
+        ;;
+    "osx")
+        # Determine the OS name and version
+        OS_NAME=$(system_profiler SPSoftwareDataType | grep -e "System Version" \
+                  | sed -E "s|^.*Version\:[[:space:]]*(.*)|\\1|")
+        ;;
+    "windows")
+        OS_NAME="Windows"
+        ;;
+    *)
+        OS_NAME="Unknown"
+        ;;
+    esac
+
+    echo "${OS_NAME}"
+}
+
+
+#****f* general-interface/get_os_type
+# NAME
+#   get_os_type
+# DESCRIPTION
+#   Simple function that returns the type of OS such as linux or osx
+# RETURN VALUE
+#   ostype - The type of OS, either linux,osx, or windows
+# EXAMPLE
+#   OSTYPE=$(get_os_type)
+#***
+get_os_type()
+{
+    OS_TYPE=""
+    
+    # Determine if the os type is linux
+    if $(uname -a | grep -q Linux) ; test "$?" -eq 0
+    then
+        OS_TYPE="linux"
+    # Determine if the os type is OS X
+    elif $(uname -a | grep -q Darwin) ; test "$?" -eq 0
+    then
+        OS_TYPE="osx"
+    # The OS is Windows
+    else
+        OS_TYPE="windows"
+    fi
+
+    echo "${OS_TYPE}"
+}
+
+
+#****f* general-interface/filename_from_url
+# NAME
+#   filename_from_url
+# DESCRIPTION
+#   Function that returns the name of a file to be downloaded given a url
+# ARGUMENTS
+#   $1 - The download url of the file
+# RETURN VALUE
+#   filename - The name of a file to be downloaded
+# EXAMPLE
+#   FILE_NAME=$(filename_from_url http://someurl/file.tar.gz)
+#***
+filename_from_url()
+{
+    # Get the filename from location
+    FILENAME=$(echo $1 | sed -E "s/^.*\/(.*)/\\1/")
+    
+    echo ${FILENAME}
+}
+
+
+#****f* general-interface/filename_from_header
+# NAME
+#   filename_from_header
+# DESCRIPTION
+#   Function that returns the name of a file to be downloaded given a url by
+#   looking at the "Location:" specified in HTTP header
+# ARGUMENTS
+#   $1 - The download url of the file
+# RETURN VALUE
+#   filename - The name of a file to be downloaded
+# EXAMPLE
+#   FILE_NAME=$(filename_from_header http://someurl/file.tar.gz)
+#***
+filename_from_header()
+{
+    # Get the HTTP header with actual location of the file
+    # Filter the ^M characters out of the stream (this caused many headaches)
+    LOCATION=$(curl -i $1 | sed 's/'"$(printf '\015')"'$//g' | egrep -E "^Location:[[:space:]]*")
+
+    # Get the filename from location
+    FILENAME=$(echo ${LOCATION} | sed -E "s/^.*\/(.*)/\\1/")
+    
+    echo ${FILENAME}
+}
+
+
+#****f* general-interface/find_file
+# NAME
+#   find_file
+# DESCRIPTION
+#   Function that finds a file and returns the name and path of a file given the 
+#   root directory and the extension of the file
+# ARGUMENTS
+#   $1 - The root directory to search for the file
+#   $2 - The extension of the file to look for
+# RETURN VALUE
+#   filelocation - The name and path of a file
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   FILE_LOCATION=$(find_file /usr/share/images vmdk)
+#***
+find_file()
+{
+    RESULT=1
+    
+    # Search for the file in the root directory based on extension
+    FILE_LOCATION=$(find $1/* -name "*.$2")
+    RESULT="$?"
+    echo ${FILE_LOCATION}
+    
+    return $RESULT
+}
+
+
+#****f* general-interface/get_hash
+# NAME
+#   get_hash
+# DESCRIPTION
+#   Simple function that returns the hash of a file
+# ARGUMENTS
+#   $1 - The location and name of the file
+#   $2 - The type of hash, currently supported hashes are: 
+#        crc32, md5, sha, sha1, sha224, sha256, sha384, sha512
+# RETURN VALUE
+#   hash - The hash of the file
+# EXAMPLE
+#   HASH=$(get_hash /root/file.tar.gz md5)
+#***
+get_hash()
+{
+    HASH=""
+        
+        # Get the hash of the file
+        case "$2" in
+        "crc32")
+          HASH=$(cksum $1 | awk '{print $1}')
+          ;;
+        "md5")
+          HASH=$(md5sum $1 | awk '{print $1}')
+          ;;
+        "sha")
+          HASH=$(shasum $1 | awk '{print $1}')
+          ;;
+        "sha1")
+          HASH=$(sha1sum $1 | awk '{print $1}')
+          ;;
+        "sha224")
+          HASH=$(sha224sum $1 | awk '{print $1}')
+          ;;
+        "sha256")
+          HASH=$(sha256sum $1 | awk '{print $1}')
+          ;;
+        "sha384")
+          HASH=$(sha384sum $1 | awk '{print $1}')
+          ;;
+        "sha512")
+          HASH=$(sha512sum $1 | awk '{print $1}')
+          ;;
+        esac
+
+    echo ${HASH}
+}
+
+
+#****f* general-interface/get_net_name
+# NAME
+#   get_net_name
+# DESCRIPTION
+#   Simple function that returns the network name for a virtual machine
+# ARGUMENTS
+#   $1 - The current hypervisor for the virtual machine network
+#   $2 - The network XML definition file, not applicable for VMware
+# RETURN VALUE
+#   networkname - The network name defined in the xml network definition file
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   NET_NAME=$(get_net_name kvm ./network-definition.xml)
+#   NET_NAME=$(get_net_name vmware)
+#***
+get_net_name()
+{
+    NETNAME=""
+    RESULT=1
+    
+    if [ "$1" != "vmware" ]
+    then
+        if file_exists $2 ; test "$?" -eq 0 
+        then
+            # Set network name as default name in xml file
+            NETNAME=$(egrep -E "^[[:space:]]*<name>.+</name>" $2 | \
+                      sed -E "s|.*<name>(.*)</name>.*|\\1|")
+            RESULT=$?
+        fi
+
+    # Otherwise for vmware, network xml file not applicable, network name is vmnet1
+    else
+        NETNAME="vmnet8"
+        RESULT=0
+    fi
+
+    echo ${NETNAME}
+    return $RESULT  
+}
+
+
+#****f* general-interface/get_mac_address
+# NAME
+#   get_mac_address
+# DESCRIPTION
+#   Simple function that returns the mac address from the virtual machine definition file
+# ARGUMENTS
+#   $1 - The virtual machine XML definition file
+# RETURN VALUE
+#   macaddress - The mac address defined in the xml definition file
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   MAC_ADDRESS=$(get_mac_address ./kvm-definition.xml)
+#***
+get_mac_address()
+{
+    MACADDRESS=""
+    RESULT=1
+    
+    if file_exists $1 ; test "$?" -eq 0
+    then
+        # Set the mac address as the value in xml file
+        MACADDRESS=$(egrep -E "^.*mac[[:space:]]*address='.*'" $1 | sed -E \
+                     "s|^.*mac[[:space:]]*address='(.*)'.*|\\1|")
+        RESULT=$?
+    fi
+
+    echo "${MACADDRESS}"
+    return $RESULT    
+}
+
+
+#****f* general-interface/get_ip_address
+# NAME
+#   get_ip_address
+# DESCRIPTION
+#   Simple function that returns the ip address of a virtual machine
+# ARGUMENTS
+#   $1 - The current hypervisor for the virtual machine network
+#   $2 - The MAC address of the virtual machine network connection
+#   $3 - The network XML definition file, not applicable for VMware
+# RETURN VALUE
+#   ipaddress - The ip address defined in the xml network definition file
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   IP_ADDRESS=$(get_ip_address kvm 52:54:00:7B:30:75 ./network-definition.xml)
+#   IP_ADDRESS=$(get_ip_address vmware 00:50:56:C0:00:01)
+#***
+get_ip_address()
+{
+    MACADDRESS="$2"
+    IPADDRESS=""
+    RESULT=1
+    
+    if [ "$1" != "vmware" ]
+    then
+        if file_exists $3 ; test "$?" -eq 0 
+        then
+            # Set the ip address as default in xml file
+            IPADDRESS=$(egrep -E "^[[:space:]]*<range[[:space:]]*start='(.*)'" $3 | sed -E \
+                        "s|.*start='([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})'.*|\\1|")
+            RESULT=$?
+        fi
+    # Otherwise for vmware, network xml file not applicable, determine the
+    # IP address of the virtual machine from the arp table
+    else
+        # COMPATABILITY FIX: Have to chop the first three characters of the MAC address as
+        # the arp command on OS X only display one of the first mac address digits if
+        # the mac address starts with two zeros
+        MACADDRESS="${MACADDRESS:3:${#MACADDRESS}}"
+
+        # Determine the IP address from the arp output
+        IPADDRESS=$(arp -an | grep -E "^.*${MACADDRESS}" | sed -E \
+                    "s|^.*\(([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})\).*|\\1|")
+        RESULT=$?
+    fi
+
+    echo "${IPADDRESS}"
+    return $RESULT          
+}
+
+
+#****f* general-interface/ssh_generate_key
+# NAME
+#   ssh_generate_key
+# DESCRIPTION
+#   A function which generates an SSH public key
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   ssh_generate_key
+#***
+ssh_generate_key()
+{
+    # Use a here-doc to script expect to automate key generation
+    /usr/bin/expect <<EOF
+    match_max 100000
+    set prompt "*?\$"
+
+    spawn ssh-keygen
+    # Look for connection prompt
+    expect {
+        "*\):*" {
+        send_user "accepting default key location\r"
+        send "\r"
+        exp_continue
+        }
+        "*?assphrase\):*" {
+        # Leave empty passphrase
+        send_user "using an empty passphrase\r"
+        send "\r"
+        exp_continue    
+        }
+        "*again:*" {
+        send "\r"
+        exp_continue    
+        }
+    }
+EOF
+
+    return $?
+}
+
+
+#****f* general-interface/ssh_autologin
+# NAME
+#   ssh_autologin
+# DESCRIPTION
+#   A function which configures automatic SSH login using keys instead of passwords
+# ARGUMENTS
+#   $1 - The IP address of the machine to login via ssh
+#   $2 - The username to login with
+#   $3 - The password to login with
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   ssh_autologin 192.168.1.125 root password
+#***
+ssh_autologin()
+{
+    # Use a here-doc to script expect to automate password authentication
+    /usr/bin/expect <<EOF
+    match_max 100000
+    set prompt "*?\$"
+
+    spawn ssh-copy-id $2@$1
+    # Look for connection prompt
+    expect {
+        "\(yes\/no)\?" {
+        send_user "saying yes to connect\r"
+        send "yes\r"
+        exp_continue
+        }
+        "*?assword:*" {
+        # Login
+        send_user "Logging in\r"
+        send "$3\r"
+        exp_continue    
+        }
+    }
+EOF
+
+    return $?
+}

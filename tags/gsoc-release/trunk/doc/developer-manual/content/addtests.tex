@@ -1,0 +1,226 @@
+\chapter{Adding \cernvm Test Cases}
+\section{Adding Test Cases Overview}
+\label{sec:addtestsoverview}
+
+The \cernvm Test Cases are simply the tests which fulfil the role of the ``\cernvm Test Cases'', these tests are just scripted
+implementations of the \cernvm Test Cases which would have otherwise been executed manually. The \cernvm Test Cases
+are an essential component of the main ``cernvm-tests.sh'' script and require both cernvm-preconditions tests as well as
+interface functions to execute the test cases. The cernvm-precondition functions are essential to executing test cases as the 
+precondition tests are what initially set up and prepare the host environment for executing the actual test cases. In addition,
+the precondition tests can be used by the \cernvm Test Cases to ensure that the minimum dependencies are met before
+executing the test case, which allows for modular, or out-of-order testing. This enables a single test to be executed without
+having any prerequisites for a specific precondition test or test case to have been executed before.
+
+Therefore, the \cernvm Test Cases differ fom precondition tests because they are merely tests which automate the otherwise
+manual process of executing the test cases and checking the \cernvm image. Unlike precondition tests, test cases are not required to
+pass in order for another \cernvm test case to be executed accurately, any dependencies required for a test case to execute
+accurately should be instead satisfied by a precondition test. 
+
+Thus, unlike precondition tests, the test cases should only contain the functionality essential to executing the \cernvm Test Cases,
+anything that could be seen as a prerequisite to executing a test case, such as starting or restarting a virtual machine should
+not be part of the test case code. \emph{This is important as separating prerequisites from actual test cases enables modular,
+or out of order testing}; writing prerequisites to test cases as precondition tests allows a single test to be executed independently
+or the results or execution of another test case.
+
+
+\section{Example, Adding a New Test Case}
+\label{sec:addnewtest}
+
+The following will be an example of adding a \cernvm Test Case which verifies that it is possible to login to the \cernvm image
+using SSH, there will be code samples provided, as well as a detailed explanation of the entire procedure to add a new test case
+and intergrate it with the ``cernvm-tests.sh'' script.
+
+\begin{enumerate}
+
+\item	The first step to take before adding a single line of code is to sit down and analyze any prerequisites for executing the
+			test case, any condition that must be met before the actual test case can be executed can be considered a prerequisite
+			and thus would be a precondition test.  First start by creating a list of any procedures that would have to be manually
+			executed before actually executing the test case, such as starting the virtual machine and verifying that it has network
+			access.
+			
+			For the test case used in this example, which verifies that it is possible to login to the \cernvm image using SSH, the
+			list of prerequisites could be listed as something similar to the following.
+			
+			\begin{itemize}
+			\item	Download and extract the \cernvm image
+			\item	Create the virtual machine
+			\item	Configure the virtual machine for testing, such as the amount of memory
+			\item	Start the virtual machine
+			\item	Configure the \cernvm image through the web interface, add a new user, configure experiment group
+			\end{itemize}
+			
+\item	Next, refer to the API reference for a comprehensive list of the precondition tests and interface functions  available 
+			and look for any precondition tests or functions that satisfy the prerequisites needed to execute the test case. Specifically,
+			refer to the section titled, ``test-suite/cernvm-preconditions''~\ref{ch:test_suite_cernvm_preconditions}, which has every 
+			precondition test function documented, including a description of what the precondition test does and the arguments and
+			return values.
+			
+			For the test case used in this example, all of the prerequisites listed in the previous step can be executed
+			by existing precondition tests and interface functions. Thus, there is a high probability that many of the prerequisites for
+			each test case have been already satisfied by a precondition test. The following is a list of the precondition tests and
+			interface functions that satisfy all of the prerequisites listed in the previous step.
+			
+			\begin{itemize}
+				\item	download\_extract()
+				\item	create\_def()
+				\item	verify\_hypervisor()
+				\item	create\_vm()
+				\item	start\_vm()
+				\item	web\_check\_interface()
+				\item	web\_check\_login()
+				\item	configure\_image\_web()
+			\end{itemize}
+			
+\item	Now that the functions necessary to meet all of the prerequisites for the \cernvm test case have been determined, the next
+			step involves determining the variables and values to pass to the precondition tests and other interface functions. After determining 
+			the arguments to the functions, determine which configuration options should be specified in the configuration file to be passed as
+			arguments to the functions, as almost all of the variables required by the functions should be specified in the configuration file and
+			not set in the cernvm-tests.sh script itself. For a complete list of the available configuration options refer to section~\ref{sec:configfile},
+			remember that it is not essential to specify every optional configuration setting as all of the configuration options which are not mandatory 
+			have default values.
+			
+			For the test case used in this is example the KVM \cernvm image will be used to verify SSH access, therefore only the two
+			mandatory configuration options ``CVM\_TS\_REPORT\_SERVER'' and ``CVM\_VM\_IMAGE\_VERSION'' would have to 
+			be specified in the provided kvm configuration file \verb|content/cernvm-kvm.cfg|. This is because all of the arguments
+			required by the functions listed in the previous step have suitable default values specified in the cernvm-tests.sh script
+			if the optional configuration setting is not specified. For example, the following code snippet from \emph{cernvm-tests.sh}
+			demonstrates the suiteable default values for the variables required by the configure\_image\_web() function, which
+			configures the \cernvm image through the web interface.
+			
+\lstset{language=bash,caption=Suiteable Default Values for the Web Interface}
+\begin{lstlisting}
+######### Optional Web Interface Settings ##########
+ADMIN_USERNAME="${CVM_WEB_ADMIN_USERNAME:-admin}"
+ADMIN_DEFAULT_PASS="${CVM_WEB_ADMIN_DEFAULT_PASS:-password}"
+ADMIN_PASS="${CVM_WEB_ADMIN_PASS:-VM4l1f3}"
+
+# CernVM image user settings, specify the settings for new account
+USER_NAME="${CVM_WEB_USER_NAME:-alice}"
+USER_PASS="${CVM_WEB_USER_PASS:-VM4l1f3}"
+USER_GROUP="${CVM_WEB_USER_GROUP:-alice}"
+
+# CernVM image root account settings, specify password for root account
+ROOT_PASS="${CVM_WEB_ROOT_PASS:-VM4l1f3}"
+
+# CernVM image desktop settings
+STARTXONBOOT="${CVM_WEB_STARTXONBOOT:-on}"
+RESOLUTION="${CVM_WEB_RESOLUTION:-1024x768}"
+KEYBOARD_LOCALE="${CVM_WEB_KEYBOARD_LOCALE:-us}"
+
+# CernVM image primary group (experiment) settings
+EXPERIMENT_GROUP="${CVM_WEB_EXPERIMENT_GROUP:-ALICE}"
+\end{lstlisting}
+			
+\item	Now that the functions, variables, and configuration options necessary to meet all of the prerequisites for 
+			the \cernvm test cases have been determined. The next step involves adding the precondition tests and 
+			other interface functions to the main ``cernvm-tests.sh'' script in a form that can be handled by 
+			tapper-autoreport. While the cernvm-tests.sh script is simply a script that has an incremental list of the 
+			precondition tests and test cases to be executed, the precondition tests and test cases still need to be
+			integrated with tapper-autoreport so that the results of the tests can be added to the Test Anything Protocol
+			(TAP) report, which is submitted to the \tapper Server.
+			
+			Because many of the test cases share similar prerequisites, such as the virtual machine first being created and
+			started, it is best to place the ordered list of precondition tests within the cervnvm-tests.sh script before calling
+			the test case function. By placing the calls to precondition tests directly in the cernvm-tests.sh script instead
+			of calling them from a test case function, test case dependencies can be avoided as the prerequisites for most
+			of the \cernvm test cases are met before any test case functions are called.
+			
+\item	After adding the ordered list of precondition tests to the cernvm-tests.sh script, the next step is to integrate
+			the precondition tests with tapper-autoreport so that the results of the tests can be added to the Test Anything 
+			Protocol (TAP) report and submitted to the \tapper Server. The easiest method of doing this is to catch the exit
+			status of the functions called, which is provided internally by bash using the variable {\bf \$?} and pass the exit
+			status to the tapper-autoreport function {\bf ok}. The tapper-autoreport function, {\bf ``ok''} takes two arguments,
+			the return code and report message; the most practical method of specifying the report message is to use
+			the precondition test's function description from the API reference and use an incremental counter for each test.
+			
+			The following code snippet from \emph{cernvm-tests.sh} is an example of implementing the precondition tests
+			before calling any test case functions and integrating the results of the precondition tests with the auto-tapper
+			reporting facilities. All of the variables used in the function calls are either set based on the options provided in
+			the configuration file or use default values if the optional configuration options are not specified.
+
+\lstset{language=bash,caption=Adding Precondition Tests and Integrating with Tapper-AutoReport}
+\begin{lstlisting}
+
+######### Optional CernVM Image Settings ##########
+IMAGE_RELEASE_ID="${CVM_VM_IMAGE_RELEASE_ID}"
+NAME="${CVM_VM_NAME:-cernvm-${HYPERVISOR}-${IMAGE_VERSION}}"
+
+######### Optional Web Interface Settings ##########
+ADMIN_USERNAME="${CVM_WEB_ADMIN_USERNAME:-admin}"
+ADMIN_DEFAULT_PASS="${CVM_WEB_ADMIN_DEFAULT_PASS:-password}"
+ADMIN_PASS="${CVM_WEB_ADMIN_PASS:-VM4l1f3}"
+
+######### CernVM Image Settings ##########
+VM_XML_DEFINITION="" # Leave blank, the virtual machine definition file
+
+. . .
+
+# Precondition Test 14 - Verify that virtual machine can be started
+start_vm ${VM_XML_DEFINITION} $NAME
+ok $? "Precondition Test 14 - Verify that virtual machine $VMNAME \
+has been started"
+
+. . .
+
+# Precondition Test 17 - Verify that virtual machine has web interface
+#                                     support
+web_check_interface ${IP_ADDRESS} web_interface.log
+ok $? "Precondition Test 17 - Verify that virtual machine $VMNAME has web \
+interface support"
+
+
+# Precondition Test 18 - Verify that it is possible to login on
+#                                     web interface
+web_check_login ${IP_ADDRESS} $ADMIN_USERNAME $ADMIN_DEFAULT_PASS \
+web_interface_login.log
+ok $? "Precondition Test 18 - Verify that it is possible to login on\
+web interface"
+
+
+# Precondition Test 19 - Setup and configure the initial CernVM image 
+#                                     through the web interface
+configure_image_web ${IP_ADDRESS} $ADMIN_USERNAME $ADMIN_DEFAULT_PASS \
+web_config_image.log
+ok $? "Precondition Test 19 - Setup and configure the initial CernVM image \
+through the web interface"
+\end{lstlisting}
+
+\item	Finally, the last step involves adding the new test case manually, again review the API reference~\ref{ch:robo32}
+			and look for any functions that may already provide the necessary functionality for the test case. In the event that
+			the functionality needed has not already been implemented, create new functions in one of the appropriate interface
+			files. Then, implement a function for the new test case in the ``cernvm-testscases'' file and call the test case function
+			from ``cernvm-tests.sh'' and integrate the results with tapper-autoreport.
+						
+			In some cases, there is a precondition test which already provides the functionality needed to implement the test case
+			and simply needs to be called with arguments specific to the test case. This is the scenario for the test case used
+			in this example, a precondition test already exists to verify that the root account has SSH access, to  create the new
+			test case the arguments for the precondition test simply need to be changed.
+
+\lstset{language=bash,caption=Adding a New Test Case and Integrating with Tapper-AutoReport}
+\begin{lstlisting}
+
+### To implement the test case call the existing precondition test 
+### and verify that a specific user, instead of the default root
+### account has SSH access
+			 
+# Add the test case function to cernvm-tests.sh that verifies SSH access
+check_ssh()
+{
+    verify_ssh_login $1 $2
+
+    return $?
+}
+
+### Finally add the test case to cernvm-tests.sh and 
+### Integrate the results of function with tapper-autoreport
+
+# CernVM Test Case 1 - Check login via ssh as user created through
+#                                    the web interface
+check_ssh ${IP_ADDRESS} $USER_NAME
+ok $? "CernVM Test Case 1 - Check login via ssh as user created \
+through web interface"
+\end{lstlisting}
+			
+
+\end{enumerate}
+

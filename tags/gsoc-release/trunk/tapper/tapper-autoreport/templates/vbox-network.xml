@@ -1,0 +1,11 @@
+<network>
+  <name>vboxnet0</name>
+  <uuid></uuid>
+  <bridge stp='off' delay='0' />
+  <ip address='192.168.56.154' netmask='255.255.255.0'>
+    <dhcp>
+      <range start='192.168.56.155' end='192.168.56.155' />
+      <host mac='0a:00:27:00:00:00' name='vboxnet0' ip='192.168.56.1' />
+    </dhcp>
+  </ip>
+</network>

@@ -1,0 +1,42 @@
+#!/bin/bash
+
+### BEGIN INIT INFO
+# Provides:          TAPPER_MSGRECEIVER
+# Required-Start:    $syslog $remote_fs
+# Should-Start: $time ypbind smtp
+# Required-Stop:     $syslog $remote_fs
+# Should-Stop: $time ypbind smtp
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: TAPPER_MSGRECEIVER daemon to receive Tapper automation state message
+# Description:       Start TAPPER_MSGRECEIVER to receive Tapper automation state messages
+### END INIT INFO
+
+# Note: Special treatment of stop for LSB conformance
+PERL=/opt/tapper/perl/perls/current/bin/perl
+TAPPER_MSGRECEIVER_BIN=/opt/tapper/perl/perls/current/bin/tapper-mcp-messagereceiver
+test -f $TAPPER_MSGRECEIVER_BIN || { echo "$TAPPER_MSGRECEIVER_BIN not installed"; 
+	if [ "$1" = "stop" ]; then exit 0;
+	else exit 5; fi; }
+
+
+case "$1" in
+    start)
+	echo -n "Starting TAPPER_MSGRECEIVER "
+	$PERL $TAPPER_MSGRECEIVER_BIN start
+	;;
+    stop)
+	echo -n "Shutting down TAPPER_MSGRECEIVER "
+	$PERL $TAPPER_MSGRECEIVER_BIN stop
+	;;
+    restart)
+	echo -n "Restart TAPPER_MSGRECEIVER "
+	$0 stop
+	$0 start
+	;;
+    *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+	;;
+esac
+

@@ -1,0 +1,436 @@
+#! /bin/bash
+
+# =============================================================================
+#
+#****** test-suite/cernvm-testcases
+# NAME
+#   cernvm-testcases
+#
+# DESCRIPTION
+#   This script contains each of the CernVM Release Testing
+#   test cases and provides a simple interface to execute each test
+#   and returns either a success or failure, (0 or 1) which can be 
+#   used to generate a TAP report.
+#
+#   More complex test cases can be created by combining other test cases
+#   as prerequisites for the test case
+#
+# NOTES
+#   Nearly all of the test cases require the root account on the CernVM image as 
+#   many of the files and commands can only be accessed by an account with root 
+#   privileges
+#
+# TODO
+#   MAKE MANY OF THE TEST CASES HAVE OTHER TEST CASES AS
+#   PREREQUISITES AND THEN IF THEY FAIL REPORT THAT THE TEST CASE
+#   FAILED BECAUSE A PREREQUISITE FAILED, AND WHY THAT PREREQUISITE
+#   FAILED. THIS IS MUCH BETTER THAN HAVING A TEST CASE FAIL DUE
+#   TO ANOTHER DEPENDENCY AND MAKES THE TEST CASES ORDER-INDEPENDENT
+#   IE. FOR check_time(), CALL check_ssh() AND VERIFY THAT SSH IS
+#   FIRST POSSIBLE, THIS GIVES MORE EXPLANATION TO FAILURES RATHER
+#   THAN A FAILURE FOR THE NTPD TIME BEING INCORRECT, WHEN IN REALITY
+#   check_time() COULDN'T SSH TO THE MACHINE
+#   *** THIS IS ESSENTIALLY TAPPER'S YAML STRUCTURE ANYWAYS...
+#***
+#
+# =============================================================================
+
+
+#****f* cernvm-testcases/check_ssh
+# NAME
+#   check_ssh
+# DESCRIPTION
+#   CernVM Test Case - Check login via ssh
+# ARGUMENTS
+#   $1 - The IP address of the machine to login via ssh
+#   $2 - The username to login with
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   check_ssh 192.168.1.125 root
+#***
+check_ssh()
+{
+    verify_ssh_login $1 $2
+
+    return $?
+}
+
+
+#****f* cernvm-testcases/check_boot_error
+# NAME
+#   check_boot_error
+# DESCRIPTION
+#   CernVM Test Case - Check for error messages at boot
+# ARGUMENTS
+#   $1 - The IP address of the machine to login via ssh
+#   $2 - The name of the boot errors log file
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   check_boot_error 192.168.1.125 boot-error.log
+#***
+check_boot_error()
+{
+    RESULT=0
+    BOOT_TESTS=("ssh -q -o \"BatchMode=yes\" root@$1 dmesg | egrep \"error|warning|fail\" > $2" 
+"ssh -q -o \"BatchMode=yes\" root@$1 cat /var/log/boot.log | egrep \"error|warning|fail\" >> $2" 
+"ssh -q -o \"BatchMode=yes\" root@$1 cat /var/log/messages | egrep \"error|warning|fail\" >> $2" 
+"ssh -q -o \"BatchMode=yes\" root@$1 cat /var/log/cernvm-update.log | egrep \"error|warning|fail\" >> $2")
+
+    # Precondition for ssh support as root for boot error tests
+    if check_ssh $1 root ; test "$?" -eq 0 ; then
+    for test in "${BOOT_TESTS[@]}"
+    do
+        eval $test
+            # If any of the tests has boot error, set result as failure and continue
+            # logging the rest of the boot messages that contain boot errors
+            if [ "$?" -eq 0 ]
+            then
+                    RESULT=1
+            fi
+    done
+    else
+        echo "FAIL - Precondition for ssh support as root for boot error tests"
+        RESULT=1
+    fi
+    
+    return $RESULT
+}
+
+
+#****f* cernvm-testcases/check_time
+# NAME
+#   check_time
+# DESCRIPTION
+#   CernVM Test Case - Check for correct time / running ntpd
+# ARGUMENTS
+#   $1 - The IP address of the machine to login via ssh
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   check_time 192.168.1.125
+#***
+check_time()
+{
+    ssh -q -o "BatchMode=yes" root@$1 ps -eaf | grep -q ntpd
+
+    return $?
+}
+
+
+#****f* cernvm-testcases/check_web_restart
+# NAME
+#   check_web_restart
+# DESCRIPTION
+#   CernVM Test Case - Restart through the web interface and check that there
+#                      are no error messages at boot
+# ARGUMENTS
+#   $1 - The hostname or ip address for the web interface
+#   $2 - The name of the web reboot logfile
+#   $3 - The name of the boot error logfile
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   check_web_restart 192.168.1.125 web-reboot.log boot-error.log
+#***
+check_web_restart()
+{
+    RESULT=1
+
+    # Restart through the web interface
+    web_restart $1 $2
+
+    # If restarted through the web interface successfully check for boot errors
+    if [ "$?" -eq 0 ]
+    then
+        # Wait for system to start, check for boot error
+        sleep 300
+        check_boot_error $1 $3
+        
+        # No boot errors, return success
+        if [ "$?" -eq 0 ]
+        then
+            RESULT=0
+        fi
+    fi
+
+    return $RESULT
+}
+
+
+#****f* cernvm-testcases/check_no_network
+# NAME
+#   check_no_network
+# DESCRIPTION
+#   CernVM Test Case - Shutdown the system and disconnect the network, then start
+#                      the image, it should take longer to boot but the system
+#                      should not hang on startup
+# ARGUMENTS
+#   $1 - The IP address of the machine to login via ssh
+#   $2 - The name of the virtual machine
+#   $3 - The virtual machine network name
+#   $4 - The path to the virtual machine definition file
+#   $5 - The path to the network definition file
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   check_no_network 192.168.1.125 vm-name network-name ./vm-def.xml ./network-def.xml
+#***
+check_no_network()
+{
+    RESULT=1
+    
+    # First shutdown the virtual machine
+    if stop_vm $2 ; test "$?" -eq 0
+    then
+        # Disconnect network, have to destroy the virtual machine network
+        if [ "$HYPERVISOR" != "vmware" ]
+        then
+            destroy_vm_net $3
+
+        # For VMware have to disable the network interface 
+        else
+            disable_network_if $3
+        fi
+
+        # If the network was disabled start the virtual machine
+        if [ "$?" -eq 0 ]
+        then
+            # Verify the virtual machine started
+            if start_vm $4 $2 ; test "$?" -eq 0
+            then
+                # Start the network
+                if [ "$HYPERVISOR" != "vmware" ]
+                then
+                    create_vm_net $5 $3
+
+                # For VMware have to enable the network interface 
+                else
+                    enable_network_if $3
+                fi
+
+                # If network started verify SSH access to check that
+                # virtual machine has not hung on startup and has network access
+                if test "$?" -eq 0 && verify_ssh_login $1 root ; test "$?" -eq 0
+                then
+                    RESULT=0
+                fi
+            fi
+        fi
+    fi
+
+    return $RESULT            
+}
+
+
+#****f* cernvm-testcases/check_cvmfs_automount
+# NAME
+#   check_cvmfs_automount
+# DESCRIPTION
+#   CernVM Test Case - Check that cernvmfs automount scripts works correctly
+#                      and is able to mount any experiment group to /cvmfs/
+# ARGUMENTS
+#   $1 - The IP address of the machine to login via ssh
+#   $2 - The appliance primary group, all capitals, only one group may be specified
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   check_cvmfs_automount 192.168.1.125 ALICE
+#***
+check_cvmfs_automount()
+{
+    RESULT=1
+    EXPERIMENT_PATH="/cvmfs/"
+    MOUNTED_PATH=""
+
+    # Set the experiment path based on the primary group specified
+    case "$2" in
+    "ALICE")
+      EXPERIMENT_PATH="${EXPERIMENT_PATH}""alice"".cern.ch"
+      ;;
+    "ATLAS")
+      EXPERIMENT_PATH="${EXPERIMENT_PATH}""atlas"".cern.ch"
+      ;;
+    "CMS")
+      EXPERIMENT_PATH="${EXPERIMENT_PATH}""cms"".cern.ch"
+      ;;
+    "LHCB")
+      EXPERIMENT_PATH="${EXPERIMENT_PATH}""lhcb"".cern.ch"
+      ;;
+    "LCD")
+      EXPERIMENT_PATH="${EXPERIMENT_PATH}""lcd"".cern.ch"
+      ;;
+    "NA61")
+      EXPERIMENT_PATH="${EXPERIMENT_PATH}""na61"".cern.ch"
+      ;;
+    "HONE")
+      EXPERIMENT_PATH="${EXPERIMENT_PATH}""hone"".cern.ch"
+      ;;
+    "HEPSOFT")
+      EXPERIMENT_PATH="${EXPERIMENT_PATH}""hepsoft"".cern.ch"
+      ;;
+    "BOSS")
+      EXPERIMENT_PATH="${EXPERIMENT_PATH}""boss"".cern.ch"
+      ;;
+    "GEANT4")
+      EXPERIMENT_PATH="${EXPERIMENT_PATH}""geant4"".cern.ch"
+      ;;
+    *)
+      # Incorrect primary group specified, return failure
+      return $RESULT
+      ;;
+    esac
+    
+    # Change to the experiment path
+    MOUNTED_PATH=$(ssh -q -o "BatchMode=yes" root@$1 "cd ${EXPERIMENT_PATH} && pwd")
+    
+    # Verify that the experiment path was mounted
+    if [ "${MOUNTED_PATH}" == "${EXPERIMENT_PATH}" ]
+    then
+        # Verify that the cvmfs2 process is running
+        if $(ssh -q -o "BatchMode=yes" root@$1 "ps -eaf | grep -v 'grep' | \
+           grep -q -e 'cvmfs2'") ; test "$?" -eq 0
+        then
+            RESULT=0
+        fi
+    fi
+
+    return $RESULT
+}
+
+
+#****f* cernvm-testcases/check_cvmfs_cache
+# NAME
+#   check_cvmfs_cache
+# DESCRIPTION
+#   CernVM Test Case - Check the cvmfs cache list, verify that the cache list is 
+#                      available after restarting the cvmfs daemon
+# ARGUMENTS
+#   $1 - The IP address of the machine to login via ssh
+#   $2 - The name of the logfile
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   check_cvmfs_cache 192.168.1.125 logfile.log
+#***
+check_cvmfs_cache()
+{
+    RESULT=1
+    
+    # Add a heading to the log file
+    echo -e "BEFORE RESTARTING CVMFS - $(date)\n\n" > $2
+    
+    # Log the initial cache list
+    ssh -q -o "BatchMode=yes" root@$1 "cvmfs-talk cache list" &> $2
+
+    # If command executed without error, restart cvmfs
+    if [ "$?" -eq 0 ]
+    then
+        ssh -q -o "BatchMode=yes" root@$1 "/etc/init.d/cvmfs restart"
+
+        # If service restarted without error log cache list again
+        if [ "$?" -eq 0 ]
+        then
+            # Second heading
+            echo -e "AFTER RESTARTING CVMFS - $(date)\n\n" > $2
+
+            ssh -q -o "BatchMode=yes" root@$1 "cvmfs-talk cache list" &> $2
+
+            if [ "$?" -eq 0 ]
+            then
+                RESULT=0
+            fi
+        fi
+    fi
+
+    return $RESULT
+}
+
+
+#****f* cernvm-testcases/migrate_experiment
+# NAME
+#   migrate_experiment
+# DESCRIPTION
+#   CernVM Test Case - Migrate to another experiment such as LHCB using the web
+#                      interface and make sure the relative tests are loaded 
+# ARGUMENTS
+#   $1 - The IP address of the machine to login via ssh
+#   $2 - The appliance primary group, all capitals, only one group may be specified
+#   $3 - The name of the logfile
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   migrate_experiment 192.168.1.125 ALICE logfile.log
+#***
+migrate_experiment()
+{
+    RESULT=1
+
+    # Migrate from current CernVM image experiment group to another group
+    web_config_group $1 $2 $3
+
+    # If successfully changed groups, reboot the system through web interface
+    if [ "$?" -eq 0 ]
+    then
+        # Reboot system
+        echo -e "\n\nREBOOTING SYSTEM THROUGH WEB INTERFACE\n\n" > $3
+        web_restart $1 $3
+
+        # If restarted successfully verify group changed
+        # TODO: Define a criteria to verify that group changed
+        if [ "$?" -eq 0 ]
+        then
+            RESULT=0
+        fi
+    fi
+
+    return $RESULT 
+}
+
+
+#****f* cernvm-testcases/change_user_group
+# NAME
+#   change_user_group
+# DESCRIPTION
+#   CernVM Test Case - Change the group of the primary user
+# ARGUMENTS
+#   $1 - The IP address of the machine to login via ssh
+#   $2 - The username for the primary user
+#   $3 - The password for the primary user
+#   $4 - The new group for the primary user
+#   $5 - The name of the logfile
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   change_user_group 192.168.1.125 alice VM4l1f3 lhcb logfile.log
+#***
+change_user_group()
+{
+    RESULT=1
+
+    # Change the primary user group
+    web_create_user $1 $2 $3 $4 $5
+
+    # If successfully changed groups, reboot the system through web interface
+    if [ "$?" -eq 0 ]
+    then
+        # Reboot system
+        echo -e "\n\nREBOOTING SYSTEM THROUGH WEB INTERFACE\n\n" > $5
+        web_restart $1 $5
+
+        # If restarted successfully verify group changed
+        if [ "$?" -eq 0 ]
+        then
+            # Verify group changed
+            ssh -q -o "BatchMode=yes" root@$1 "su $2 -c 'id'" | grep -q -e "$4"
+            
+            if [ "$?" -eq 0 ]
+            then
+                RESULT=0
+            fi
+        fi
+    fi
+            
+    return $RESULT 
+}

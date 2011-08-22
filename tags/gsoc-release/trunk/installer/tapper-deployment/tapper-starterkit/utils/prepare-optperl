@@ -1,0 +1,37 @@
+#! /bin/bash
+
+set -x
+
+export TAPPERFROMGIT
+export GITPREFIXTAPPERLIBS
+export GITPREFIXTESTSUITES
+export PYTHONSTATICTWEAKS
+
+# for parallel builds
+export CPUCOUNT=`cat /proc/cpuinfo | grep vendor_id | wc -l`
+
+# Install Perl
+cd /tmp
+export PERLVERSION=5.12.3
+export PERLBREW_ROOT=/opt/tapper/perl
+mkdir -p $PERLBREW_ROOT
+curl -LO http://xrl.us/perlbrew
+chmod +x perlbrew
+./perlbrew install
+/opt/tapper/perl/bin/perlbrew init
+echo "if [ -e /opt/tapper/perl/etc/bashrc ] ; then . /opt/tapper/perl/etc/bashrc ; fi" >> $HOME/.bashrc
+. /opt/tapper/perl/etc/bashrc
+perlbrew install -j ${CPUCOUNT} perl-${PERLVERSION}
+perlbrew switch perl-${PERLVERSION}
+cd /opt/tapper/perl/perls ; ln -sf perl-${PERLVERSION} current
+
+# CPAN config
+cp /tmp/tapper-starterkit/misc/CPAN-Config.pm /opt/tapper/perl/perls/perl-${PERLVERSION}/lib/${PERLVERSION}/CPAN/Config.pm
+export TWMC_TEST_PORT=9876
+export PERL_AUTOINSTALL="--defaultdeps"
+export TEST_JOBS=${CPUCOUNT}
+export CPAN=/opt/tapper/perl/perls/current/bin/cpan
+echo "reload index" | $CPAN
+
+$CPAN LWP
+$CPAN Expect

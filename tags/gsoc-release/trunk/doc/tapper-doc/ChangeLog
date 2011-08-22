@@ -1,0 +1,29 @@
+2011-04-07  Steffen Schwigon  <steffen.schwigon@amd.com>
+
+	* v3.0.10
+
+	* new primary starterkit suggestion
+	* how to create a NFSroots for network boot
+	* YAPC::EU 2009 presentation about Tapper
+	  (though under a different name then)
+	* release version++ roundhouse kick
+
+2011-03-10 Steffen Schwigon <steffen.schwigon@amd.com>
+
+	* v3.0.4
+
+	* distro maintenance
+
+	* add section "Correlation to autotest.kernel.org"
+
+2011-03-02  Steffen Schwigon  <steffen.schwigon@amd.com>
+
+	* v3.0.1
+
+	* first public CPAN release
+
+	* FactSheet containing high level feature overview
+
+	* StepByStep installation guide, not perfect yet
+
+

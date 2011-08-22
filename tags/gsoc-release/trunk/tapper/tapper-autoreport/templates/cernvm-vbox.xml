@@ -1,0 +1,47 @@
+<domain type='vbox'>
+  <name>cernvm-vbox</name>
+  <uuid></uuid>
+  <memory>1048576</memory>
+  <currentMemory>1048576</currentMemory>
+  <vcpu>1</vcpu>
+  <os>
+    <type arch=''>hvm</type>
+    <boot dev='cdrom'/>
+    <boot dev='hd'/>
+  </os>
+  <features>
+    <acpi/>
+    <apic/>
+  </features>
+  <clock offset='localtime'/>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>destroy</on_reboot>
+  <on_crash>destroy</on_crash>
+  <devices>
+    <disk type='file' device='disk'>
+      <source file=''/>
+      <target dev='hda' bus='ide'/>
+    </disk>
+    <disk type='file' device='cdrom'>
+      <source file='/usr/share/virtualbox/VBoxGuestAdditions.iso'/>
+      <target dev='hdc' bus='ide'/>
+    </disk>
+    <interface type='user'>
+      <mac address='08:00:27:c3:2a:5c'/>
+      <model type='82540EM'/>
+    </interface>
+    <interface type='network'>
+      <mac address='08:00:27:47:75:0b'/>
+      <source network='vboxnet0'/>
+      <model type='82540EM'/>
+    </interface>
+    <input type='mouse' bus='ps2'/>
+    <graphics type='desktop' display=':0.0'/>
+    <video>
+      <model type='vbox' vram='65536' heads='1'>
+        <acceleration accel3d='no' accel2d='no'/>
+      </model>
+    </video>
+  </devices>
+</domain>
+

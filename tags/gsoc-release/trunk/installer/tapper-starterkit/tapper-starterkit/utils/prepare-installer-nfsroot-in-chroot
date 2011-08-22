@@ -1,0 +1,111 @@
+#! /bin/bash
+
+# for parallel builds
+export CPUCOUNT=`cat /proc/cpuinfo | grep vendor_id | wc -l`
+
+# deactivate network interfaces coming up in NFS root
+insserv -r ifupdown
+
+# deactivate udev
+insserv -r udev-mtab
+insserv -r udev
+
+# setup locales
+apt-get --yes --allow-unauthenticated install locales
+echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen
+/usr/sbin/locale-gen
+
+# prepare example files
+cd /tmp
+tar xzf tapper-starterkit.tgz
+
+# some utils
+apt-get --yes --allow-unauthenticated install pciutils
+apt-get --yes --allow-unauthenticated install patch
+apt-get --yes --allow-unauthenticated install makepatch
+apt-get --yes --allow-unauthenticated install curl
+apt-get --yes --allow-unauthenticated install make
+apt-get --yes --allow-unauthenticated install gcc
+apt-get --yes --allow-unauthenticated install less
+apt-get --yes --allow-unauthenticated install perl-modules
+apt-get --yes --allow-unauthenticated install openssh-server
+apt-get --yes --allow-unauthenticated install nfs-common
+# Bug with nfs-common
+/var/lib/dpkg/info/nfs-common.postinst
+apt-get --yes --allow-unauthenticated install grub-legacy
+
+# dependencies for Perl libs
+apt-get --yes --allow-unauthenticated install expect
+apt-get --yes --allow-unauthenticated install expect-dev
+apt-get --yes --allow-unauthenticated install libssl-dev
+apt-get --yes --allow-unauthenticated install libmysqlclient-dev
+apt-get --yes --allow-unauthenticated install libsqlite3-0
+apt-get --yes --allow-unauthenticated install sqlite3
+apt-get --yes --allow-unauthenticated install libxml2
+apt-get --yes --allow-unauthenticated install libxml2-dev
+apt-get --yes --allow-unauthenticated install libexpat1
+apt-get --yes --allow-unauthenticated install libexpat1-dev
+
+# set default password
+echo "root:tapper" | chpasswd
+
+# Install Perl
+cd /tmp
+export PERLVERSION=5.12.3
+export PERLBREW_ROOT=/opt/tapper/perl
+mkdir -p $PERLBREW_ROOT
+curl -k -LO http://xrl.us/perlbrew
+chmod +x perlbrew
+./perlbrew install
+/opt/tapper/perl/bin/perlbrew init
+echo ". /opt/tapper/perl/etc/bashrc" >> $HOME/.bashrc
+. /opt/tapper/perl/etc/bashrc
+perlbrew install -j ${CPUCOUNT} perl-${PERLVERSION}
+perlbrew switch perl-${PERLVERSION}
+cd /opt/tapper/perl/perls ; ln -sf perl-${PERLVERSION} current
+
+# CPAN config
+echo cp /tmp/tapper-starterkit/misc/CPAN-Config.pm /opt/tapper/perl/perls/perl-${PERLVERSION}/lib/${PERLVERSION}/CPAN/Config.pm
+cp /tmp/tapper-starterkit/misc/CPAN-Config.pm /opt/tapper/perl/perls/perl-${PERLVERSION}/lib/${PERLVERSION}/CPAN/Config.pm
+export TWMC_TEST_PORT=9876
+export PERL_AUTOINSTALL="--defaultdeps"
+export TEST_JOBS=${CPUCOUNT}
+export CPAN=/opt/tapper/perl/perls/current/bin/cpan
+echo "reload index" | $CPAN
+$CPAN LWP
+$CPAN Expect
+
+# the actual Tapper::Installer
+$CPAN Tapper::Installer
+cp /tmp/tapper-starterkit/etc/init.d/tapper /etc/init.d/tapper
+chmod +x /etc/init.d/tapper
+insserv tapper
+
+# create the required files and directories
+
+mkdir -p /mnt/target/
+mkdir -p /mnt/guests
+mkdir -p /data/tapper
+
+# Since /etc/ is not writable on a readonly NFS we need to
+# symlink some files into tmpfs
+ln -sf /tmp/tapper  /etc/tapper
+ln -sf /tmp/adjtime /etc/adjtime
+
+# Link mtab to proc.
+# The content is the same and we can not write to mtab on a readonly NFS.
+ln -sf /proc/mounts /etc/mtab
+
+# copy basic Log4Perl config
+cp /tmp/tapper-starterkit/etc/log4perl.cfg /etc/log4perl.cfg
+
+# don't set a hostname to trigger getting it dynamically on boot
+rm /etc/hostname
+
+# create devices
+cp /tmp/tapper-starterkit/misc/MAKEDEV /dev/MAKEDEV
+chmod +x /dev/MAKEDEV
+cd /dev
+./MAKEDEV generic
+
+

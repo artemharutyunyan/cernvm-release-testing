@@ -1,0 +1,17 @@
+#!/bin/bash
+
+### BEGIN INIT INFO
+# Provides:          TAPPER_INSTALLER
+# Required-Start:    $syslog $remote_fs $all
+# Should-Start: $time ypbind smtp
+# Required-Stop:     $syslog $remote_fs
+# Should-Stop: $time ypbind smtp
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: TAPPER_INSTALLER Tapper installer reports receiving
+# Description:       Start TAPPER_INSTALLER to setup machine
+### END INIT INFO
+
+if ( test "$1" = 'start' ); then
+    /opt/tapper/perl/perls/current/bin/tapper-installer-client.pl $*
+fi

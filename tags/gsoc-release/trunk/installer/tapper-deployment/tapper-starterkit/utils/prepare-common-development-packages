@@ -1,0 +1,39 @@
+#! /bin/bash
+
+set -x
+
+export TAPPERFROMGIT
+export GITPREFIXTAPPERLIBS
+export GITPREFIXTESTSUITES
+export PYTHONSTATICTWEAKS
+
+apt-get --yes --allow-unauthenticated install patch
+apt-get --yes --allow-unauthenticated install makepatch
+apt-get --yes --allow-unauthenticated install curl
+apt-get --yes --allow-unauthenticated install make
+apt-get --yes --allow-unauthenticated install gcc
+apt-get --yes --allow-unauthenticated install less
+apt-get --yes --allow-unauthenticated install rsync
+apt-get --yes --allow-unauthenticated install python
+apt-get --yes --allow-unauthenticated install perl-modules
+apt-get --yes --allow-unauthenticated install openssh-server
+apt-get --yes --allow-unauthenticated install nfs-common
+apt-get --yes --allow-unauthenticated install lshw
+apt-get --yes --allow-unauthenticated install grub-legacy
+apt-get --yes --allow-unauthenticated install initramfs-tools
+apt-get --yes --allow-unauthenticated install git
+# Bug with nfs-common
+/var/lib/dpkg/info/nfs-common.postinst
+apt-get --yes --allow-unauthenticated install grub-legacy
+
+# dependencies for Perl libs
+apt-get --yes --allow-unauthenticated install expect
+apt-get --yes --allow-unauthenticated install expect-dev
+apt-get --yes --allow-unauthenticated install libssl-dev
+apt-get --yes --allow-unauthenticated install libmysqlclient-dev
+apt-get --yes --allow-unauthenticated install libsqlite3-0
+apt-get --yes --allow-unauthenticated install sqlite3
+apt-get --yes --allow-unauthenticated install libxml2
+apt-get --yes --allow-unauthenticated install libxml2-dev
+apt-get --yes --allow-unauthenticated install libexpat1
+apt-get --yes --allow-unauthenticated install libexpat1-dev

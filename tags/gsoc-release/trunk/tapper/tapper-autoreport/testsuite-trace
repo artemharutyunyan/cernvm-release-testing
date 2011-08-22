@@ -1,0 +1,471 @@
+#! /bin/bash
+
+# =============================================================================
+#
+#****** test-suite/testsuite-trace
+# NAME
+#   testsuite-trace
+#
+# DESCRIPTION
+#   This script contains several trace and debugging functions that
+#   provide an easy and effective way to log the execution of CernVM
+#   test cases, precondition tests, and any other function which
+#   enables trace and debugging support.
+#
+#   These functions are well suited for debugging precondition tests
+#   and CernVM test cases, to enable debugging of a function simply
+#   call the function using "call", to enable more verbose debugging
+#   set the trace verbosity level.
+#***
+#
+# =============================================================================
+
+
+DEPTH=0
+INDEX=0
+export TRACE_OUTPUT=("")
+export TRACE_TEMPLATE=("")
+# Each tab character for indentation is 4 spaces
+export TAB_SPACE='    '
+
+
+#****f* testsuite-trace/generate_trace_template
+# NAME
+#   generate_trace_template
+# DESCRIPTION
+#   Generate a template for the trace log file output
+# ARGUMENTS
+#   $1 - The name of the function currently being traced
+#   $@ - The arguments to the function that is being called
+# RESULT
+#   TRACE_TEMPLATE - Generates a trace template for current function
+# EXAMPLE
+#   generate_trace_template create_net ./network-definition.xml default
+#***
+generate_trace_template()
+{
+    local ARG_LIST=( "$@" )
+    local TAB_DEPTH=""
+    
+    # Specify the depth to tab in the current function in trace logfile
+    if [ "$DEPTH" -gt 0 ]
+    then
+        for i in $(eval echo {0..$((${DEPTH} - 1))})
+        do
+            TAB_DEPTH=${TAB_DEPTH}${TAB_SPACE}  
+        done
+    fi
+
+    # Create initial function call identifier
+    TRACE_TEMPLATE=("${TAB_DEPTH}->${1}")
+
+    # Create indented STATUS and ARGUMENTS headings
+    TRACE_TEMPLATE=("${TRACE_TEMPLATE[@]}" "${TAB_DEPTH}${TAB_SPACE}STATUS")
+    TRACE_TEMPLATE=("${TRACE_TEMPLATE[@]}" "")
+    TRACE_TEMPLATE=("${TRACE_TEMPLATE[@]}" "${TAB_DEPTH}${TAB_SPACE}ARGUMENTS")
+
+    for i in $(eval echo {1..$((${#ARG_LIST[@]} - 1))})
+    do
+        TRACE_TEMPLATE=("${TRACE_TEMPLATE[@]}" "${TAB_DEPTH}${TAB_SPACE}${TAB_SPACE}${ARG_LIST[i]}")
+    done
+
+    # Create indented RETURN VALUE and RESULT headings
+    TRACE_TEMPLATE=("${TRACE_TEMPLATE[@]}" "${TAB_DEPTH}${TAB_SPACE}RETURN VALUE")
+    TRACE_TEMPLATE=("${TRACE_TEMPLATE[@]}" "")
+    TRACE_TEMPLATE=("${TRACE_TEMPLATE[@]}" "${TAB_DEPTH}${TAB_SPACE}RESULT")
+    TRACE_TEMPLATE=("${TRACE_TEMPLATE[@]}" "")
+
+    for i in $(eval echo {0..$((${#TRACE_TEMPLATE[@]} - 1))})
+    do
+        echo -e ${TRACE_TEMPLATE[i]} >> logfile.log
+    done
+}
+
+
+#****f* testsuite-trace/add_trace_template
+# NAME
+#   add_trace_template
+# DESCRIPTION
+#   Adds the contents of the global TRACE_TEMPLATE to TRACE_OUTPUT, this allows the
+#   TRACE_TEMPLATE file to be dynamically re-generated if "call" is used recursively
+# RESULT
+#   TRACE_OUTPUT - Adds the contents of TRACE_TEMPLATE to the TRACE_OUTPUT global variable
+#   INDEX        - Sets the global variable INDEX as the next index element of TRACE_OUTPUT
+# EXAMPLE
+#   add_trace_template
+#***
+add_trace_template()
+{
+    # Add the function name heading first 
+    TRACE_OUTPUT[$INDEX]="${TRACE_TEMPLATE[0]}"
+
+    # Add the remaining contents of trace template to output
+    for i in $(eval echo {1..$((${#TRACE_TEMPLATE[@]} - 1))})
+    do
+        TRACE_OUTPUT=("${TRACE_OUTPUT[@]}" "${TRACE_TEMPLATE[i]}")
+    done
+
+    for i in $(eval echo {0..$((${#TRACE_OUTPUT[@]} - 1))})
+    do
+        echo -e ${TRACE_OUTPUT[i]} >> logfile2.log
+    done
+
+    # Update the index as the next available index element of TRACE_OUTPUT
+    export INDEX="${#TRACE_OUTPUT[@]}"
+
+    # Increment the DEPTH so that the next trace template for the current function
+    # being traced is indented further
+    export DEPTH=$((${DEPTH} + 1))
+}
+
+
+#****f* testsuite-trace/add_trace_output
+# NAME
+#   add_trace_output
+# DESCRIPTION
+#   Adds the data specified to the trace output, which will be logged to file
+# ARGUMENTS
+#   $@ - The data to add to the trace output
+# RESULT
+#   TRACE_OUTPUT - Adds the data speficied to TRACE_OUTPUT global variable
+#   INDEX        - Sets the global variable index as the next index element of TRACE_OUTPUT
+# EXAMPLE
+#   add_trace_output "${TRACE_TEMPLATE[@]}"
+#***
+add_trace_output()
+{
+    local DATA_LIST=( "$@" )
+    
+    for i in $(eval echo {0..$((${#DATA_LIST[@]} - 1))})
+    do
+        TRACE_OUTPUT=("${TRACE_OUTPUT[@]}" "${DATA_LIST[i]}")
+    done
+
+    for i in $(eval echo {0..$((${#TRACE_OUTPUT[@]} - 1))})
+    do
+        echo -e ${TRACE_OUTPUT[i]} >> logfile2.log
+    done
+
+    # Update the index as the next available index element of TRACE_OUTPUT
+    export INDEX="${#TRACE_OUTPUT[@]}"
+}
+
+
+#****f* testsuite-trace/add_trace_results
+# NAME
+#   add_trace_results
+# DESCRIPTION
+#   Adds the results from a traced function call back to the TRACE_OUTPUT heading for the function 
+# ARGUMENTS
+#   $1 - The RETURN VALUE from the function called
+#   $2 - The RESULT from the function called
+#   $3 - The index of the heading in TRACE_OUTPUT for the function called
+#   $4 - The length of the heading for the function called 
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   add_trace_results $FUNCTION_RETURN_VALUE $FUNCTION_RESULT 0 12
+#***
+add_trace_results()
+{
+    local TAB_DEPTH=""
+    local HEADING_INDEX="$3"
+    local HEADING_LENGTH="$4"
+
+    # Since the function traced has exited decrease the DEPTH to indent the results
+    export DEPTH=$((${DEPTH} - 1))
+
+    # Specify the depth to tab in for the current function, add exra indentation 
+    for i in $(eval echo {0..$((${DEPTH} + 1))})
+    do
+        TAB_DEPTH=${TAB_DEPTH}${TAB_SPACE}  
+    done
+
+    # Set the STATUS heading for the function called
+    if [ "$2" -eq 0 ]
+    then
+        TRACE_OUTPUT[$((${HEADING_INDEX} + 2))]="${TAB_DEPTH}SUCCESS"
+    else
+        TRACE_OUTPUT[$((${HEADING_INDEX} + 2))]="${TAB_DEPTH}FAILURE"
+    fi 
+         
+    # Set the RETURN VALUE heading for function called if it is defined
+    if [ -n "$1" ]
+    then
+        # Set the return value at OUTPUT_RESULT index based on length of heading
+        TRACE_OUTPUT[$[${HEADING_INDEX} + ${HEADING_LENGTH} - 3]]="${TAB_DEPTH}${1}"
+    else
+        # Delete the RETURN VALUE heading since the function called has no return value
+        #echo "deleting values"
+        unset TRACE_OUTPUT[$[${HEADING_INDEX} + ${HEADING_LENGTH} - 3]]
+        unset TRACE_OUTPUT[$[${HEADING_INDEX} + ${HEADING_LENGTH} - 4]]
+    fi
+
+    # Set the RESULT heading for the function called
+    TRACE_OUTPUT[$[${HEADING_INDEX} + ${HEADING_LENGTH} - 1]]="${TAB_DEPTH}${2}"
+}
+
+
+#****f* testsuite-trace/add_trace_close
+# NAME
+#   add_trace_close
+# DESCRIPTION
+#   Adds the closing marker for the trace of the function call
+# ARGUMENTS
+#   $1 - The name of the function that was called
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   add_trace_close connect_virsh
+#***
+add_trace_close()
+{
+    local TAB_DEPTH=""
+    
+    # Specify the depth to tab in the current function close in trace logfile
+    if [ "$DEPTH" -gt 0 ]
+    then
+        for i in $(eval echo {0..$((${DEPTH} - 1))})
+        do
+            TAB_DEPTH=${TAB_DEPTH}${TAB_SPACE}
+        done
+    fi
+
+    # Create function call closure identifier
+    TRACE_OUTPUT=("${TRACE_OUTPUT[@]}" "${TAB_DEPTH}<-${1}")
+}
+
+
+#****f* testsuite-trace/log_trace_output
+# NAME
+#   log_trace_output
+# DESCRIPTION
+#   Logs the trace output to the file specified
+# ARGUMENTS
+#   $1 - The name of the logfile to store the trace output
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   log_trace_output $TRACE_LOGFILE
+#***
+log_trace_output()
+{
+    # Log the data stored in TRACE_OUTPUT to file
+    for i in $(eval echo {0..$((${#TRACE_OUTPUT[@]} - 1))})
+    do
+        echo -e "${TRACE_OUTPUT[i]}" >> $1
+    done
+}
+
+
+#****f* testsuite-trace/create_trace_log
+# NAME
+#   create_trace_log
+# DESCRIPTION
+#   Creates a new trace log file with a title, the date, and basic info
+# ARGUMENTS
+#   $1 - The name of the trace log file to create
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   create_trace_log cernvm-trace.log
+#***
+create_trace_log()
+{
+    CURRENT_DATE=$(date)
+
+    # Create the trace log file
+    echo -e "Trace Log File - ${CURRENT_DATE}" > $1
+}
+
+
+#****f* testsuite-trace/success_msg
+# NAME
+#   success_msg
+# DESCRIPTION
+#   Message to report in the trace log file if a function executes successfully
+# ARGUMENTS
+#   $1 - The success message to report
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   success_msg "The function executed successfully"
+#***
+success_msg()
+{
+    return 0
+}
+
+
+#****f* testsuite-trace/error_msg
+# NAME
+#   error_msg
+# DESCRIPTION
+#   Message to report in the trace log file if a function has an error
+# ARGUMENTS
+#   $1 - The error message to report
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   error_msg "The function had an unknown error"
+#***
+error_msg()
+{
+    return 0
+}
+
+
+#****f* testsuite-trace/generic_msg
+# NAME
+#   generic_msg
+# DESCRIPTION
+#   A generic message to report in the trace log file
+# ARGUMENTS
+#   $1 - A generic message to report
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   generic_msg "Waiting for the CernVM image to start"
+#***
+generic_msg()
+{
+    return
+}
+
+
+#****f* testsuite-trace/call
+# NAME
+#   call
+# DESCRIPTION
+#   The core of the trace functionality, to register the function with trace
+#   and enable debug and logging support prefix the name of the function and
+#   its arguments with the trace function "call". This executes the function
+#   in the trace debugging environment and logs the results based on the 
+#   trace verbosity level specified, the trace function "call" is transparent
+#   and returns the same exitstatus and return values as the function called.
+# ARGUMENTS
+#   $1 - The name of the function to call with trace/debugging support
+#   $@ - The arguments to the function that is being called
+# RETURN VALUE
+#   value - The value returned by the function called if applicable
+# RESULT
+#   exitstatus - Sets the exitstatus as what is returned by the function
+#                called, $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   call download_extract http://cern.ch/cernvm-img.tar.gz /usr/share/image logfile.log
+#***
+call()
+{
+    # Variables specific to the function to trace
+    local FUNCTION_NAME="$1"
+    local FUNCTION_CALL="$@"
+    local FUNCTION_RETURN_VALUE=""
+    local FUNCTION_RESULT=""
+
+    # Scope and trace logfile formatting
+    local CURRENT_DEPTH=$DEPTH
+    local CURRENT_INDEX=$INDEX
+    local TEMPLATE_LENGTH=0
+    local OUTPUT_TEMP=("")
+    export TRACE_TEMPLATE=("")
+   
+
+    # Verify that the trace log file exists
+    if file_exists $TRACE_LOGFILE ; test "$?" -eq 1 \
+    && test "$TRACE_VERBOSITY" -gt 0
+    then
+        echo -e "ERROR: The trace log file does not exist" 1>&2
+        exit 1
+    fi
+
+    # Generate the detailed trace output for verbosity level 3 logging
+    if [ "$TRACE_VERBOSITY" -eq 3 ]
+    then
+        if [ "$CURRENT_DEPTH" -eq 0 ]
+        then
+            # Generate a blank trace output array
+            export TRACE_OUTPUT=("")
+        else    
+            # Export the contents of TRACE_OUTPUT from previous recursive
+            # function to make it available to subshells
+            export TRACE_OUTPUT=("${TRACE_OUTPUT[@]}")
+        fi
+        
+
+        # Generate a template for trace log file
+        generate_trace_template $FUNCTION_CALL
+
+        # Determine the lenght of the trace template heading
+        TEMPLATE_LENGTH="${#TRACE_TEMPLATE[@]}"
+
+        # Add the trace template contents to the trace output array
+        add_trace_template
+
+        # Now, call the function provided transparently and store the exitstatus
+        # and return values from the function call
+        FUNCTION_RETURN_VALUE=($(${FUNCTION_CALL}))
+        FUNCTION_RESULT="$?"
+      
+        # Source the contents of the previous subshell
+        if [ -e trace_output ]
+        then
+            . ./trace_output
+        fi
+
+        # Add the results from the function call to the trace output
+        add_trace_results "${FUNCTION_RETURN_VALUE}" $FUNCTION_RESULT \
+                          $CURRENT_INDEX $TEMPLATE_LENGTH
+
+        # use this for adding msg? and adding the closing <-
+        add_trace_close ${FUNCTION_NAME}
+
+        # Output the contents of the current TRACE_OUTPUT so that parent
+        # shell can source it, this is due to scope issues with bash and subshells
+        OUTPUT_TEMP[0]="\"${TRACE_OUTPUT[0]}\""
+        for i in $(eval echo {1..$((${#TRACE_OUTPUT[@]} - 1))})
+        do
+            OUTPUT_TEMP=("${OUTPUT_TEMP[@]}" "\"${TRACE_OUTPUT[i]}\"")
+        done
+
+        echo -e "export TRACE_OUTPUT=(""${OUTPUT_TEMP[@]}"")" > trace_output
+
+        # Output the current DEPTH as PREVIOUS_DEPTH so that the relative
+        # scope and depth can be easily determined by future functions called
+        echo -e "export PREVIOUS_DEPTH=${CURRENT_DEPTH}" >> trace_output
+
+        # Output the INDEX as PREVIOUS_INDEX so that the relative index for 
+        # creating TRACE_OUTPUT can be easily determined by future functions called
+        echo -e "export PREVIOUS_INDEX=${INDEX}" >> trace_output
+        
+        cat trace_output >> backup
+
+        # Output the contents of TRACE_OUTPUT to the logfile for the initial function
+        # traced, TRACE_OUTPUT also includes nested results of recusively traced functions
+        if [ "${CURRENT_DEPTH}" -eq 0 ]
+        then
+            log_trace_output $TRACE_LOGFILE
+
+            # Reset the INDEX and DEPTH
+            export INDEX=0
+            export DEPTH=0
+
+            # Reset the TRACE_OUTPUT variables and source file
+            export TRACE_OUTPUT=("")
+            rm -f trace_output
+        
+        # If the current depth is the same as the previous depth update
+        # the index for the current depth as the previous INDEX
+        elif [ "${CURRENT_DEPTH}" == "${PREVIOUS_DEPTH}" ]
+        then
+            # Update the INDEX as the previous INDEX
+            export INDEX="${PREVIOUS_INDEX}"
+        fi
+    fi
+
+
+    # Return the same RETURN VALUES and STATUS as the traced function called,
+    # which makes the tracing of the function executed by "call" transparent
+    echo "${FUNCTION_RETURN_VALUE}"
+    return $FUNCTION_RESULT
+    
+}
