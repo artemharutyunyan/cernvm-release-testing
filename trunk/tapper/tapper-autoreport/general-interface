@@ -423,6 +423,48 @@ get_ip_address()
 }
 
 
+#****f* general-interface/ssh_generate_key
+# NAME
+#   ssh_generate_key
+# DESCRIPTION
+#   A function which generates an SSH public key
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   ssh_generate_key
+#***
+ssh_generate_key()
+{
+    # Use a here-doc to script expect to automate key generation
+    /usr/bin/expect <<EOF
+    match_max 100000
+    set prompt "*?\$"
+
+    spawn ssh-keygen
+    # Look for connection prompt
+    expect {
+        "*\):*" {
+        send_user "accepting default key location\r"
+        send "\r"
+        exp_continue
+        }
+        "*?assphrase\):*" {
+        # Leave empty passphrase
+        send_user "using an empty passphrase\r"
+        send "\r"
+        exp_continue    
+        }
+        "*again:*" {
+        send "\r"
+        exp_continue    
+        }
+    }
+EOF
+
+    return $?
+}
+
+
 #****f* general-interface/ssh_autologin
 # NAME
 #   ssh_autologin

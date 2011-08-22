@@ -142,6 +142,9 @@ verify_autologin_ssh()
     # Remove known_hosts file to avoid host key mismatch message
     rm -f ~/.ssh/known_hosts
 
+    # Generate a public SSH key, this is required to enable automatic login
+    ssh_generate_key
+
     # Configure account specifed to automatically login through SSH'
     if ssh_autologin $1 $2 $3 ; test "$?" -eq 0
     then

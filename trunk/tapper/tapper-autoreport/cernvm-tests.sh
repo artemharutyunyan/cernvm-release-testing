@@ -359,7 +359,7 @@ network XML definition file have been provided and are valid"
 
 # Set the network name, for VMware it is only a pseudo network name
 # because libvirt/virsh does not support VMware networking currently
-NET_NAME=$(get_net_name ${NET_XML_DEFINITION})
+NET_NAME=$(get_net_name $HYPERVISOR ${NET_XML_DEFINITION})
 
 
 # Precondition Test 11 - Verify that the virtual machine network has been created 
