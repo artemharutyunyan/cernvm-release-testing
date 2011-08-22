@@ -232,12 +232,26 @@ start_vm()
 #***
 stop_vm()
 {
+    RESULT=1
+
     virsh --connect $URI shutdown $1
+    RESULT=$?
+    
     # Wait 2 minutes for virtual machine to turn off
     sleep 120
-    virsh --connect $URI list --all | egrep -q "^[[:space:]]*-[[:space:]]*$1[[:space:]]*shut[[:space:]]off"
 
-    return $?
+    # If URI is VMware do not check for virtual machine in list
+    # as it does not appear in the list of virtual machines unless running
+    if [ "$URI" == "vmwarews:///session" ]
+    then
+        return $RESULT
+    else
+        virsh --connect $URI list --all | egrep -q "^[[:space:]]*-[[:space:]]*$1[[:space:]]*shut[[:space:]]off"
+        # If either returned a failure, set RESULT as error code
+        RESULT=$((${RESULT} | $?))
+    fi
+    
+    return $RESULT
 }
 
 
