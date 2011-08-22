@@ -367,4 +367,21 @@ test cases.
 				through the web interface as part of a \cernvmreleasetesting test case
 		\item[-]	The password specified {\bf must be six characters or longer}
 		\end{itemize}
+		
+\item {\bf CVM\_TC\_EXPERIMENT\_GROUP}
+		\begin{itemize}
+		\item[-]	Overrides the default primary experiment group, ``LHCB'', to migrate to 
+						as part of a \cernvmreleasetesting test case
+		\item[-]	The valid values are one of following group names, {\bf the group name
+				specified must be in UPPERCASE}: ALICE, ATLAS, CMS, LHCB, LCD, NA61, HONE,
+				HEPSOFT, BOSS, GEANT4
+		\end{itemize}
+		
+\item {\bf CVM\_TC\_USER\_GROUP}
+		\begin{itemize}
+		\item[-]	Overrides the default group ``lhcb'' to change to for the primary 
+						user as part of a \cernvmreleasetesting test case
+		\item[-]	The group specified must be a valid group available
+				through the web interface, such as ``lhcb''
+		\end{itemize}
 \end{description}
