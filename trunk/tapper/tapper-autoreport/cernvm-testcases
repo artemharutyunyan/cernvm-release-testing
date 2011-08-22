@@ -387,3 +387,50 @@ migrate_experiment()
 
     return $RESULT 
 }
+
+
+#****f* cernvm-testcases/change_user_group
+# NAME
+#   change_user_group
+# DESCRIPTION
+#   CernVM Test Case - Change the group of the primary user
+# ARGUMENTS
+#   $1 - The IP address of the machine to login via ssh
+#   $2 - The username for the primary user
+#   $3 - The password for the primary user
+#   $4 - The new group for the primary user
+#   $5 - The name of the logfile
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   change_user_group 192.168.1.125 alice VM4l1f3 lhcb logfile.log
+#***
+change_user_group()
+{
+    RESULT=1
+
+    # Change the primary user group
+    web_create_user $1 $2 $3 $4 $5
+
+    # If successfully changed groups, reboot the system through web interface
+    if [ "$?" -eq 0 ]
+    then
+        # Reboot system
+        echo -e "\n\nREBOOTING SYSTEM THROUGH WEB INTERFACE\n\n" > $5
+        web_restart $1 $5
+
+        # If restarted successfully verify group changed
+        if [ "$?" -eq 0 ]
+        then
+            # Verify group changed
+            ssh -q -o "BatchMode=yes" root@$1 "su $2 -c 'id'" | grep -q -e "$4"
+            
+            if [ "$?" -eq 0 ]
+            then
+                RESULT=0
+            fi
+        fi
+    fi
+            
+    return $RESULT 
+}
