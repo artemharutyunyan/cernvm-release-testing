@@ -126,9 +126,9 @@ check_time()
 #   CernVM Test Case - Restart through the web interface and check that there
 #                      are no error messages at boot
 # ARGUMENTS
-#    $1 - The hostname or ip address for the web interface
-#    $2 - The name of the web reboot logfile
-#    $3 - The name of the boot error logfile
+#   $1 - The hostname or ip address for the web interface
+#   $2 - The name of the web reboot logfile
+#   $3 - The name of the boot error logfile
 # RESULT
 #   exitstatus - Sets $? as a zero for success, otherwise sets an error code
 # EXAMPLE
@@ -145,7 +145,7 @@ check_web_restart()
     if [ "$?" -eq 0 ]
     then
         # Wait for system to start, check for boot error
-        sleep 120
+        sleep 300
         check_boot_error $1 $3
         
         # No boot errors, return success
@@ -156,4 +156,69 @@ check_web_restart()
     fi
 
     return $RESULT
+}
+
+
+#****f* cernvm-testcases/check_no_network
+# NAME
+#   check_no_network
+# DESCRIPTION
+#   CernVM Test Case - Shutdown the system and disconnect the network, then start
+#                      the image, it should take longer to boot but the system
+#                      should not hang on startup
+# ARGUMENTS
+#   $1 - The IP address of the machine to login via ssh
+#   $2 - The name of the virtual machine
+#   $3 - The virtual machine network name
+#   $4 - The path to the virtual machine definition file
+#   $5 - The path to the network definition file
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   check_no_network 192.168.1.125 vm-name network-name ./vm-def.xml ./network-def.xml
+#***
+check_no_network()
+{
+    RESULT=1
+    
+    # First shutdown the virtual machine
+    if stop_vm $2 ; test "$?" -eq 0
+    then
+        # Disconnect network, have to destroy the virtual machine network
+        if [ "$HYPERVISOR" != "vmware" ]
+        then
+            destroy_vm_net $3
+
+        # For VMware have to disable the network interface 
+        else
+            disable_network_if $3
+        fi
+
+        # If the network was disabled start the virtual machine
+        if [ "$?" -eq 0 ]
+        then
+            # Verify the virtual machine started
+            if start_vm $4 $2 ; test "$?" -eq 0
+            then
+                # Start the network
+                if [ "$HYPERVISOR" != "vmware" ]
+                then
+                    create_vm_net $5 $3
+
+                # For VMware have to enable the network interface 
+                else
+                    enable_network_if $3
+                fi
+
+                # If network started verify SSH access to check that
+                # virtual machine has not hung on startup and has network access
+                if test "$?" -eq 0 && verify_ssh_login $1 root ; test "$?" -eq 0
+                then
+                    RESULT=0
+                fi
+            fi
+        fi
+    fi
+
+    return $RESULT            
 }

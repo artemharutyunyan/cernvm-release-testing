@@ -86,6 +86,46 @@ extract_file()
 }
 
 
+#****f* general-interface/enable_network_if
+# NAME
+#   enable_network_if
+# DESCRIPTION
+#   Simple function which enables a network interface
+# ARGUMENTS
+#   $1 - The name of the network interface
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   enable_network_if eth0
+#***
+enable_network_if()
+{
+    # Enable the network interface
+    ifconfig $1 up
+    return $?
+}
+
+
+#****f* general-interface/disable_network_if
+# NAME
+#   disable_network_if
+# DESCRIPTION
+#   Simple function which disables a network interface
+# ARGUMENTS
+#   $1 - The name of the network interface
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   disable_network_if eth0
+#***
+disable_network_if()
+{
+    # Enable the network interface
+    ifconfig $1 down
+    return $?
+}
+
+
 #****f* general-interface/get_os_name
 # NAME
 #   get_os_name
