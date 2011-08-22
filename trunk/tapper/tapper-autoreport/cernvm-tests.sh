@@ -98,21 +98,43 @@
 # including an API reference for each test case
 #
 #
-#   CernVM Test Case 1 - Check login via ssh as user created through web interface
+#   CernVM Test Case 1  - Check login via ssh as user created through web interface
 #
-#   CernVM Test Case 2 - Check login via ssh as root
+#   CernVM Test Case 2  - Check login via ssh as root
 #
-#   CernVM Test Case 3 - No error messages at boot
+#   CernVM Test Case 3  - No error messages at boot
 #
-#   CernVM Test Case 4 - Check for correct time / running ntpd
+#   CernVM Test Case 4  - Check for correct time / running ntpd
 #
-#   CernVM Test Case 5 - Create a new user using the CernVM web interface
+#   CernVM Test Case 5  - Create a new user using the CernVM web interface
 #
-#   CernVM Test Case 6 - Verify that the user is created and can be accessed
-#                        from ssh login
+#   CernVM Test Case 6  - Verify that the user is created and can be accessed
+#                         from ssh login
 #
-#   CernVM Test Case 7 - Restart through the web interface and check that there
-#                        are no error messages at boot
+#   CernVM Test Case 7  - Restart through the web interface and check that there
+#                         are no error messages at boot
+#
+#   CernVM Test Case 8  - Shutdown the system and disconnect the network, then start
+#                         the image, it should take longer to boot but the system
+#                         should not hang on startup
+#
+#   CernVM Test Case 9  - Check that cernvmfs automount scripts works correctly
+#                         and is able to mount any experiment group to /cvmfs/
+#
+#   CernVM Test Case 10 - Check the cvmfs cache list, verify that the cache list is 
+#                         available after restarting the cvmfs daemon
+#
+#   CernVM Test Case 11 - Migrate to another experiment such as LHCB using the web
+#                         interface and make sure the relative tests are loaded 
+#
+#   CernVM Test Case 12 - Check that cernvmfs automount scripts works correctly
+#                         and is able to mount the new experiment group to /cvmfs/
+#
+#   CernVM Test Case 13 - Check the cvmfs cache list for the new experiment group,
+#                         verify that the cache list is available after restarting
+#                         the cvmfs daemon 
+#
+#   CernVM Test Case 14 - Change the group of the primary user
 #
 # =============================================================================
 
@@ -223,6 +245,12 @@ EXPERIMENT_GROUP="${CVM_WEB_EXPERIMENT_GROUP:-ALICE}" # Group name, should be al
 ######### Optional Test Case Settings ##########
 USER_NAME2="${CVM_TC_USER_NAME:-bob}"   # Best to leave as default as it does affect testing
 USER_PASS2="${CVM_TC_USER_PASS:-R00tM3}" # Best to leave as default as it does affect testing
+
+# CernVM image primary group to migrate to for test case
+EXPERIMENT_GROUP2="${CVM_TC_EXPERIMENT_GROUP:-LHCB}" # Group name, should be all capitals
+
+# New group for primary user to change to
+USER_GROUP2="${CVM_TC_USER_GROUP:-lhcb}"
 
 ###
 ###
@@ -507,6 +535,59 @@ ok $? "CernVM Test Case 7 - Restart through the web interface and check that \
 there are no error messages at boot"
 add_file web_interface_reboot.log
 add_file web_restart_boot.log
+
+
+#   CernVM Test Case 8  - Shutdown the system and disconnect the network, then start
+#                         the image, it should take longer to boot but the system
+#                         should not hang on startup
+check_no_network ${IP_ADDRESS} $NAME ${NET_NAME} ${VM_XML_DEFINITION} ${NET_XML_DEFINITION}
+ok $? "CernVM Test Case 8 - Shutdown the system and disconnect the network, then start the \
+the image, it should take longer to boot but the system should not hang on startup"
+
+
+#   CernVM Test Case 9  - Check that cernvmfs automount scripts works correctly
+#                         and is able to mount any experiment group to /cvmfs/
+check_cvmfs_automount ${IP_ADDRESS} $EXPERIMENT_GROUP
+ok $? "CernVM Test Case 9 - Check that cernvmfs automount scripts works correctly and is \
+able to mount any experiment group to /cvmfs/"
+
+
+#   CernVM Test Case 10 - Check the cvmfs cache list, verify that the cache list is 
+#                         available after restarting the cvmfs daemon
+check_cvmfs_cache ${IP_ADDRESS} cvmfs_cache.log
+ok $? "CernVM Test Case 10 - Check the cvmfs cache list, verify that the cache list is \
+available after restarting the cvmfs daemon"
+add_file cvmfs_cache.log
+
+
+#   CernVM Test Case 11 - Migrate to another experiment such as LHCB using the web
+#                         interface and make sure the relative tests are loaded 
+migrate_experiment ${IP_ADDRESS} $EXPERIMENT_GROUP2 migrate_experiment.log
+ok $? "CernVM Test Case 11 - Migrate to another experiment such as LHCB using the web \
+interface and make sure the relative tests are loaded"
+add_file migrate_experiment.log
+
+
+#   CernVM Test Case 12 - Check that cernvmfs automount scripts works correctly
+#                         and is able to mount the new experiment group to /cvmfs/
+check_cvmfs_automount ${IP_ADDRESS} $EXPERIMENT_GROUP2
+ok $? "CernVM Test Case 12 - Check that cernvmfs automount scripts works correctly and \
+is able to mount the new experiment group to /cvmfs/"
+
+
+#   CernVM Test Case 13 - Check the cvmfs cache list for the new experiment group,
+#                         verify that the cache list is available after restarting
+#                         the cvmfs daemon 
+check_cvmfs_cache ${IP_ADDRESS} cvmfs_cache_new_group.log
+ok $? "CernVM Test Case 13 - Check the cvmfs cache list for the new experiment group, \
+verify that the cache list is available after restarting the cvmfs daemon" 
+add_file cvmfs_cache_new_group.log
+
+
+#   CernVM Test Case 14 - Change the group of the primary user
+change_user_group $USER_NAME $USER_PASS $USER_GROUP2 change_user_group.log
+ok $? "CernVM Test Case 14 - Change the group of the primary user"
+add_file change_user_group.log
 
 
 . ./tapper-autoreport
