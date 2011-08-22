@@ -304,25 +304,35 @@ get_hash()
 # DESCRIPTION
 #   Simple function that returns the network name for a virtual machine
 # ARGUMENTS
-#   $1 - The network XML definition file
+#   $1 - The current hypervisor for the virtual machine network
+#   $2 - The network XML definition file, not applicable for VMware
 # RETURN VALUE
 #   networkname - The network name defined in the xml network definition file
 # RESULT
 #   exitstatus - Sets $? as a zero for success, otherwise sets an error code
 # EXAMPLE
-#   NET_NAME=$(get_net_name ./network-definition.xml)
+#   NET_NAME=$(get_net_name kvm ./network-definition.xml)
+#   NET_NAME=$(get_net_name vmware)
 #***
 get_net_name()
 {
     NETNAME=""
     RESULT=1
     
-    if file_exists $1 ; test "$?" -eq 0 
+    if [ "$1" != "vmware" ]
     then
-        # Set network name as default name in xml file
-        NETNAME=$(egrep -E "^[[:space:]]*<name>.+</name>" $1 | \
-                  sed -E "s|.*<name>(.*)</name>.*|\\1|")
-        RESULT=$?
+        if file_exists $2 ; test "$?" -eq 0 
+        then
+            # Set network name as default name in xml file
+            NETNAME=$(egrep -E "^[[:space:]]*<name>.+</name>" $2 | \
+                      sed -E "s|.*<name>(.*)</name>.*|\\1|")
+            RESULT=$?
+        fi
+
+    # Otherwise for vmware, network xml file not applicable, network name is vmnet1
+    else
+        NETNAME="vmnet8"
+        RESULT=0
     fi
 
     echo ${NETNAME}

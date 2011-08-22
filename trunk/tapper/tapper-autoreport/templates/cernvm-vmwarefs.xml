@@ -19,6 +19,7 @@
     </disk>
     <controller type='ide' index='0'/>
     <interface type='bridge'>
+      <target dev='/dev/vmnet8'/>
       <mac address='00:16:3e:5d:c7:9e'/>
       <source bridge=''/>
     </interface>
