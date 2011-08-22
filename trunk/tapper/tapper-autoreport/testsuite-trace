@@ -363,8 +363,8 @@ call()
     local FUNCTION_RESULT=""
 
     # Scope and trace logfile formatting
-    local CURRENT_DEPTH="$DEPTH"
-    local CURRENT_INDEX="$INDEX"
+    local CURRENT_DEPTH=$DEPTH
+    local CURRENT_INDEX=$INDEX
     local TEMPLATE_LENGTH=0
     local OUTPUT_TEMP=("")
     export TRACE_TEMPLATE=("")
@@ -429,18 +429,43 @@ call()
 
         echo -e "export TRACE_OUTPUT=(""${OUTPUT_TEMP[@]}"")" > trace_output
 
+        # Output the current DEPTH as PREVIOUS_DEPTH so that the relative
+        # scope and depth can be easily determined by future functions called
+        echo -e "export PREVIOUS_DEPTH=${CURRENT_DEPTH}" >> trace_output
+
+        # Output the INDEX as PREVIOUS_INDEX so that the relative index for 
+        # creating TRACE_OUTPUT can be easily determined by future functions called
+        echo -e "export PREVIOUS_INDEX=${INDEX}" >> trace_output
+        
+        cat trace_output >> backup
+
         # Output the contents of TRACE_OUTPUT to the logfile for the initial function
         # traced, TRACE_OUTPUT also includes nested results of recusively traced functions
         if [ "${CURRENT_DEPTH}" -eq 0 ]
         then
             log_trace_output $TRACE_LOGFILE
+
+            # Reset the INDEX and DEPTH
+            export INDEX=0
+            export DEPTH=0
+
+            # Reset the TRACE_OUTPUT variables and source file
+            export TRACE_OUTPUT=("")
+            rm -f trace_output
+        
+        # If the current depth is the same as the previous depth update
+        # the index for the current depth as the previous INDEX
+        elif [ "${CURRENT_DEPTH}" == "${PREVIOUS_DEPTH}" ]
+        then
+            # Update the INDEX as the previous INDEX
+            export INDEX="${PREVIOUS_INDEX}"
         fi
     fi
 
 
     # Return the same RETURN VALUES and STATUS as the traced function called,
     # which makes the tracing of the function executed by "call" transparent
-    echo "${FUNCTION_RETURN_VALUES}"
+    echo "${FUNCTION_RETURN_VALUE}"
     return $FUNCTION_RESULT
     
 }
