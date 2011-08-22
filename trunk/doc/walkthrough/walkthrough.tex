@@ -1,7 +1,6 @@
 \documentclass[final,a4paper,10pt,abstracton]{scrreprt}
 
 \usepackage{verbatim}
-\usepackage{draftwatermark}\SetWatermarkScale{5} %_DRAFT watermark
 \include{atex}
 
 \title{CernVM Release Testing Walkthrough}
@@ -74,7 +73,7 @@
 		%  \large \today\\
  
 		\large Technical Report\\
-		Version: 1.6 (Draft) \today 
+		Version: 1.7 \today 
 		%	\large ISSN 1432-7864	
 
   		\setlength{\parindent}{\saveparindent}
@@ -102,7 +101,8 @@ testing environment, which will install and configure CernVM images, run the set
 \include{content/default/testclient_debian}
 \include{content/default/testclient_osx}
 \include{content/server}
-\include{content/default/server_redhat}
+% Red Hat not fully supported by Tapper Deployment yet
+%\include{content/default/server_redhat}
 \include{content/default/server_debian}
 \include{content/default/server_ubuntu}
 
