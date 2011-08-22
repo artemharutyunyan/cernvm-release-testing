@@ -222,3 +222,79 @@ check_no_network()
 
     return $RESULT            
 }
+
+
+#****f* cernvm-testcases/check_cvmfs_automount
+# NAME
+#   check_cvmfs_automount
+# DESCRIPTION
+#   CernVM Test Case - Check that cernvmfs automount scripts works correctly
+#                      and is able to mount any experiment group to /cvmfs/
+# ARGUMENTS
+#   $1 - The IP address of the machine to login via ssh
+#   $2 - The appliance primary group, all capitals, only one group may be specified
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   check_cvmfs_automount 192.168.1.125 ALICE
+#***
+check_cvmfs_automount()
+{
+    RESULT=1
+    EXPERIMENT_PATH="/cvmfs/"
+    MOUNTED_PATH=""
+
+    # Set the experiment path based on the primary group specified
+    case "$2" in
+    "ALICE")
+      EXPERIMENT_PATH="${EXPERIMENT_PATH}""alice"".cern.ch"
+      ;;
+    "ATLAS")
+      EXPERIMENT_PATH="${EXPERIMENT_PATH}""atlas"".cern.ch"
+      ;;
+    "CMS")
+      EXPERIMENT_PATH="${EXPERIMENT_PATH}""cms"".cern.ch"
+      ;;
+    "LHCB")
+      EXPERIMENT_PATH="${EXPERIMENT_PATH}""lhcb"".cern.ch"
+      ;;
+    "LCD")
+      EXPERIMENT_PATH="${EXPERIMENT_PATH}""lcd"".cern.ch"
+      ;;
+    "NA61")
+      EXPERIMENT_PATH="${EXPERIMENT_PATH}""na61"".cern.ch"
+      ;;
+    "HONE")
+      EXPERIMENT_PATH="${EXPERIMENT_PATH}""hone"".cern.ch"
+      ;;
+    "HEPSOFT")
+      EXPERIMENT_PATH="${EXPERIMENT_PATH}""hepsoft"".cern.ch"
+      ;;
+    "BOSS")
+      EXPERIMENT_PATH="${EXPERIMENT_PATH}""boss"".cern.ch"
+      ;;
+    "GEANT4")
+      EXPERIMENT_PATH="${EXPERIMENT_PATH}""geant4"".cern.ch"
+      ;;
+    *)
+      # Incorrect primary group specified, return failure
+      return $RESULT
+      ;;
+    esac
+    
+    # Change to the experiment path
+    MOUNTED_PATH=$(ssh -q -o "BatchMode=yes" root@$1 "cd ${EXPERIMENT_PATH} && pwd")
+    
+    # Verify that the experiment path was mounted
+    if [ "${MOUNTED_PATH}" == "${EXPERIMENT_PATH}" ]
+    then
+        # Verify that the cvmfs2 process is running
+        if $(ssh -q -o "BatchMode=yes" root@$1 "ps -eaf | grep -v 'grep' | \
+           grep -q -e 'cvmfs2'") ; test "$?" -eq 0
+        then
+            RESULT=0
+        fi
+    fi
+
+    return $RESULT
+}
