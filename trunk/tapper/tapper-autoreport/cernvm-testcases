@@ -298,3 +298,92 @@ check_cvmfs_automount()
 
     return $RESULT
 }
+
+
+#****f* cernvm-testcases/check_cvmfs_cache
+# NAME
+#   check_cvmfs_cache
+# DESCRIPTION
+#   CernVM Test Case - Check the cvmfs cache list, verify that the cache list is 
+#                      available after restarting the cvmfs daemon
+# ARGUMENTS
+#   $1 - The IP address of the machine to login via ssh
+#   $2 - The name of the logfile
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   check_cvmfs_cache 192.168.1.125 logfile.log
+#***
+check_cvmfs_cache()
+{
+    RESULT=1
+    
+    # Add a heading to the log file
+    echo -e "BEFORE RESTARTING CVMFS - $(date)\n\n" > $2
+    
+    # Log the initial cache list
+    ssh -q -o "BatchMode=yes" root@$1 "cvmfs-talk cache list" &> $2
+
+    # If command executed without error, restart cvmfs
+    if [ "$?" -eq 0 ]
+    then
+        ssh -q -o "BatchMode=yes" root@$1 "/etc/init.d/cvmfs restart"
+
+        # If service restarted without error log cache list again
+        if [ "$?" -eq 0 ]
+        then
+            # Second heading
+            echo -e "AFTER RESTARTING CVMFS - $(date)\n\n" > $2
+
+            ssh -q -o "BatchMode=yes" root@$1 "cvmfs-talk cache list" &> $2
+
+            if [ "$?" -eq 0 ]
+            then
+                RESULT=0
+            fi
+        fi
+    fi
+
+    return $RESULT
+}
+
+
+#****f* cernvm-testcases/migrate_experiment
+# NAME
+#   migrate_experiment
+# DESCRIPTION
+#   CernVM Test Case - Migrate to another experiment such as LHCB using the web
+#                      interface and make sure the relative tests are loaded 
+# ARGUMENTS
+#   $1 - The IP address of the machine to login via ssh
+#   $2 - The appliance primary group, all capitals, only one group may be specified
+#   $3 - The name of the logfile
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   migrate_experiment 192.168.1.125 ALICE logfile.log
+#***
+migrate_experiment()
+{
+    RESULT=1
+
+    # Migrate from current CernVM image experiment group to another group
+    web_config_group $1 $2 $3
+
+    # If successfully changed groups, reboot the system through web interface
+    if [ "$?" -eq 0 ]
+    then
+        # Reboot system
+        echo -e "\n\nREBOOTING SYSTEM THROUGH WEB INTERFACE\n\n" > $3
+        web_restart $1 $3
+
+        # If restarted successfully verify group changed
+        # TODO: Define a criteria to verify that group changed
+        if [ "$?" -eq 0 ]
+        then
+            RESULT=0
+        fi
+    fi
+
+    return $RESULT 
+}
