@@ -62,12 +62,16 @@ generate_trace_template()
     # Create indented STATUS and ARGUMENTS headings
     TRACE_TEMPLATE=("${TRACE_TEMPLATE[@]}" "${TAB_DEPTH}${TAB_SPACE}STATUS")
     TRACE_TEMPLATE=("${TRACE_TEMPLATE[@]}" "")
-    TRACE_TEMPLATE=("${TRACE_TEMPLATE[@]}" "${TAB_DEPTH}${TAB_SPACE}ARGUMENTS")
 
-    for i in $(eval echo {1..$((${#ARG_LIST[@]} - 1))})
-    do
-        TRACE_TEMPLATE=("${TRACE_TEMPLATE[@]}" "${TAB_DEPTH}${TAB_SPACE}${TAB_SPACE}${ARG_LIST[i]}")
-    done
+    if [ "${#ARG_LIST[@]}" -gt 1 ]
+    then
+        TRACE_TEMPLATE=("${TRACE_TEMPLATE[@]}" "${TAB_DEPTH}${TAB_SPACE}ARGUMENTS")
+
+        for i in $(eval echo {1..$((${#ARG_LIST[@]} - 1))})
+        do
+            TRACE_TEMPLATE=("${TRACE_TEMPLATE[@]}" "${TAB_DEPTH}${TAB_SPACE}${TAB_SPACE}${ARG_LIST[i]}")
+        done
+    fi
 
     # Create indented RETURN VALUE and RESULT headings
     TRACE_TEMPLATE=("${TRACE_TEMPLATE[@]}" "${TAB_DEPTH}${TAB_SPACE}RETURN VALUE")
@@ -391,9 +395,26 @@ call()
             export TRACE_OUTPUT=("${TRACE_OUTPUT[@]}")
         fi
         
+        # If the current depth is the same as the previous depth update the 
+        # trace output and set INDEX for the current depth as the previous INDEX
+        if [ -e scope_output ]
+        then
+            . ./scope_output
 
+            if [[ -e trace_output && "${CURRENT_DEPTH}" == "${PREVIOUS_DEPTH}" ]]
+            then
+                # Source the TRACE_OUTPUT which is needed for generating template
+                . ./trace_output
+                
+                # Update the current INDEXES as the previous INDEX
+                export INDEX="${PREVIOUS_INDEX}"
+                CURRENT_INDEX="${PREVIOUS_INDEX}"
+            fi
+
+        fi
+        
         # Generate a template for trace log file
-        generate_trace_template $FUNCTION_CALL
+        generate_trace_template ${FUNCTION_CALL}
 
         # Determine the lenght of the trace template heading
         TEMPLATE_LENGTH="${#TRACE_TEMPLATE[@]}"
@@ -403,11 +424,11 @@ call()
 
         # Now, call the function provided transparently and store the exitstatus
         # and return values from the function call
-        FUNCTION_RETURN_VALUE=($(${FUNCTION_CALL}))
+        FUNCTION_RETURN_VALUE="$(${FUNCTION_CALL})"
         FUNCTION_RESULT="$?"
       
         # Source the contents of the previous subshell
-        if [ -e trace_output ]
+        if [[ -e trace_output && "${CURRENT_DEPTH}" != "${PREVIOUS_DEPTH}" ]]
         then
             . ./trace_output
         fi
@@ -417,49 +438,21 @@ call()
                           $CURRENT_INDEX $TEMPLATE_LENGTH
 
         # use this for adding msg? and adding the closing <-
-        add_trace_close ${FUNCTION_NAME}
+        add_trace_close "${FUNCTION_NAME}"
 
-        # Output the contents of the current TRACE_OUTPUT so that parent
-        # shell can source it, this is due to scope issues with bash and subshells
-        OUTPUT_TEMP[0]="\"${TRACE_OUTPUT[0]}\""
-        for i in $(eval echo {1..$((${#TRACE_OUTPUT[@]} - 1))})
-        do
-            OUTPUT_TEMP=("${OUTPUT_TEMP[@]}" "\"${TRACE_OUTPUT[i]}\"")
-        done
-
-        echo -e "export TRACE_OUTPUT=(""${OUTPUT_TEMP[@]}"")" > trace_output
-
-        # Output the current DEPTH as PREVIOUS_DEPTH so that the relative
-        # scope and depth can be easily determined by future functions called
-        echo -e "export PREVIOUS_DEPTH=${CURRENT_DEPTH}" >> trace_output
-
-        # Output the INDEX as PREVIOUS_INDEX so that the relative index for 
-        # creating TRACE_OUTPUT can be easily determined by future functions called
-        echo -e "export PREVIOUS_INDEX=${INDEX}" >> trace_output
+        # Preserve the scope of the current call function so that any recursive
+        # calls (subshells) will be able to influence the scope of the current shell
+        preserve_scope   
         
-        cat trace_output >> backup
-
         # Output the contents of TRACE_OUTPUT to the logfile for the initial function
         # traced, TRACE_OUTPUT also includes nested results of recusively traced functions
         if [ "${CURRENT_DEPTH}" -eq 0 ]
         then
             log_trace_output $TRACE_LOGFILE
 
-            # Reset the INDEX and DEPTH
-            export INDEX=0
-            export DEPTH=0
-
-            # Reset the TRACE_OUTPUT variables and source file
-            export TRACE_OUTPUT=("")
-            rm -f trace_output
-        
-        # If the current depth is the same as the previous depth update
-        # the index for the current depth as the previous INDEX
-        elif [ "${CURRENT_DEPTH}" == "${PREVIOUS_DEPTH}" ]
-        then
-            # Update the INDEX as the previous INDEX
-            export INDEX="${PREVIOUS_INDEX}"
-        fi
+            # Reset the call function scope back to intial state
+            reset_scope
+        fi 
     fi
 
 
