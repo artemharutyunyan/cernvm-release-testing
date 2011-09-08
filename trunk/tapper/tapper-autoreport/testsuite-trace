@@ -519,7 +519,11 @@ call()
 
     # Return the same RETURN VALUES and STATUS as the traced function called,
     # which makes the tracing of the function executed by "call" transparent
-    echo "${FUNCTION_RETURN_VALUE}"
+    if [ "${FUNCTION_RETURN_VALUE}" ]
+    then
+        echo "${FUNCTION_RETURN_VALUE}"
+    fi
+
     return $FUNCTION_RESULT
     
 }

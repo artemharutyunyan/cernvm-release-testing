@@ -598,6 +598,11 @@ ok $? "CernVM Test Case 14 - Change the group of the primary user"
 add_file change_user_group.log
 
 
+# Shutdown the virtual machine and cleanup the test environment for next set of tests
+call stop_vm $NAME
+add_file $TRACE_LOGFILE
+
+
 . ./tapper-autoreport
 
 exit 0
