@@ -143,7 +143,7 @@ web_check_login()
                        'Content-Type: application/x-www-form-urlencoded' \
                        "Referer: http://$1:8004/login")
 
-    generate_header
+    call generate_header
     curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" --data "user_name=$2" --data "password=$3" \
     --data "login=Login" --location-trusted http://$1:8004/login > $4 2>&1
     
@@ -189,7 +189,7 @@ web_config_proxy()
                        'Pragma: no-cache' \
                        'Cache-Control: no-cache')
 
-    generate_header
+    call generate_header
     curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" --data "httpProxy=" \
     --data "httpPort=" --data "httpUser=" --data "httpPass=" --data "httpsProxy=" \
     --data "httpsPort=" --data "httpsUser=" --data "httpsPass=" --location-trusted \
@@ -233,7 +233,7 @@ web_config_password()
                        'Pragma: no-cache' \
                        'Cache-Control: no-cache')
 
-    generate_header
+    call generate_header
     curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" --data "pwd1=$2" \
     --data "pwd2=$2" --location-trusted \
     http://$1:8004/changepassword/ChangePassword/changePassword > $3 2>&1
@@ -279,7 +279,7 @@ web_root_password()
                        'Pragma: no-cache' \
                        'Cache-Control: no-cache')
 
-    generate_header
+    call generate_header
     curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" --data "newpw=$2" --data \
     "newpw2=$2" --data "currentpw=$3" --location-trusted \
     http://$1:8004/configure/RootPw/changePass > $4 2>&1
@@ -324,7 +324,7 @@ web_config_desktop()
                        'Pragma: no-cache' \
                        'Cache-Control: no-cache')
 
-    generate_header
+    call generate_header
     curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" --data "cernvmEdition=Desktop" \
     --data "cernvmScreenRes=$3" --data "cernvmKeyboard=$4" --data "cernvmStartXDM=$2" \
     --location-trusted http://$1:8004/cernvm/Config/editionUpdate > $5 2>&1
@@ -411,7 +411,7 @@ web_config_group()
       ;;
     esac
 
-    generate_header
+    call generate_header
     curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" \
     --data "cernvmOrganisation=$2" --data "cernvmRepositories=$GROUP_REPOSITORY" \
     --location-trusted http://$1:8004/cernvm/Config/repositoriesUpdate > $3 2>&1
@@ -462,7 +462,7 @@ web_create_user()
                        'Pragma: no-cache' \
                        'Cache-Control: no-cache')
 
-    generate_header
+    call generate_header
     curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" --data "cernvmUser=$2" --data \
     "cernvmUserGroup=$4" --data "cernvmUserShell=%2Fbin%2Fbash" --data "newpass1=$3" \
     --data "newpass2=$3" --location-trusted http://$1:8004/cernvm/User/userUpdate \
@@ -507,7 +507,7 @@ web_apply_settings()
                        'Content-Type: application/x-www-form-urlencoded' \
                        "Referer: http://$1:8004/cernvm/Config/")
 
-    generate_header
+    call generate_header
     curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" --location-trusted \
     http://$1:8004/cernvm/Config/applyUpdate > $2 2>&1
 
@@ -548,8 +548,7 @@ web_restart()
                        'Pragma: no-cache' \
                        'Cache-Control: no-cache')
 
-    generate_header
-    echo "${HEADER[@]}"
+    call generate_header
     curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" --location-trusted \
     http://$1:8004/reboot/Reboot/rebootNow > $2 2>&1
 

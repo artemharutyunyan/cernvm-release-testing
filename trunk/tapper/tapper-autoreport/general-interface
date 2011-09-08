@@ -229,7 +229,7 @@ filename_from_url()
     # Get the filename from location
     FILENAME=$(echo $1 | sed -E "s/^.*\/(.*)/\\1/")
     
-    echo ${FILENAME}
+    echo "${FILENAME}"
 }
 
 
@@ -255,7 +255,7 @@ filename_from_header()
     # Get the filename from location
     FILENAME=$(echo ${LOCATION} | sed -E "s/^.*\/(.*)/\\1/")
     
-    echo ${FILENAME}
+    echo "${FILENAME}"
 }
 
 
@@ -280,10 +280,10 @@ find_file()
     RESULT=1
     
     # Search for the file in the root directory based on extension
-    FILE_LOCATION=$(find $1/* -name "*.$2")
+    FILE_LOCATION=$(find $1/* -name "*.$2" 2> /dev/null)
     RESULT="$?"
-    echo ${FILE_LOCATION}
-    
+
+    echo "${FILE_LOCATION}"    
     return $RESULT
 }
 
@@ -334,7 +334,7 @@ get_hash()
           ;;
         esac
 
-    echo ${HASH}
+    echo "${HASH}"
 }
 
 
@@ -361,7 +361,7 @@ get_net_name()
     
     if [ "$1" != "vmware" ]
     then
-        if file_exists $2 ; test "$?" -eq 0 
+        if call file_exists $2 ; test "$?" -eq 0 
         then
             # Set network name as default name in xml file
             NETNAME=$(egrep -E "^[[:space:]]*<name>.+</name>" $2 | \
@@ -375,7 +375,7 @@ get_net_name()
         RESULT=0
     fi
 
-    echo ${NETNAME}
+    echo "${NETNAME}"
     return $RESULT  
 }
 
@@ -399,7 +399,7 @@ get_mac_address()
     MACADDRESS=""
     RESULT=1
     
-    if file_exists $1 ; test "$?" -eq 0
+    if call file_exists $1 ; test "$?" -eq 0
     then
         # Set the mac address as the value in xml file
         MACADDRESS=$(egrep -E "^.*mac[[:space:]]*address='.*'" $1 | sed -E \
@@ -437,7 +437,7 @@ get_ip_address()
     
     if [ "$1" != "vmware" ]
     then
-        if file_exists $3 ; test "$?" -eq 0 
+        if call file_exists $3 ; test "$?" -eq 0 
         then
             # Set the ip address as default in xml file
             IPADDRESS=$(egrep -E "^[[:space:]]*<range[[:space:]]*start='(.*)'" $3 | sed -E \
