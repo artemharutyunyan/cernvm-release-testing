@@ -295,6 +295,7 @@ has_console_support()
 #***
 connect_virsh()
 {
+    # Retrieve the actual name of URI used by virsh 
     virsh -q --connect $1 uri
 
     return $?

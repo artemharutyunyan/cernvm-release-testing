@@ -262,6 +262,7 @@ NET_XML_DEFINITION=""               # Leave blank, the network definition file
 IP_ADDRESS=""                       # DO NOT TOUCH, SPECIFYING CUSTOM IP ADDRESSES IS NOT SUPPORTED YET
 VM_UUID=$(uuid)                     # Must be set as a valid uuid
 NET_UUID=$(uuid)                    # Must be set as a valid uuid
+URI=""                              # Leave blank, virsh URI for the hypervisor, exported by script
 
 
 ######### Auto-Tapper Report Settings ##########
@@ -364,9 +365,12 @@ virtual machine XML definition file have been provided and are valid"
 
 # Precondition Test 6  - Verify that the hypervisor for the current virtual machine
 #                        tested is accessible, set the URI as a global variable
-call verify_hypervisor ${VM_XML_DEFINITION}
+URI=$(call verify_hypervisor ${VM_XML_DEFINITION})
 ok $? "Precondition Test 6  - Verify that the hypervisor for the current virtual machine \
 tested is accessible, set the URI as a global variable"
+
+### Export the URI, required environment variable for virsh
+export URI
 
 
 # Precondition Test 7 - Create an XML definition file for the virtual machine network

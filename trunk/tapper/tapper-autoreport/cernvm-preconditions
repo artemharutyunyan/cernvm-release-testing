@@ -604,6 +604,8 @@ validate_net_settings()
 #   tested is accessible, set the hypervisor URI as a global variable
 # ARGUMENTS
 #   $1 - The virtual machine XML definition file
+# RETURN VALUE
+#   URI - The current URI for the hypervisor of the virtual machine being tested
 # RESULT
 #   exitstatus - Sets $? as a zero for success, otherwise sets an error code
 # EXAMPLE
@@ -613,6 +615,7 @@ verify_hypervisor()
 {
     RESULT=1
     URI="test:///default"
+    CURRENT_URI=""
 
     # Precondition - Validate the mandatory virtual machine settings for the hypervisor
     if call validate_def_settings $1 ; test "$?" -eq 0
@@ -639,13 +642,15 @@ verify_hypervisor()
         esac
     fi
 
-    # If it is possible to connect to the hypervisor through virsh export URI
-    if call connect_virsh $URI ; test "$?" -eq 0
+    # Verify that it is possible to connect to the hypervisor through virsh
+    # and set the URI as URI that is used by virsh
+    CURRENT_URI="$(call connect_virsh ${URI})"
+    if test "$?" -eq 0
     then
-        export URI
         RESULT=0
     fi
 
+    echo "${CURRENT_URI}"
     return $RESULT
 }
 
