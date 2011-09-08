@@ -361,7 +361,7 @@ get_net_name()
     
     if [ "$1" != "vmware" ]
     then
-        if call file_exists $2 ; test "$?" -eq 0 
+        if file_exists $2 ; test "$?" -eq 0 
         then
             # Set network name as default name in xml file
             NETNAME=$(egrep -E "^[[:space:]]*<name>.+</name>" $2 | \
@@ -399,7 +399,7 @@ get_mac_address()
     MACADDRESS=""
     RESULT=1
     
-    if call file_exists $1 ; test "$?" -eq 0
+    if file_exists $1 ; test "$?" -eq 0
     then
         # Set the mac address as the value in xml file
         MACADDRESS=$(egrep -E "^.*mac[[:space:]]*address='.*'" $1 | sed -E \
@@ -437,7 +437,7 @@ get_ip_address()
     
     if [ "$1" != "vmware" ]
     then
-        if call file_exists $3 ; test "$?" -eq 0 
+        if file_exists $3 ; test "$?" -eq 0 
         then
             # Set the ip address as default in xml file
             IPADDRESS=$(egrep -E "^[[:space:]]*<range[[:space:]]*start='(.*)'" $3 | sed -E \
@@ -476,7 +476,7 @@ get_ip_address()
 ssh_generate_key()
 {
     # Use a here-doc to script expect to automate key generation
-    /usr/bin/expect <<EOF
+    /usr/bin/expect <<EOF &> /dev/null
     match_max 100000
     set prompt "*?\$"
 
@@ -522,7 +522,7 @@ EOF
 ssh_autologin()
 {
     # Use a here-doc to script expect to automate password authentication
-    /usr/bin/expect <<EOF
+    /usr/bin/expect <<EOF &> /dev/null
     match_max 100000
     set prompt "*?\$"
 

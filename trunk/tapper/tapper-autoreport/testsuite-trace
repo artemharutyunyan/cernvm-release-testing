@@ -425,7 +425,7 @@ call()
     local FUNCTION_NAME="$1"
     local FUNCTION_CALL="$@"
     local FUNCTION_RETURN_VALUE=""
-    local FUNCTION_RESULT=""
+    local FUNCTION_RESULT="1"
 
     # Scope and trace logfile formatting
     local CURRENT_DEPTH=$DEPTH
@@ -524,6 +524,5 @@ call()
         echo "${FUNCTION_RETURN_VALUE}"
     fi
 
-    return $FUNCTION_RESULT
-    
+    return ${FUNCTION_RESULT}
 }

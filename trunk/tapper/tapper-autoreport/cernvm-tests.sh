@@ -275,7 +275,7 @@ NOUPLOAD=0
 ######### Tapper AutoReport Settings ##########
 TAP[0]="ok - autoreport selftest"
 
-HEADERS[0]="# Tapper-CernVM-Version: ${SUITEVERSION}"
+HEADERS[0]="# Tapper-CernVM-Version: ${IMAGE_VERSION}"
 HEADERS[1]="# Tapper-CernVM-ReleaseID: ${IMAGE_RELEASE_ID}"
 HEADERS[2]="# Tapper-CernVM-Name: ${NAME}"
 HEADERS[3]="# Tapper-CernVM-Path: ${IMAGE_FOLDER}"
@@ -311,7 +311,7 @@ main_after_hook ()
 
 
 # Mandatory if trace enabled, create trace log file
-create_trace_log $TRACE_LOGFILE
+#create_trace_log $TRACE_LOGFILE
 
 
 # A very simple test
@@ -328,44 +328,44 @@ ok $? "The system is running Linux"
 # Precondition Test 0 - Verify that the download page exists and that there is a 
 #                     valid download url for the CernVM image specified, returns
 #                     the url to download the image
-IMAGE_URL=$(call image_url $DOWNLOAD_PAGE $IMAGE_VERSION $HYPERVISOR $ARCH $IMAGE_TYPE)
+IMAGE_URL=$(image_url $DOWNLOAD_PAGE $IMAGE_VERSION $HYPERVISOR $ARCH $IMAGE_TYPE)
 ok $? "Precondition Test 0 - Verify that the download page exists and that there is a \
 valid download url for the CernVM image specified, returns the url to download the image"
 
 
 # Precondition Test 1 - Download and extract the CernVM image, returns the location 
 #                       of the extracted cernvm image file
-CERNVM_IMAGE=$(call download_extract $IMAGE_URL $IMAGE_FOLDER cernvm_image_download.log)
+CERNVM_IMAGE=$(download_extract $IMAGE_URL $IMAGE_FOLDER cernvm_image_download.log)
 ok $? "Precondition Test 1 - Download and extract the CernVM image"
 
 
 # Precondition Test 2 - Create an XML definition file for the virtual machine based on 
 #                       the template XML definition file and settings provided
-VM_XML_DEFINITION=$(call create_def $TEMPLATE $IMAGE_FOLDER)
+VM_XML_DEFINITION=$(create_def $TEMPLATE $IMAGE_FOLDER)
 ok $? "Precondition Test 2 - Create an XML definition file for the virtual machine \
 based on the template XML definition file and settings provided"
 
 
 # Precondition Test 3  - Verify that the virtual machine XML definition file exists
-call verify_exists ${VM_XML_DEFINITION}
+verify_exists ${VM_XML_DEFINITION}
 ok $? "Precondition Test 3  - Verify that the virtual machine XML definition file exists"
 
 
 # Precondition Test 4  - Verify that the XML definition file provided is valid
-call validate_def_xml ${VM_XML_DEFINITION}
+validate_def_xml ${VM_XML_DEFINITION}
 ok $? "Precondition Test 4  - Verify that the XML definition file provided is valid"
 
 
 # Precondition Test 5  - Verify that the mandatory configuration settings for the
 #                        virtual machine XML definition file have been provided and are valid
-call validate_def_settings ${VM_XML_DEFINITION}
+validate_def_settings ${VM_XML_DEFINITION}
 ok $? "Precondition Test 5  - Verify that the mandatory configuration settings for the \
 virtual machine XML definition file have been provided and are valid"
 
 
 # Precondition Test 6  - Verify that the hypervisor for the current virtual machine
 #                        tested is accessible, set the URI as a global variable
-URI=$(call verify_hypervisor ${VM_XML_DEFINITION})
+URI=$(verify_hypervisor ${VM_XML_DEFINITION})
 ok $? "Precondition Test 6  - Verify that the hypervisor for the current virtual machine \
 tested is accessible, set the URI as a global variable"
 
@@ -375,98 +375,98 @@ export URI
 
 # Precondition Test 7 - Create an XML definition file for the virtual machine network
 #                       based on the template network XML definition file and settings defined
-NET_XML_DEFINITION=$(call create_net_def $NET_TEMPLATE $IMAGE_FOLDER)
+NET_XML_DEFINITION=$(create_net_def $NET_TEMPLATE $IMAGE_FOLDER)
 ok $? "Precondition Test 7 - Create an XML definition file for the virtual machine network \
 based on the template network XML definition file and settings defined"
 
 
 # Precondition Test 8 - Verify that the network XML definition file exists
-call verify_exists ${NET_XML_DEFINITION}
+verify_exists ${NET_XML_DEFINITION}
 ok $? "Precondition Test 8 - Verify that the network XML definition file exists"
 
 
 # Precondition Test 9 - Verify that the network XML definition file provided is valid
-call validate_def_xml ${NET_XML_DEFINITION}
+validate_def_xml ${NET_XML_DEFINITION}
 ok $? "Precondition Test 9 - Verify that the network XML definition file provided is valid"
 
 
 # Precondition Test 10 - Verify that the mandatory configuration settings for the
 #                        network XML definition file have been provided and are valid
-call validate_net_settings ${NET_XML_DEFINITION}
+validate_net_settings ${NET_XML_DEFINITION}
 ok $? "Precondition Test 10 - Verify that the mandatory configuration settings for the \
 network XML definition file have been provided and are valid"
 
 
 # Set the network name, for VMware it is only a pseudo network name
 # because libvirt/virsh does not support VMware networking currently
-NET_NAME=$(call get_net_name $HYPERVISOR ${NET_XML_DEFINITION})
+NET_NAME=$(get_net_name $HYPERVISOR ${NET_XML_DEFINITION})
 
 
 # Precondition Test 11 - Verify that the virtual machine network has been created 
 #                        from an xml file
-call create_net ${NET_XML_DEFINITION} ${NET_NAME}
+create_net ${NET_XML_DEFINITION} ${NET_NAME}
 ok $? "Precondition Test 11 - Verify that the virtual machine network has been \
 created from an xml file"
 
 
 # Precondition Test 12  - Verify that virtual machine network is active and 
 #                        set to autostart
-call verify_vm_net ${NET_NAME}
+verify_vm_net ${NET_NAME}
 ok $? "Precondition Test 12  - Verify that virtual machine NAT network is active and \
 set to autostart"
 
 
 # Precondition Test 13 - Verify that virtual machine domain has been created 
 #                       from an xml file
-call create_vm ${VM_XML_DEFINITION} $NAME
+create_vm ${VM_XML_DEFINITION} $NAME
 ok $? "Precondition Test 13 - Verify that virtual machine domain $VMNAME has been \
 created from an xml file"
 
 
 # Precondition Test 14 - Verify that virtual machine can be started
-call start_vm ${VM_XML_DEFINITION} $NAME
+start_vm ${VM_XML_DEFINITION} $NAME
 ok $? "Precondition Test 14 - Verify that virtual machine $VMNAME has been started"
 
 
 # Precondition Test 15 - Verify that virtual machine $VMNAME has been stopped
-call stop_vm $NAME
+stop_vm $NAME
 ok $? "Precondition Test 15 - Verify that virtual machine $VMNAME has been stopped"
 
 
 # Precondition Test 16 - Verify that the virtual machine has console support
 # Start the virtual machine and verify that it has console support
-call start_vm ${VM_XML_DEFINITION} $NAME
-call has_console_support $NAME
+start_vm ${VM_XML_DEFINITION} $NAME
+has_console_support $NAME
 ok $? "Precondition Test 16 - Verify that virtual machine $VMNAME has console support"
 
 
 # Set the network MAC address and IP address
-MAC_ADDRESS=$(call get_mac_address ${VM_XML_DEFINITION})
-IP_ADDRESS=$(call get_ip_address $HYPERVISOR ${MAC_ADDRESS} ${NET_XML_DEFINITION})
+MAC_ADDRESS="$(get_mac_address ${VM_XML_DEFINITION})"
+IP_ADDRESS="$(get_ip_address $HYPERVISOR ${MAC_ADDRESS} ${NET_XML_DEFINITION})"
 
 
 # Precondition Test 17 - Verify that virtual machine has web interface support
-call web_check_interface ${IP_ADDRESS} web_interface.log
+web_check_interface ${IP_ADDRESS} web_interface.log
 ok $? "Precondition Test 17 - Verify that virtual machine $VMNAME has web interface support"
 add_file web_interface.log
 
 
 # Precondition Test 18 - Verify that it is possible to login on web interface
-call web_check_login ${IP_ADDRESS} $ADMIN_USERNAME $ADMIN_DEFAULT_PASS web_interface_login.log
+web_check_login ${IP_ADDRESS} $ADMIN_USERNAME $ADMIN_DEFAULT_PASS web_interface_login.log
 ok $? "Precondition Test 18 - Verify that it is possible to login on web interface"
 add_file web_interface_login.log
 
 
 # Precondition Test 19 - Setup and configure the initial CernVM image through the
 #                     web interface
-call configure_image_web ${IP_ADDRESS} $ADMIN_USERNAME $ADMIN_DEFAULT_PASS web_config_image.log
+configure_image_web ${IP_ADDRESS} $ADMIN_USERNAME $ADMIN_DEFAULT_PASS web_config_image.log
 ok $? "Precondition Test 19 - Setup and configure the initial CernVM image through \
 the web interface"
 
 
 # Precondition Test 20 - Verify that it is possible to login on web interface using
 #                        the new web interface administrator password
-call web_check_login ${IP_ADDRESS} $ADMIN_USERNAME $ADMIN_PASS web_interface_login2.log
+web_check_login ${IP_ADDRESS} $ADMIN_USERNAME $ADMIN_PASS web_interface_login2.log
 ok $? "Precondition Test 20 - Verify that it is possible to login on web interface using \
 the new web interface administrator password"
 add_file web_interface_login2.log
@@ -475,20 +475,20 @@ add_file web_interface_login2.log
 # Precondition Test 21 - Enable automatic SSH login to the machine for the user
 #                        specified using keys instead of passwords, and verify that it
 #                        is possible to login automatically
-call verify_autologin_ssh ${IP_ADDRESS} $USER_NAME $USER_PASS
+verify_autologin_ssh ${IP_ADDRESS} $USER_NAME $USER_PASS
 ok $? "Precondition Test 21 - Enable automatic SSH login to the machine for the user
 specified using keys instead of passwords, and verify that it is possible to login automatically"
 
 
 # Precondition Test 22 - Set the root password using the CernVM web interface
-call web_root_password ${IP_ADDRESS} $ROOT_PASS $ADMIN_PASS web_root_pass.log
+web_root_password ${IP_ADDRESS} $ROOT_PASS $ADMIN_PASS web_root_pass.log
 ok $? "Precondition Test 22 - Set the root password using the CernVM web interface"
 
 
 # Precondition Test 23 - Enable automatic SSH login to the machine for the root
 #                        user using keys instead of passwords, and verify that it
 #                        is possible to login automatically
-call verify_autologin_ssh ${IP_ADDRESS} root $ROOT_PASS
+verify_autologin_ssh ${IP_ADDRESS} root $ROOT_PASS
 ok $? "Precondition Test 23 - Enable automatic SSH login to the machine for the root \
 user using keys instead of passwords, and verify that it is possible to login automatically"
 
@@ -501,28 +501,28 @@ user using keys instead of passwords, and verify that it is possible to login au
 #
 
 # CernVM Test Case 1 - Check login via ssh as user created through web interface
-call check_ssh ${IP_ADDRESS} $USER_NAME
+check_ssh ${IP_ADDRESS} $USER_NAME
 ok $? "CernVM Test Case 1 - Check login via ssh as user created through web interface"
 
 
 # CernVM Test Case 2 - Check login via ssh as root
-call check_ssh ${IP_ADDRESS} root
+check_ssh ${IP_ADDRESS} root
 ok $? "CernVM Test Case 2 - Check login via ssh as root"
 
 
 # CernVM Test Case 3 - No error messages at boot
-call check_boot_error ${IP_ADDRESS} boot_error.log
+check_boot_error ${IP_ADDRESS} boot_error.log
 ok $? "CernVM Test Case 3 - No error messages at boot"
 add_file boot_error.log
 
 
 # CernVM Test Case 4 - Check for correct time / running ntpd
-call check_time ${IP_ADDRESS}
+check_time ${IP_ADDRESS}
 ok $? "CernVM Test Case 4 - Check for correct time / running ntpd"
 
 
 # CernVM Test Case 5 - Create a new user using the CernVM web interface
-call web_create_user ${IP_ADDRESS} $USER_NAME2 $USER_PASS2 $USER_GROUP web_interface_newuser.log
+web_create_user ${IP_ADDRESS} $USER_NAME2 $USER_PASS2 $USER_GROUP web_interface_newuser.log
 ok $? "CernVM Test Case 5 - Create a new user using the CernVM web interface"
 add_file web_interface_newuser.log
 
@@ -530,19 +530,19 @@ add_file web_interface_newuser.log
 # Precondition Test - Enable automatic SSH login to the machine for the user
 #                     specified using keys instead of passwords, and verify that it
 #                     is possible to login automatically
-call verify_autologin_ssh ${IP_ADDRESS} $USER_NAME2 $USER_PASS2
+verify_autologin_ssh ${IP_ADDRESS} $USER_NAME2 $USER_PASS2
 
 
 # CernVM Test Case 6 - Verify that the user is created and can be accessed
 #                      from ssh login
-call check_ssh ${IP_ADDRESS} $USER_NAME2
+check_ssh ${IP_ADDRESS} $USER_NAME2
 ok $? "CernVM Test Case 6 - Verify that the user is created and can be accessed \
 from ssh login"
 
 
 # CernVM Test Case 7 - Restart through the web interface and check that there
 #                      are no error messages at boot
-call check_web_restart ${IP_ADDRESS} web_interface_reboot.log web_restart_boot.log
+check_web_restart ${IP_ADDRESS} web_interface_reboot.log web_restart_boot.log
 ok $? "CernVM Test Case 7 - Restart through the web interface and check that \
 there are no error messages at boot"
 add_file web_interface_reboot.log
@@ -552,21 +552,21 @@ add_file web_restart_boot.log
 #   CernVM Test Case 8  - Shutdown the system and disconnect the network, then start
 #                         the image, it should take longer to boot but the system
 #                         should not hang on startup
-call check_no_network ${IP_ADDRESS} $NAME ${NET_NAME} ${VM_XML_DEFINITION} ${NET_XML_DEFINITION}
+check_no_network ${IP_ADDRESS} $NAME ${NET_NAME} ${VM_XML_DEFINITION} ${NET_XML_DEFINITION}
 ok $? "CernVM Test Case 8 - Shutdown the system and disconnect the network, then start the \
 the image, it should take longer to boot but the system should not hang on startup"
 
 
 #   CernVM Test Case 9  - Check that cernvmfs automount scripts works correctly
 #                         and is able to mount any experiment group to /cvmfs/
-call check_cvmfs_automount ${IP_ADDRESS} $EXPERIMENT_GROUP
+check_cvmfs_automount ${IP_ADDRESS} $EXPERIMENT_GROUP
 ok $? "CernVM Test Case 9 - Check that cernvmfs automount scripts works correctly and is \
 able to mount any experiment group to /cvmfs/"
 
 
 #   CernVM Test Case 10 - Check the cvmfs cache list, verify that the cache list is 
 #                         available after restarting the cvmfs daemon
-call check_cvmfs_cache ${IP_ADDRESS} cvmfs_cache.log
+check_cvmfs_cache ${IP_ADDRESS} cvmfs_cache.log
 ok $? "CernVM Test Case 10 - Check the cvmfs cache list, verify that the cache list is \
 available after restarting the cvmfs daemon"
 add_file cvmfs_cache.log
@@ -574,7 +574,7 @@ add_file cvmfs_cache.log
 
 #   CernVM Test Case 11 - Migrate to another experiment such as LHCB using the web
 #                         interface and make sure the relative tests are loaded 
-call migrate_experiment ${IP_ADDRESS} $EXPERIMENT_GROUP2 migrate_experiment.log
+migrate_experiment ${IP_ADDRESS} $EXPERIMENT_GROUP2 migrate_experiment.log
 ok $? "CernVM Test Case 11 - Migrate to another experiment such as LHCB using the web \
 interface and make sure the relative tests are loaded"
 add_file migrate_experiment.log
@@ -582,7 +582,7 @@ add_file migrate_experiment.log
 
 #   CernVM Test Case 12 - Check that cernvmfs automount scripts works correctly
 #                         and is able to mount the new experiment group to /cvmfs/
-call check_cvmfs_automount ${IP_ADDRESS} $EXPERIMENT_GROUP2
+check_cvmfs_automount ${IP_ADDRESS} $EXPERIMENT_GROUP2
 ok $? "CernVM Test Case 12 - Check that cernvmfs automount scripts works correctly and \
 is able to mount the new experiment group to /cvmfs/"
 
@@ -590,21 +590,21 @@ is able to mount the new experiment group to /cvmfs/"
 #   CernVM Test Case 13 - Check the cvmfs cache list for the new experiment group,
 #                         verify that the cache list is available after restarting
 #                         the cvmfs daemon 
-call check_cvmfs_cache ${IP_ADDRESS} cvmfs_cache_new_group.log
+check_cvmfs_cache ${IP_ADDRESS} cvmfs_cache_new_group.log
 ok $? "CernVM Test Case 13 - Check the cvmfs cache list for the new experiment group, \
 verify that the cache list is available after restarting the cvmfs daemon" 
 add_file cvmfs_cache_new_group.log
 
 
 #   CernVM Test Case 14 - Change the group of the primary user
-call change_user_group ${IP_ADDRESS} $USER_NAME $USER_PASS $USER_GROUP2 change_user_group.log
+change_user_group ${IP_ADDRESS} $USER_NAME $USER_PASS $USER_GROUP2 change_user_group.log
 ok $? "CernVM Test Case 14 - Change the group of the primary user"
 add_file change_user_group.log
 
 
 # Shutdown the virtual machine and cleanup the test environment for next set of tests
-call stop_vm $NAME
-add_file $TRACE_LOGFILE
+stop_vm $NAME
+#add_file $TRACE_LOGFILE
 
 
 . ./tapper-autoreport

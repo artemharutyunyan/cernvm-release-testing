@@ -51,7 +51,7 @@
 #***
 check_ssh()
 {
-    call verify_ssh_login $1 $2
+    verify_ssh_login $1 $2
 
     return $?
 }
@@ -79,7 +79,7 @@ check_boot_error()
 "ssh -q -o \"BatchMode=yes\" root@$1 cat /var/log/cernvm-update.log | egrep \"error|warning|fail\" >> $2")
 
     # Precondition for ssh support as root for boot error tests
-    if call check_ssh $1 root ; test "$?" -eq 0 ; then
+    if check_ssh $1 root ; test "$?" -eq 0 ; then
     for test in "${BOOT_TESTS[@]}"
     do
         eval $test
@@ -91,7 +91,6 @@ check_boot_error()
             fi
     done
     else
-        echo "FAIL - Precondition for ssh support as root for boot error tests"
         RESULT=1
     fi
     
@@ -139,14 +138,14 @@ check_web_restart()
     RESULT=1
 
     # Restart through the web interface
-    call web_restart $1 $2
+    web_restart $1 $2
 
     # If restarted through the web interface successfully check for boot errors
     if [ "$?" -eq 0 ]
     then
         # Wait for system to start, check for boot error
         sleep 300
-        call check_boot_error $1 $3
+        check_boot_error $1 $3
         
         # No boot errors, return success
         if [ "$?" -eq 0 ]
@@ -182,37 +181,37 @@ check_no_network()
     RESULT=1
     
     # First shutdown the virtual machine
-    if call stop_vm $2 ; test "$?" -eq 0
+    if stop_vm $2 ; test "$?" -eq 0
     then
         # Disconnect network, have to destroy the virtual machine network
         if [ "$HYPERVISOR" != "vmware" ]
         then
-            call destroy_vm_net $3
+            destroy_vm_net $3
 
         # For VMware have to disable the network interface 
         else
-            call disable_network_if $3
+            disable_network_if $3
         fi
 
         # If the network was disabled start the virtual machine
         if [ "$?" -eq 0 ]
         then
             # Verify the virtual machine started
-            if call start_vm $4 $2 ; test "$?" -eq 0
+            if start_vm $4 $2 ; test "$?" -eq 0
             then
                 # Start the network
                 if [ "$HYPERVISOR" != "vmware" ]
                 then
-                    call create_vm_net $5 $3
+                    create_vm_net $5 $3
 
                 # For VMware have to enable the network interface 
                 else
-                    call enable_network_if $3
+                    enable_network_if $3
                 fi
 
                 # If network started verify SSH access to check that
                 # virtual machine has not hung on startup and has network access
-                if test "$?" -eq 0 && call verify_ssh_login $1 root ; test "$?" -eq 0
+                if test "$?" -eq 0 && verify_ssh_login $1 root ; test "$?" -eq 0
                 then
                     RESULT=0
                 fi
@@ -331,7 +330,7 @@ check_cvmfs_cache()
         # Restart notice
         echo -e "\nRESTARTING CVMFS - $(date)\n\n" >> $2
 
-        ssh -q -o "BatchMode=yes" root@$1 "${CVMFS_ENV} ; /etc/init.d/cvmfs restart"
+        ssh -q -o "BatchMode=yes" root@$1 "${CVMFS_ENV} ; /etc/init.d/cvmfs restart" &>> $2
 
         # If service restarted without error log cache list again
         if [ "$?" -eq 0 ]
@@ -339,6 +338,7 @@ check_cvmfs_cache()
             # Second heading
             echo -e "\nAFTER RESTARTING CVMFS - $(date)\n\n" >> $2
 
+            sleep 15
             ssh -q -o "BatchMode=yes" root@$1 "${CVMFS_ENV} ; cvmfs-talk cache list" &>> $2
 
             if [ "$?" -eq 0 ]
@@ -372,14 +372,14 @@ migrate_experiment()
     RESULT=1
 
     # Migrate from current CernVM image experiment group to another group
-    call web_config_group $1 $2 $3
+    web_config_group $1 $2 $3
 
     # If successfully changed groups, reboot the system through web interface
     if [ "$?" -eq 0 ]
     then
         # Reboot system
         echo -e "\n\nREBOOTING SYSTEM THROUGH WEB INTERFACE\n\n" > $3
-        call web_restart $1 $3
+        web_restart $1 $3
 
         # If restarted successfully verify group changed
         # TODO: Define a criteria to verify that group changed
@@ -414,14 +414,14 @@ change_user_group()
     RESULT=1
 
     # Change the primary user group
-    call web_create_user $1 $2 $3 $4 $5
+    web_create_user $1 $2 $3 $4 $5
 
     # If successfully changed groups, reboot the system through web interface
     if [ "$?" -eq 0 ]
     then
         # Reboot system
-        echo -e "\n\nREBOOTING SYSTEM THROUGH WEB INTERFACE\n\n" > $5
-        call web_restart $1 $5
+        echo -e "\n\nREBOOTING SYSTEM THROUGH WEB INTERFACE\n\n" >> $5
+        web_restart $1 $5
 
         # If restarted successfully verify group changed
         if [ "$?" -eq 0 ]

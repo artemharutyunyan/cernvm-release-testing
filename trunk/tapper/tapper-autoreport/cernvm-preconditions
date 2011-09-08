@@ -51,7 +51,7 @@
 #***
 verify_exists()
 {
-    call file_exists $1
+    file_exists $1
     
     return $?
 }
@@ -143,13 +143,13 @@ verify_autologin_ssh()
     rm -f ~/.ssh/known_hosts
 
     # Generate a public SSH key, this is required to enable automatic login
-    call ssh_generate_key
+    ssh_generate_key
 
     # Configure account specifed to automatically login through SSH'
-    if call ssh_autologin $1 $2 $3 ; test "$?" -eq 0
+    if ssh_autologin $1 $2 $3 ; test "$?" -eq 0
     then
         # Precondition - Verify that user is able to login via ssh automatically
-        if call verify_ssh_login $1 $2 ; test "$?" -eq 0
+        if verify_ssh_login $1 $2 ; test "$?" -eq 0
         then
             # SSH autologin configured, working
             RESULT=0
@@ -197,7 +197,7 @@ image_url()
 
     # If the download page url exists, remove control statements from file
     # and retrieve CernVM image url from file
-    if test "$?" -eq 0 && call verify_exists $DOWNLOAD_PAGE ; test "$?" -eq 0
+    if test "$?" -eq 0 && verify_exists $DOWNLOAD_PAGE ; test "$?" -eq 0
     then
         # Remove trailing control statments
         sed -i -E "s/$(printf '\015')$//g" $DOWNLOAD_PAGE
@@ -289,16 +289,16 @@ download_extract()
 {
     RESULT=1
     # This is specific to the cernvm website which doesn't give the actual location
-    FILENAME=$(call filename_from_url $1)
+    FILENAME=$(filename_from_url $1)
     FILE_LOCATION="$2/${FILENAME}"
     IMAGE_LOCATION=""
 
     # Precondition - verify file has not already been downloaded
-    if call verify_exists ${FILE_LOCATION} ; test "$?" -eq 1
+    if verify_exists ${FILE_LOCATION} ; test "$?" -eq 1
     then
         
         # Create the directory if it does not already exist
-        if call verify_exists $2 ; test "$?" -eq 1
+        if verify_exists $2 ; test "$?" -eq 1
         then
             mkdir -p $2
         fi
@@ -307,18 +307,18 @@ download_extract()
         wget --verbose $1 -P $2 > $3 2>&1
 
         # If download succeeded extract file        
-        if test "$?" -eq 0 && call verify_exists ${FILE_LOCATION} ; test "$?" -eq 0
+        if test "$?" -eq 0 && verify_exists ${FILE_LOCATION} ; test "$?" -eq 0
         then
             # Extract downloaded CernVM image in the directory it is located in
-            call extract_file ${FILE_LOCATION}
+            extract_file ${FILE_LOCATION}
             
             # Verify extraction succeeded and get the location of CernVM image file
             if test "$?" -eq 0
             then
                 # Get the location and name of the extracted CernVM image file
                 # which is either a hdd vmdk vdi or ext3 file
-                IMAGE_LOCATION=$(call find_file $2 hdd || call find_file $2 vmdk || \
-                                 call find_file $2 vdi || call find_file $2 ext3)
+                IMAGE_LOCATION=$(find_file $2 hdd || find_file $2 vmdk || \
+                                 find_file $2 vdi || find_file $2 ext3)
                 RESULT="$?"
             fi
         fi          
@@ -358,7 +358,7 @@ verify_virsh_uri()
     RESULT=1
     ACTUAL_URI=""
 
-    ACTUAL_URI=$(call connect_virsh $1)
+    ACTUAL_URI=$(connect_virsh $1)
 
     # Verify virsh connected to the URI
     if [ "$?" -eq 0 ]
@@ -399,10 +399,10 @@ verify_vm_net()
     fi 
     
     # Verify that the network is set as active
-    if call vm_net_active $1 ; test "$?" -eq 0
+    if vm_net_active $1 ; test "$?" -eq 0
     then
         # Verify that the network set as autostart
-        if call vm_net_autostart $1 ; test "$?" -eq 0
+        if vm_net_autostart $1 ; test "$?" -eq 0
         then
             RESULT=0
         fi
@@ -429,7 +429,7 @@ validate_def_xml()
     RESULT=1
 
     # Precondition - verify file exists
-    if call verify_exists $1 ; test "$?" -eq 0
+    if verify_exists $1 ; test "$?" -eq 0
     then
         # Verify xml file is valid
         if xmllint --noout $1 ; test "$?" -eq 0
@@ -461,8 +461,8 @@ validate_def_settings()
 
     # Precondition - verify file exists
     # Precondition - verify xml file is valid
-    if call verify_exists $1 ; test "$?" -eq 0 \
-    && call validate_def_xml $1 ; test "$?" -eq 0
+    if verify_exists $1 ; test "$?" -eq 0 \
+    && validate_def_xml $1 ; test "$?" -eq 0
     then
         # Check that mandatory settings are correct
         # Verify domain type from xml file, return failure if not valid type
@@ -518,7 +518,7 @@ validate_def_settings()
         # Verify that the virtual machine image file is set and exists
         IMAGE_FILE=$(egrep -E "^[[:space:]]*<source file='(.+)'" $1 | sed -E \
                     "s|.*'([^']+)'.*|\\1|")
-        if call verify_exists ${IMAGE_FILE} ; test "$?" -ne 0
+        if verify_exists ${IMAGE_FILE} ; test "$?" -ne 0
         then
             # Image file not set, or doesn't exist
             return $RESULT
@@ -554,8 +554,8 @@ validate_net_settings()
 
     # Precondition - verify file exists
     # Precondition - verify xml file is valid
-    if call verify_exists $1 ; test "$?" -eq 0 \
-    && call validate_def_xml $1 ; test "$?" -eq 0
+    if verify_exists $1 ; test "$?" -eq 0 \
+    && validate_def_xml $1 ; test "$?" -eq 0
     then
         # Check that mandatory settings are correct
         # Verify that a valid uuid for the network is set
@@ -618,7 +618,7 @@ verify_hypervisor()
     CURRENT_URI=""
 
     # Precondition - Validate the mandatory virtual machine settings for the hypervisor
-    if call validate_def_settings $1 ; test "$?" -eq 0
+    if validate_def_settings $1 ; test "$?" -eq 0
     then
         # Set the virsh URI for the virtual machine hypervisor
         DOMAIN_TYPE=$(egrep -E "^<domain[[:space:]]*type='([a-zA-Z]+)'" $1 | sed -E \
@@ -644,7 +644,7 @@ verify_hypervisor()
 
     # Verify that it is possible to connect to the hypervisor through virsh
     # and set the URI as URI that is used by virsh
-    CURRENT_URI="$(call connect_virsh ${URI})"
+    CURRENT_URI="$(connect_virsh ${URI})"
     if test "$?" -eq 0
     then
         RESULT=0
@@ -679,8 +679,8 @@ create_def()
     DEFINITION_FILE=""
     
     # Precondition - Verify that the template file and destination directory exist
-    if call verify_exists $TEMPLATE_FILE ; test "$?" -eq 0 \
-    && call verify_exists $2 ; test "$?" -eq 0
+    if verify_exists $TEMPLATE_FILE ; test "$?" -eq 0 \
+    && verify_exists $2 ; test "$?" -eq 0
     then
         # Copy template file to the directory specified
         cp -f $TEMPLATE_FILE $2
@@ -786,8 +786,8 @@ create_net_def()
     DEFINITION_FILE=""
  
     # Precondition - Verify that the template file and destination directory exist
-    if call verify_exists $TEMPLATE_FILE ; test "$?" -eq 0 \
-    && call verify_exists $2 ; test "$?" -eq 0
+    if verify_exists $TEMPLATE_FILE ; test "$?" -eq 0 \
+    && verify_exists $2 ; test "$?" -eq 0
     then
         # Copy template file to the directory specified
         cp -f $TEMPLATE_FILE $2
@@ -855,10 +855,10 @@ create_net()
     fi
 
     # Remove previously existing networks with the same name
-    if call destroy_vm_net $2 ; test "$?" -eq 0
+    if destroy_vm_net $2 ; test "$?" -eq 0
     then
         # Create the network
-        call create_vm_net $1 $2
+        create_vm_net $1 $2
 
         RESULT=0
     fi
@@ -897,32 +897,32 @@ configure_image_web()
 
     # Generate the template header which is used as a basis for 
     # creating headers for interacting with CernVM web interface
-    call generate_template_header $1
+    generate_template_header $1
 
 
     # Precondition - verify virtual machine has web interface support
     # Precondition - verify that it is possible to login on web interface
-    if call web_check_interface $1 web_config_check.log ; test "$?" -eq 0 \
-    && call web_check_login $1 $2 $3 web_config_login.log ; test "$?" -eq 0
+    if web_check_interface $1 web_config_check.log ; test "$?" -eq 0 \
+    && web_check_login $1 $2 $3 web_config_login.log ; test "$?" -eq 0
     then
 
         # Configure the proxy settings using the CernVM web interface
         # at the moment it doesn't specify any proxy settings
-        if call web_config_proxy $1 web_config_proxy.log ; test "$?" -ne 0
+        if web_config_proxy $1 web_config_proxy.log ; test "$?" -ne 0
         then
             # Configure proxy settings failed
             return $RESULT
         fi
 
         # Configure the web interface administrator password
-        if call web_config_password $1 $ADMIN_PASS web_config_password.log ; test "$?" -ne 0
+        if web_config_password $1 $ADMIN_PASS web_config_password.log ; test "$?" -ne 0
         then
             # Configure the web interface administrator password failed
             return $RESULT
         fi
     
         # Create a new user using the CernVM web interface
-        if call web_create_user $1 $USER_NAME $USER_PASS $USER_GROUP \
+        if web_create_user $1 $USER_NAME $USER_PASS $USER_GROUP \
         web_create_new_user.log ; test "$?" -ne 0
         then
             # Create new user failed
@@ -930,7 +930,7 @@ configure_image_web()
         fi
 
         # Configure the CernVM image desktop settings using the CernVM web interface
-        if call web_config_desktop $1 $STARTXONBOOT $RESOLUTION $KEYBOARD_LOCALE \
+        if web_config_desktop $1 $STARTXONBOOT $RESOLUTION $KEYBOARD_LOCALE \
         web_config_desktop.log ; test "$?" -ne 0
         then
             # Configure CernVM image desktop failed
@@ -938,7 +938,7 @@ configure_image_web()
         fi
 
         # Configure the CernVM image appliance group settings using web interface
-        if call web_config_group $1 $EXPERIMENT_GROUP web_config_group.log ; test "$?" -ne 0
+        if web_config_group $1 $EXPERIMENT_GROUP web_config_group.log ; test "$?" -ne 0
         then
             # Configure experiment group failed
             return $RESULT
@@ -946,7 +946,7 @@ configure_image_web()
 
         # Apply configuration changes made using the CernVM web interface, which
         # then reboots the CernVM image once completed
-        if call web_apply_settings $1 web_apply_settings.log ; test "$?" -ne 0
+        if web_apply_settings $1 web_apply_settings.log ; test "$?" -ne 0
         then
             # Apply settings failed
             return $RESULT
