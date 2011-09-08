@@ -65,7 +65,13 @@
 \lstset{language=bash, caption=Install Homebrew}
 \begin{lstlisting}
 # Install Homebrew using the following command
-/usr/bin/ruby -e "$(curl -fsSL https://raw.github.com/gist/323731)"
+$ /usr/bin/ruby -e "$(curl -fsSL https://raw.github.com/gist/323731)"
+
+# Install git, needed by Homebrew
+$ brew install git
+
+# Update Homebrew
+$ brew update
 \end{lstlisting}
 
 \item        Next, download and install Xcode, which is freely available at \url{http://developer.apple.com/xcode/}. At the moment Xcode 3 can
@@ -81,7 +87,7 @@
 \lstset{language=bash, caption=Install libvirt}
 \begin{lstlisting}
 # Install libvirt using the following command
-brew install libvirt
+$ brew install libvirt
 \end{lstlisting}
 
 \item 	Finally, ensure that virsh installed correctly and is running by connecting to the test hypervisor and ensuring 
