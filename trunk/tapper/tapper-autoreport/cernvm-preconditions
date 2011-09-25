@@ -142,8 +142,11 @@ verify_autologin_ssh()
     # Remove known_hosts file to avoid host key mismatch message
     rm -f ~/.ssh/known_hosts
 
-    # Generate a public SSH key, this is required to enable automatic login
-    ssh_generate_key
+    # Generate a public SSH key if none exists, this is required to enable automatic login
+    if [ ! -e ~/.ssh/id_rsa.pub ]
+    then
+        ssh_generate_key
+    fi
 
     # Configure account specifed to automatically login through SSH'
     if ssh_autologin $1 $2 $3 ; test "$?" -eq 0
@@ -289,9 +292,10 @@ download_extract()
 {
     RESULT=1
     # This is specific to the cernvm website which doesn't give the actual location
-    FILENAME=$(filename_from_url $1)
+    FILENAME="$(filename_from_url $1)"
     FILE_LOCATION="$2/${FILENAME}"
     IMAGE_LOCATION=""
+    IMAGE_EXTENSIONS=("hdd" "vmdk" "vdi" "ext3")
 
     # Precondition - verify file has not already been downloaded
     if verify_exists ${FILE_LOCATION} ; test "$?" -eq 1
@@ -317,9 +321,16 @@ download_extract()
             then
                 # Get the location and name of the extracted CernVM image file
                 # which is either a hdd vmdk vdi or ext3 file
-                IMAGE_LOCATION=$(find_file $2 hdd || find_file $2 vmdk || \
-                                 find_file $2 vdi || find_file $2 ext3)
-                RESULT="$?"
+                for i in $(eval echo {0..$((${#IMAGE_EXTENSIONS[@]} - 1))})
+                do
+                    IMAGE_LOCATION="$(find_file $2 ${IMAGE_EXTENSIONS[i]})"
+                    if [ -n "${IMAGE_LOCATION}" ]
+                    then
+                        RESULT=0
+                        break
+                    fi
+                done
+                
             fi
         fi          
     fi
@@ -894,11 +905,6 @@ create_net()
 configure_image_web()
 {
     RESULT=1
-
-    # Generate the template header which is used as a basis for 
-    # creating headers for interacting with CernVM web interface
-    generate_template_header $1
-
 
     # Precondition - verify virtual machine has web interface support
     # Precondition - verify that it is possible to login on web interface

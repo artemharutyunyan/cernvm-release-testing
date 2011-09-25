@@ -280,10 +280,10 @@ find_file()
     RESULT=1
     
     # Search for the file in the root directory based on extension
-    FILE_LOCATION=$(find $1/* -name "*.$2" 2> /dev/null)
+    LOCATION="$(find $1/* -name "*.$2" 2> /dev/null)"
     RESULT="$?"
 
-    echo "${FILE_LOCATION}"    
+    echo "${LOCATION}"    
     return $RESULT
 }
 
@@ -402,8 +402,8 @@ get_mac_address()
     if file_exists $1 ; test "$?" -eq 0
     then
         # Set the mac address as the value in xml file
-        MACADDRESS=$(egrep -E "^.*mac[[:space:]]*address='.*'" $1 | sed -E \
-                     "s|^.*mac[[:space:]]*address='(.*)'.*|\\1|")
+        MACADDRESS=$(pcregrep -M "^.*<interface type='network'>\n.*mac[[:space:]]*address='.*'" \
+                   $1 | tail -n1 | sed -E "s|^.*mac[[:space:]]*address='(.*)'.*|\\1|")
         RESULT=$?
     fi
 
@@ -521,12 +521,14 @@ EOF
 #***
 ssh_autologin()
 {
+    # Get the home directory
+    ROOT_HOME="$HOME"
     # Use a here-doc to script expect to automate password authentication
     /usr/bin/expect <<EOF &> /dev/null
     match_max 100000
     set prompt "*?\$"
 
-    spawn ssh-copy-id $2@$1
+    spawn ssh-copy-id -i ${ROOT_HOME}/.ssh/id_rsa.pub $2@$1
     # Look for connection prompt
     expect {
         "\(yes\/no)\?" {
