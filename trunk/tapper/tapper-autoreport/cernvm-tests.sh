@@ -65,25 +65,23 @@
 #
 #   Precondition Test 15 - Verify that virtual machine has been stopped
 #
-#   Precondition Test 16 - Verify that the virtual has console support
+#   Precondition Test 16 - Verify that virtual machine has web interface support
 #
-#   Precondition Test 17 - Verify that virtual machine has web interface support
+#   Precondition Test 17 - Verify that it is possible to login on web interface
 #
-#   Precondition Test 18 - Verify that it is possible to login on web interface
-#
-#   Precondition Test 19 - Setup and configure the initial CernVM image through the
+#   Precondition Test 18 - Setup and configure the initial CernVM image through the
 #                          web interface
 #
-#   Precondition Test 20 - Verify that it is possible to login on web interface using
+#   Precondition Test 19 - Verify that it is possible to login on web interface using
 #                          the new web interface administrator password
 #
-#   Precondition Test 21 - Enable automatic SSH login to the machine for the user
+#   Precondition Test 20 - Enable automatic SSH login to the machine for the user
 #                          specified using keys instead of passwords, and verify that it
 #                          is possible to login automatically
 #
-#   Precondition Test 22 - Set the root password using the CernVM web interface
+#   Precondition Test 21 - Set the root password using the CernVM web interface
 #
-#   Precondition Test 23 - Enable automatic SSH login to the machine for the root
+#   Precondition Test 22 - Enable automatic SSH login to the machine for the root
 #                          user using keys instead of passwords, and verify that it
 #                          is possible to login automatically
 #                         
@@ -193,8 +191,10 @@ HOSTNAME="${CVM_TS_HOSTNAME}"                           # Optional, set this to 
 
 
 ######### Optional CernVM Image Settings ##########
-IMAGE_RELEASE_ID="${CVM_VM_IMAGE_RELEASE_ID}" # Optional, used to narrow down testing of the same release version 
-NAME="${CVM_VM_NAME:-cernvm-${HYPERVISOR}-${IMAGE_VERSION}-${IMAGE_RELEASE_ID}-$(date +%Y%m%d%H%M%S)}" # Optional, default name based on hypervisor & version
+IMAGE_RELEASE_ID="${CVM_VM_IMAGE_RELEASE_ID}" # Optional, used to narrow down testing of the same release version
+TEST_DATE="$(date +%Y-%m-%d-%H-%M-%S)"
+TEST_DATE_SHORT="$(date +%Y%m%d%H%M%S)"
+NAME="${CVM_VM_NAME:-${HYPERVISOR}-${ARCH}-${IMAGE_VERSION}-${IMAGE_RELEASE_ID}-${TEST_DATE_SHORT}}" # Optional, default name based on hypervisor & version
 CPUS="${CVM_VM_CPUS}"                       # Optional, default in template used unless overriden
 MEMORY="${CVM_VM_MEMORY}"                   # Optional, default in template used unless overriden
 VIDEO_MEMORY="${CVM_VM_VIDEO_MEMORY}"       # Optional, default in template used unless overriden
@@ -250,8 +250,7 @@ USER_GROUP2="${CVM_TC_USER_GROUP:-lhcb}"
 
 ######### Path Settings ##########
 TEMPLATE_DIR="$(pwd)/templates"
-IMAGE_DATE="$(date +%Y-%m-%d-%H-%M-%S)"
-IMAGE_FOLDER="${IMAGES_DIR}/${HYPERVISOR}/${IMAGE_VERSION}/${ARCH}/${IMAGE_DATE}" # Unique image download location
+IMAGE_FOLDER="${IMAGES_DIR}/${HYPERVISOR}/$(($RANDOM % 999))" # Unique image download location
 
 
 ######### CernVM Image Settings ##########
@@ -278,8 +277,10 @@ TAP[0]="ok - autoreport selftest"
 HEADERS[0]="# Tapper-CernVM-Version: ${IMAGE_VERSION}"
 HEADERS[1]="# Tapper-CernVM-ReleaseID: ${IMAGE_RELEASE_ID}"
 HEADERS[2]="# Tapper-CernVM-Name: ${NAME}"
-HEADERS[3]="# Tapper-CernVM-Path: ${IMAGE_FOLDER}"
-HEADERS[4]="# Tapper-CernVM-Description: CernVM Image Testing"
+HEADERS[3]="# Tapper-CernVM-Architecture: ${ARCH}"
+HEADERS[4]="# Tapper-CernVM-Image-Path: ${IMAGE_FOLDER}"
+HEADERS[5]="# Tapper-CernVM-Test-Start: ${TEST_DATE}"
+HEADERS[6]="# Tapper-CernVM-Description: CernVM Image Testing"
 
 OUTPUT[0]="Please review the attached files"
 OUTPUT[1]="for more information about"
@@ -335,7 +336,7 @@ valid download url for the CernVM image specified, returns the url to download t
 
 # Precondition Test 1 - Download and extract the CernVM image, returns the location 
 #                       of the extracted cernvm image file
-CERNVM_IMAGE=$(download_extract $IMAGE_URL $IMAGE_FOLDER cernvm_image_download.log)
+CERNVM_IMAGE=$(download_extract ${IMAGE_URL} ${IMAGE_FOLDER} cernvm_image_download.log)
 ok $? "Precondition Test 1 - Download and extract the CernVM image"
 
 
@@ -433,11 +434,8 @@ stop_vm $NAME
 ok $? "Precondition Test 15 - Verify that virtual machine $VMNAME has been stopped"
 
 
-# Precondition Test 16 - Verify that the virtual machine has console support
-# Start the virtual machine and verify that it has console support
+# Start the virtual machine, which is must be running for the proceeding tests
 start_vm ${VM_XML_DEFINITION} $NAME
-has_console_support $NAME
-ok $? "Precondition Test 16 - Verify that virtual machine $VMNAME has console support"
 
 
 # Set the network MAC address and IP address
@@ -445,51 +443,51 @@ MAC_ADDRESS="$(get_mac_address ${VM_XML_DEFINITION})"
 IP_ADDRESS="$(get_ip_address $HYPERVISOR ${MAC_ADDRESS} ${NET_XML_DEFINITION})"
 
 
-# Precondition Test 17 - Verify that virtual machine has web interface support
+# Precondition Test 16 - Verify that virtual machine has web interface support
 web_check_interface ${IP_ADDRESS} web_interface.log
-ok $? "Precondition Test 17 - Verify that virtual machine $VMNAME has web interface support"
+ok $? "Precondition Test 16 - Verify that virtual machine $VMNAME has web interface support"
 add_file web_interface.log
 
 
-# Precondition Test 18 - Verify that it is possible to login on web interface
+# Precondition Test 17 - Verify that it is possible to login on web interface
 web_check_login ${IP_ADDRESS} $ADMIN_USERNAME $ADMIN_DEFAULT_PASS web_interface_login.log
-ok $? "Precondition Test 18 - Verify that it is possible to login on web interface"
+ok $? "Precondition Test 17 - Verify that it is possible to login on web interface"
 add_file web_interface_login.log
 
 
-# Precondition Test 19 - Setup and configure the initial CernVM image through the
+# Precondition Test 18 - Setup and configure the initial CernVM image through the
 #                     web interface
 configure_image_web ${IP_ADDRESS} $ADMIN_USERNAME $ADMIN_DEFAULT_PASS web_config_image.log
-ok $? "Precondition Test 19 - Setup and configure the initial CernVM image through \
+ok $? "Precondition Test 18 - Setup and configure the initial CernVM image through \
 the web interface"
 
 
-# Precondition Test 20 - Verify that it is possible to login on web interface using
+# Precondition Test 19 - Verify that it is possible to login on web interface using
 #                        the new web interface administrator password
 web_check_login ${IP_ADDRESS} $ADMIN_USERNAME $ADMIN_PASS web_interface_login2.log
-ok $? "Precondition Test 20 - Verify that it is possible to login on web interface using \
+ok $? "Precondition Test 19 - Verify that it is possible to login on web interface using \
 the new web interface administrator password"
 add_file web_interface_login2.log
 
 
-# Precondition Test 21 - Enable automatic SSH login to the machine for the user
+# Precondition Test 20 - Enable automatic SSH login to the machine for the user
 #                        specified using keys instead of passwords, and verify that it
 #                        is possible to login automatically
 verify_autologin_ssh ${IP_ADDRESS} $USER_NAME $USER_PASS
-ok $? "Precondition Test 21 - Enable automatic SSH login to the machine for the user
+ok $? "Precondition Test 20 - Enable automatic SSH login to the machine for the user
 specified using keys instead of passwords, and verify that it is possible to login automatically"
 
 
-# Precondition Test 22 - Set the root password using the CernVM web interface
+# Precondition Test 21 - Set the root password using the CernVM web interface
 web_root_password ${IP_ADDRESS} $ROOT_PASS $ADMIN_PASS web_root_pass.log
-ok $? "Precondition Test 22 - Set the root password using the CernVM web interface"
+ok $? "Precondition Test 21 - Set the root password using the CernVM web interface"
 
 
-# Precondition Test 23 - Enable automatic SSH login to the machine for the root
+# Precondition Test 22 - Enable automatic SSH login to the machine for the root
 #                        user using keys instead of passwords, and verify that it
 #                        is possible to login automatically
 verify_autologin_ssh ${IP_ADDRESS} root $ROOT_PASS
-ok $? "Precondition Test 23 - Enable automatic SSH login to the machine for the root \
+ok $? "Precondition Test 22 - Enable automatic SSH login to the machine for the root \
 user using keys instead of passwords, and verify that it is possible to login automatically"
 
 
@@ -552,9 +550,9 @@ add_file web_restart_boot.log
 #   CernVM Test Case 8  - Shutdown the system and disconnect the network, then start
 #                         the image, it should take longer to boot but the system
 #                         should not hang on startup
-check_no_network ${IP_ADDRESS} $NAME ${NET_NAME} ${VM_XML_DEFINITION} ${NET_XML_DEFINITION}
-ok $? "CernVM Test Case 8 - Shutdown the system and disconnect the network, then start the \
-the image, it should take longer to boot but the system should not hang on startup"
+#check_no_network ${IP_ADDRESS} $NAME ${NET_NAME} ${VM_XML_DEFINITION} ${NET_XML_DEFINITION}
+#ok $? "CernVM Test Case 8 - Shutdown the system and disconnect the network, then start the \
+#the image, it should take longer to boot but the system should not hang on startup"
 
 
 #   CernVM Test Case 9  - Check that cernvmfs automount scripts works correctly
