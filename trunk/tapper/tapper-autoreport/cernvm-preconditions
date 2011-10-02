@@ -893,7 +893,6 @@ create_net()
 #   $1 - The hostname or ip address for the web interface
 #   $2 - The default username to access web interface
 #   $3 - The default password to access web interface
-#   $4 - The name of the logfile
 # RESULT
 #   exitstatus - Sets $? as a zero for success, otherwise sets an error code
 # EXAMPLE

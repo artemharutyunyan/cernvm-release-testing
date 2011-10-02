@@ -261,6 +261,27 @@ log_trace_output()
     done
 }
 
+#****f* testsuite-trace/log_trace_message
+# NAME
+#   log_trace_message
+# DESCRIPTION
+#   Logs the generic,error,and success trace messages to file
+# ARGUMENTS
+#   $1 - The name of the logfile to store the trace message
+#   $2 - The actual messsage to store in the logfile
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   log_trace_output $TRACE_LOGFILE "SUCCESS - Test Case Executed Without Errors"
+#***
+log_trace_message()
+{
+    # TODO: Add support for indenting the message based on the scope
+    #       depth (for when trace verbosity level 3 is used)
+    # Log the message to the trace logfile
+    echo -e "$2" >> $1
+}
+
 
 #****f* testsuite-trace/create_trace_log
 # NAME
@@ -358,6 +379,12 @@ reset_scope()
 #***
 success_msg()
 {
+    # If the trace verbosity level is set higher than 1, log message
+    if [ "$TRACE_VERBOSITY" -gt 1 ]
+    then
+        log_trace_message $TRACE_LOGFILE "\e[0;32mSUCCESS - ${1}\e[0m"
+    fi
+
     return 0
 }
 
@@ -376,6 +403,12 @@ success_msg()
 #***
 error_msg()
 {
+    # If the trace verbosity level is set higher than 0, log message
+    if [ "$TRACE_VERBOSITY" -gt 0 ]
+    then
+        log_trace_message $TRACE_LOGFILE "\e[0;31mFAILURE - ${1}\e[0m"
+    fi
+
     return 0
 }
 
@@ -394,7 +427,13 @@ error_msg()
 #***
 generic_msg()
 {
-    return
+    # If the trace verbosity level is set higher than 1, log message
+    if [ "$TRACE_VERBOSITY" -gt 1 ]
+    then
+        log_trace_message $TRACE_LOGFILE "\e[0;36m${1}\e[0m"
+    fi
+
+    return 0
 }
 
 

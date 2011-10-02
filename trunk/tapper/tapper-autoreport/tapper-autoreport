@@ -345,10 +345,15 @@ add_file()
 ok () {
     success="${1:-0}"
     msg="${2:-unknown}"
-    if [ "$success" != "0" ] ; then
+    if [ "$success" != "0" ]
+    then
         NOT="not "
+        # Add an error message to the trace log file
+        error_msg "An error occurred, review the log files for more information"
     else
         NOT=""
+        # Add a success message to trace log file
+        success_msg "The test executed successfully"
     fi
     append_tap "${NOT}ok - $msg"
 }
@@ -356,10 +361,15 @@ ok () {
 negate_ok () {
     success="${1:-0}"
     msg="${2:-unknown}"
-    if [ "$success" == "0" ] ; then
+    if [ "$success" == "0" ]
+    then
         NOT="not "
+        # Add an error message to the trace log file
+        error_msg "An error occurred, review the log files for more information"
     else
         NOT=""
+        # Add a success message to trace log file
+        success_msg "The test executed successfully"
     fi
     append_tap "${NOT}ok - $msg"
 }
