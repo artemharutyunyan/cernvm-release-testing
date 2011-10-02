@@ -126,6 +126,47 @@ create_vm_net()
 }
 
 
+#****f* virt-interface/set_vmhdd_uuid
+# NAME
+#   set_vmhdd_uuid
+# DESCRIPTION
+#   Sets a new UUID for the virtual machine hdd, this function is specific
+#   to VirtualBox and is a fix for a known issue where the virtual machine
+#   will fail to start if another virtual machine hdd has the same uuid
+# ARGUMENTS
+#   $1 - The path to the virtual machine hdd image
+# RESULT
+#   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+# EXAMPLE
+#   set_vmhdd_uuid /usr/share/images/cernvm-desktop-2.4.0-x86.vdi
+#***
+set_vmhdd_uuid()
+{
+    NEW_UUID=""
+    ACTUAL_UUID=""
+    RESULT=1
+
+    # First change the UUID of the virtual machine hdd
+    NEW_UUID=$(VBoxManage internalcommands sethduuid $1 $(uuid) | sed -E \
+             "s/^UUID[[:space:]]*changed[[:space:]]*to\:[[:space:]]*(.*)$/\\1/")
+
+    # Verify that the UUID of the virtual machine hdd was changed    
+    if [ "$?" -eq 0 ]
+    then
+        # Get the actual UUID of the hdd
+        ACTUAL_UUID=$(VBoxManage showhdinfo $1 | grep -E '^UUID\:' | sed -E \
+                    "s/^UUID\:[[:space:]]*(.*)$/\\1/")
+    
+        if test "$?" -eq 0 && test "${NEW_UUID}" == "${ACTUAL_UUID}"
+        then
+            RESULT=0
+        fi
+    fi
+    
+    return $RESULT
+}
+
+
 #****f* virt-interface/create_vm
 # NAME
 #   create_vm
@@ -208,12 +249,18 @@ start_vm()
     else
         virsh --connect $URI start $2
     fi
-
-    # Wait five minutes for virtual machine to start
-    sleep 300
-    virsh --connect $URI list --all | egrep -q \
-    "^[[:space:]]*[[:digit:]]*[[:space:]]*$2[[:space:]]*running"
-
+    
+    # If virsh had an error starting do not sleep, return failure
+    if [ "$?" -ne 0 ]
+    then
+        return 1
+    else
+        # Wait five minutes for virtual machine to start
+        sleep 300
+        virsh --connect $URI list --all | egrep -q \
+        "^[[:space:]]*[[:digit:]]*[[:space:]]*$2[[:space:]]*running"
+    fi
+    
     return $?
 }
 
@@ -236,19 +283,25 @@ stop_vm()
 
     virsh --connect $URI shutdown $1
     RESULT=$?
-    
-    # Wait 2 minutes for virtual machine to turn off
-    sleep 120
-
-    # If URI is VMware do not check for virtual machine in list
-    # as it does not appear in the list of virtual machines unless running
-    if [ "$URI" == "vmwarews:///session" ]
+   
+    # If virsh had an error stopping virtual machine, do not sleep return failure
+    if [ "$RESULT" -ne 0 ]
     then
-        return $RESULT
+         return 1
     else
-        virsh --connect $URI list --all | egrep -q "^[[:space:]]*-[[:space:]]*$1[[:space:]]*shut[[:space:]]off"
-        # If either returned a failure, set RESULT as error code
-        RESULT=$((${RESULT} | $?))
+        # Wait 2 minutes for virtual machine to turn off
+        sleep 120
+
+        # If URI is VMware do not check for virtual machine in list
+        # as it does not appear in the list of virtual machines unless running
+        if [ "$URI" == "vmwarews:///session" ]
+        then
+            return $RESULT
+        else
+            virsh --connect $URI list --all | egrep -q "^[[:space:]]*-[[:space:]]*$1[[:space:]]*shut[[:space:]]off"
+            # If either returned a failure, set RESULT as error code
+            RESULT=$((${RESULT} | $?))
+        fi
     fi
     
     return $RESULT
