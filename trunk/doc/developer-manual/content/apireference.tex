@@ -1,6 +1,6 @@
 % Document: ./content/apireference
 % Source: ./../../tapper/tapper-autoreport/
-% Generated with ROBODoc Version 4.99.41 (Aug 17 2011)
+% Generated with ROBODoc Version 4.99.41 (Oct  2 2011)
 \newpage
 \section{test-suite/cernvm-preconditions}
 \textsl{[ Generics ]}
@@ -61,7 +61,6 @@
    $1 - The hostname or ip address for the web interface
    $2 - The default username to access web interface
    $3 - The default password to access web interface
-   $4 - The name of the logfile
 \end{verbatim}
 \textbf{RESULT}
 \begin{verbatim}
@@ -452,6 +451,10 @@
 \textbf{ARGUMENTS}
 \begin{verbatim}
    $1 - The virtual machine XML definition file
+\end{verbatim}
+\textbf{RETURN VALUE}
+\begin{verbatim}
+   URI - The current URI for the hypervisor of the virtual machine being tested
 \end{verbatim}
 \textbf{RESULT}
 \begin{verbatim}
@@ -1621,11 +1624,40 @@
    generic_msg "Waiting for the CernVM image to start"
 \end{verbatim}
 \newpage
-\subsection{testsuite-trace/log\_trace\_output}
+\subsection{testsuite-trace/log\_trace\_message}
 \textsl{[ testsuite-trace ]}
 \textsl{[ Functions ]}
 
 \label{ch:robo55}
+\label{ch:testsuite_trace_log_trace_message}
+\index{unsorted!log\_trace\_message}\index{Functions!log\_trace\_message}
+\textbf{NAME}
+\begin{verbatim}
+   log_trace_message
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Logs the generic,error,and success trace messages to file
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The name of the logfile to store the trace message
+   $2 - The actual messsage to store in the logfile
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   log_trace_output $TRACE_LOGFILE "SUCCESS - Test Case Executed Without Errors"
+\end{verbatim}
+\newpage
+\subsection{testsuite-trace/log\_trace\_output}
+\textsl{[ testsuite-trace ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo56}
 \label{ch:testsuite_trace_log_trace_output}
 \index{unsorted!log\_trace\_output}\index{Functions!log\_trace\_output}
 \textbf{NAME}
@@ -1649,11 +1681,62 @@
    log_trace_output $TRACE_LOGFILE
 \end{verbatim}
 \newpage
+\subsection{testsuite-trace/preserve\_scope}
+\textsl{[ testsuite-trace ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo57}
+\label{ch:testsuite_trace_preserve_scope}
+\index{unsorted!preserve\_scope}\index{Functions!preserve\_scope}
+\textbf{NAME}
+\begin{verbatim}
+   preserve_scope
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   A function which preserves the scope of the call function when it is
+   recursively called as bash has scope limitations which prevent a
+   sub-shell from influencing the scope of the parent shell
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   preserve_scope   
+\end{verbatim}
+\newpage
+\subsection{testsuite-trace/reset\_scope}
+\textsl{[ testsuite-trace ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo58}
+\label{ch:testsuite_trace_reset_scope}
+\index{unsorted!reset\_scope}\index{Functions!reset\_scope}
+\textbf{NAME}
+\begin{verbatim}
+   reset_scope
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   A function which resets the scope of the "call" function which was initially
+   executed and any nested "call" functions that were recursively executed
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   reset_scope
+\end{verbatim}
+\newpage
 \subsection{testsuite-trace/success\_msg}
 \textsl{[ testsuite-trace ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo56}
+\label{ch:robo59}
 \label{ch:testsuite_trace_success_msg}
 \index{unsorted!success\_msg}\index{Functions!success\_msg}
 \textbf{NAME}
@@ -1702,7 +1785,7 @@
 \textsl{[ virt-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo57}
+\label{ch:robo60}
 \label{ch:virt_interface_connect_virsh}
 \index{unsorted!connect\_virsh}\index{Functions!connect\_virsh}
 \textbf{NAME}
@@ -1734,7 +1817,7 @@
 \textsl{[ virt-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo58}
+\label{ch:robo61}
 \label{ch:virt_interface_create_vm}
 \index{unsorted!create\_vm}\index{Functions!create\_vm}
 \textbf{NAME}
@@ -1763,7 +1846,7 @@
 \textsl{[ virt-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo59}
+\label{ch:robo62}
 \label{ch:virt_interface_create_vm_net}
 \index{unsorted!create\_vm\_net}\index{Functions!create\_vm\_net}
 \textbf{NAME}
@@ -1792,7 +1875,7 @@
 \textsl{[ virt-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo60}
+\label{ch:robo63}
 \label{ch:virt_interface_destroy_vm}
 \index{unsorted!destroy\_vm}\index{Functions!destroy\_vm}
 \textbf{NAME}
@@ -1825,7 +1908,7 @@
 \textsl{[ virt-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo61}
+\label{ch:robo64}
 \label{ch:virt_interface_destroy_vm_net}
 \index{unsorted!destroy\_vm\_net}\index{Functions!destroy\_vm\_net}
 \textbf{NAME}
@@ -1858,7 +1941,7 @@
 \textsl{[ virt-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo62}
+\label{ch:robo65}
 \label{ch:virt_interface_has_console_support}
 \index{unsorted!has\_console\_support}\index{Functions!has\_console\_support}
 \textbf{NAME}
@@ -1888,11 +1971,41 @@
    discouraged as console support is unnecessary and only supported for KVM
 \end{verbatim}
 \newpage
+\subsection{virt-interface/set\_vmhdd\_uuid}
+\textsl{[ virt-interface ]}
+\textsl{[ Functions ]}
+
+\label{ch:robo66}
+\label{ch:virt_interface_set_vmhdd_uuid}
+\index{unsorted!set\_vmhdd\_uuid}\index{Functions!set\_vmhdd\_uuid}
+\textbf{NAME}
+\begin{verbatim}
+   set_vmhdd_uuid
+\end{verbatim}
+\textbf{DESCRIPTION}
+\begin{verbatim}
+   Sets a new UUID for the virtual machine hdd, this function is specific
+   to VirtualBox and is a fix for a known issue where the virtual machine
+   will fail to start if another virtual machine hdd has the same uuid
+\end{verbatim}
+\textbf{ARGUMENTS}
+\begin{verbatim}
+   $1 - The path to the virtual machine hdd image
+\end{verbatim}
+\textbf{RESULT}
+\begin{verbatim}
+   exitstatus - Sets $? as a zero for success, otherwise sets an error code
+\end{verbatim}
+\textbf{EXAMPLE}
+\begin{verbatim}
+   set_vmhdd_uuid /usr/share/images/cernvm-desktop-2.4.0-x86.vdi
+\end{verbatim}
+\newpage
 \subsection{virt-interface/start\_vm}
 \textsl{[ virt-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo63}
+\label{ch:robo67}
 \label{ch:virt_interface_start_vm}
 \index{unsorted!start\_vm}\index{Functions!start\_vm}
 \textbf{NAME}
@@ -1921,7 +2034,7 @@
 \textsl{[ virt-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo64}
+\label{ch:robo68}
 \label{ch:virt_interface_stop_vm}
 \index{unsorted!stop\_vm}\index{Functions!stop\_vm}
 \textbf{NAME}
@@ -1949,7 +2062,7 @@
 \textsl{[ virt-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo65}
+\label{ch:robo69}
 \label{ch:virt_interface_vm_net_active}
 \index{unsorted!vm\_net\_active}\index{Functions!vm\_net\_active}
 \textbf{NAME}
@@ -1977,7 +2090,7 @@
 \textsl{[ virt-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo66}
+\label{ch:robo70}
 \label{ch:virt_interface_vm_net_autostart}
 \index{unsorted!vm\_net\_autostart}\index{Functions!vm\_net\_autostart}
 \textbf{NAME}
@@ -2025,7 +2138,7 @@
 \textsl{[ web-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo67}
+\label{ch:robo71}
 \label{ch:web_interface_generate_header}
 \index{unsorted!generate\_header}\index{Functions!generate\_header}
 \textbf{NAME}
@@ -2052,7 +2165,7 @@
 \textsl{[ web-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo68}
+\label{ch:robo72}
 \label{ch:web_interface_generate_template_header}
 \index{unsorted!generate\_template\_header}\index{Functions!generate\_template\_header}
 \textbf{NAME}
@@ -2085,7 +2198,7 @@
 \textsl{[ web-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo69}
+\label{ch:robo73}
 \label{ch:web_interface_web_apply_settings}
 \index{unsorted!web\_apply\_settings}\index{Functions!web\_apply\_settings}
 \textbf{NAME}
@@ -2115,7 +2228,7 @@
 \textsl{[ web-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo70}
+\label{ch:robo74}
 \label{ch:web_interface_web_check_interface}
 \index{unsorted!web\_check\_interface}\index{Functions!web\_check\_interface}
 \textbf{NAME}
@@ -2144,7 +2257,7 @@
 \textsl{[ web-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo71}
+\label{ch:robo75}
 \label{ch:web_interface_web_check_login}
 \index{unsorted!web\_check\_login}\index{Functions!web\_check\_login}
 \textbf{NAME}
@@ -2175,7 +2288,7 @@
 \textsl{[ web-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo72}
+\label{ch:robo76}
 \label{ch:web_interface_web_config_desktop}
 \index{unsorted!web\_config\_desktop}\index{Functions!web\_config\_desktop}
 \textbf{NAME}
@@ -2207,7 +2320,7 @@
 \textsl{[ web-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo73}
+\label{ch:robo77}
 \label{ch:web_interface_web_config_group}
 \index{unsorted!web\_config\_group}\index{Functions!web\_config\_group}
 \textbf{NAME}
@@ -2241,7 +2354,7 @@
 \textsl{[ web-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo74}
+\label{ch:robo78}
 \label{ch:web_interface_web_config_password}
 \index{unsorted!web\_config\_password}\index{Functions!web\_config\_password}
 \textbf{NAME}
@@ -2271,7 +2384,7 @@
 \textsl{[ web-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo75}
+\label{ch:robo79}
 \label{ch:web_interface_web_config_proxy}
 \index{unsorted!web\_config\_proxy}\index{Functions!web\_config\_proxy}
 \textbf{NAME}
@@ -2304,7 +2417,7 @@
 \textsl{[ web-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo76}
+\label{ch:robo80}
 \label{ch:web_interface_web_create_user}
 \index{unsorted!web\_create\_user}\index{Functions!web\_create\_user}
 \textbf{NAME}
@@ -2341,7 +2454,7 @@
 \textsl{[ web-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo77}
+\label{ch:robo81}
 \label{ch:web_interface_web_restart}
 \index{unsorted!web\_restart}\index{Functions!web\_restart}
 \textbf{NAME}
@@ -2370,7 +2483,7 @@
 \textsl{[ web-interface ]}
 \textsl{[ Functions ]}
 
-\label{ch:robo78}
+\label{ch:robo82}
 \label{ch:web_interface_web_root_password}
 \index{unsorted!web\_root\_password}\index{Functions!web\_root\_password}
 \textbf{NAME}

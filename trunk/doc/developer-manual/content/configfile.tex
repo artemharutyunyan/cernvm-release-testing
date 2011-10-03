@@ -69,6 +69,22 @@ tests to work, ensure that you enter valid values, \emph{in lower-case}, for the
 				then this url must be changed.
 		\end{itemize}
 
+\item {\bf CVM\_PRECONDITION\_TEST\_LIST}
+		\begin{itemize}
+		\item[-]	Must ALWAYS be set, it is a space-separated list of the \pretest to be executed,
+						should be left as the default as the precondition tests ensure that all of the 
+						prerequisites for the \testcase are met. For a description of each test and the
+						numerical value associated, please refer to ~\ref{sec:cernvmpretests}.
+		\end{itemize}
+
+\item {\bf CVM\_TEST\_CASE\_LIST}
+		\begin{itemize}
+		\item[-]	Must ALWAYS be set, it is a space-separated list of the \testcase to be executed,
+						should be left as the default unless there is a specific list of test cases to
+						execute. For a description of each test case and the numerical value associated,
+						please refer to ~\ref{sec:cernvmtestcases}.
+		\end{itemize}
+
 \item {\bf CVM\_VM\_HYPERVISOR}
 		\begin{itemize}
 		\item[-]	Must ALWAYS be set, MUST be the first setting before the rest of the mandatory

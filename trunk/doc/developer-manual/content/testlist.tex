@@ -1,0 +1,242 @@
+\chapter{CernVM Precondition Tests and Test Cases}
+\label{sec:cernvmtests}
+
+The \cernvm precondition tests and test cases are the core of the entire testing infrastructure, these are
+the tests and prerequisite tests for test cases which make up all of the testing which is done for the
+virtual machine image. {\bf It is essential that you are familiar with these tests and understand that the}
+\pretest~ {\bf are tests which ensures that the prerequisites for the actual tests are met.}
+Essentially, the \testcase are the actual tests which check for errors and validate the \cernvm image, the
+\pretest are tests which ensure that the prerequisites required for the actual \testcase are met, such as
+verifying that the virtual machine can even be started on the test system.
+
+
+\section{CernVM Precondition Tests}
+\label{sec:cernvmpretests}
+
+As stated in the introduction, the \pretest are tests which ensure that the prerequisites required for the
+actual \testcase are met, such as verifying that the virtual machine can even be started on the test system.
+{\bf Although precondition tests are not the actual test cases themselves, they are required to all succeed
+in order for the \testcase to be executed accurately}. It is highly recommended that you only execute
+the \testcase after all of the \pretest have all completed successfully, as executing the test cases when
+a precondition test has failed may result in inaccurate results.
+
+\begin{description}
+\item {\bf	 Precondition Test 0}
+		\begin{itemize}
+		\item[-] 	Verify that the download page exists and that there is a valid download url for the CernVM 
+						image specified, returns the url to download the image
+		\end{itemize}
+
+\item {\bf	 Precondition Test 1}
+		\begin{itemize}
+		\item[-]	Download and extract the CernVM image, returns the location of the extracted cernvm image file
+		\end{itemize}
+
+\item {\bf	 Precondition Test 2}
+		\begin{itemize}
+		\item[-]	Create an XML definition file for the virtual machine based on the template XML definition file and
+						settings defined and return the location of the final xml defintion file
+		\end{itemize}
+		
+\item {\bf	 Precondition Test 3}
+		\begin{itemize}
+		\item[-]	Verify that the virtual machine XML definition file exists
+		\end{itemize}
+
+\item {\bf	 Precondition Test 4}
+		\begin{itemize}
+		\item[-]	Verify that the XML definition file provided is valid
+		\end{itemize}
+		
+\item {\bf	 Precondition Test 5}
+		\begin{itemize}
+		\item[-]	Verify that the mandatory configuration settings for the virtual machine XML definition file have
+						been provided and are valid
+		\end{itemize}
+
+\item {\bf	 Precondition Test 6}
+		\begin{itemize}
+		\item[-]	Verify that the hypervisor for the current virtual machine tested is accessible, set the URI as a 
+						global variable
+		\end{itemize}
+
+\item {\bf	 Precondition Test 7}
+		\begin{itemize}
+		\item[-]	Create an XML definition file for the virtual machine network based on the template network XML
+						definition file and settings defined and return the location of the created xml defintion file
+		\end{itemize}
+		
+\item {\bf	 Precondition Test 8}
+		\begin{itemize}
+		\item[-]	Verify that the network XML definition file exists
+		\end{itemize}
+
+\item {\bf	 Precondition Test 9}
+		\begin{itemize}
+		\item[-]	Verify that the network XML definition file provided is valid
+		\end{itemize}
+		
+\item {\bf	 Precondition Test 10}
+		\begin{itemize}
+		\item[-]	Verify that the mandatory configuration settings for the network XML definition file have
+						been provided and are valid
+		\end{itemize}
+		
+\item {\bf	 Precondition Test 11}
+		\begin{itemize}
+		\item[-]	Verify that the virtual machine network has been created from an xml file
+		\end{itemize}
+
+\item {\bf	 Precondition Test 12}
+		\begin{itemize}
+		\item[-]	Verify that virtual machine NAT network is active and  set to autostart, only supported
+						for KVM currently
+		\end{itemize}
+		
+\item {\bf	 Precondition Test 13}
+		\begin{itemize}
+		\item[-]	Set a new UUID for the virtual machine hdd, this test is specific to VirtualBox and is
+						a fix for a known UUID conflict issue
+		\end{itemize}
+
+\item {\bf	 Precondition Test 14}
+		\begin{itemize}
+		\item[-]	Verify that virtual machine domain has been created from an xml file
+		\end{itemize}
+		
+\item {\bf	 Precondition Test 15}
+		\begin{itemize}
+		\item[-]	Verify that virtual machine can be started
+		\end{itemize}
+		
+\item {\bf	 Precondition Test 16}
+		\begin{itemize}
+		\item[-]	Verify that virtual machine has been stopped
+		\end{itemize}
+
+\item {\bf	 Precondition Test 17}
+		\begin{itemize}
+		\item[-]	Verify that virtual machine has web interface support
+		\end{itemize}
+		
+\item {\bf	 Precondition Test 18}
+		\begin{itemize}
+		\item[-]	Verify that it is possible to login on web interface
+		\end{itemize}
+
+\item {\bf	 Precondition Test 19}
+		\begin{itemize}
+		\item[-]	Setup and configure the initial CernVM image through the web interface
+		\end{itemize}
+		
+\item {\bf	 Precondition Test 20}
+		\begin{itemize}
+		\item[-]	Verify that it is possible to login on web interface using the new web
+						interface administrator password
+		\end{itemize}
+		
+\item {\bf	 Precondition Test 21}
+		\begin{itemize}
+		\item[-]	Enable automatic SSH login to the machine for the user specified using
+						keys instead of passwords, and verify that it is possible to login automatically
+		\end{itemize}
+
+\item {\bf	 Precondition Test 22}
+		\begin{itemize}
+		\item[-]	Set the root password using the CernVM web interface
+		\end{itemize}
+		
+\item {\bf	 Precondition Test 23}
+		\begin{itemize}
+		\item[-]	Enable automatic SSH login to the machine for the root user using keys
+						instead of passwords, and verify that it is possible to login automatically
+		\end{itemize}
+\end{description}
+
+
+\section{CernVM Test Cases}
+\label{sec:cernvmtestcases}
+
+As stated in the introduction the \testcase are the actual test cases for testing \cernvm
+images, the following is a list of the available \cernvm test cases, for more detailed
+information about the functions that make up each test, refer to the API reference at 
+the end of this document.
+
+\begin{description}
+\item {\bf	 CernVM Test Case 0}
+		\begin{itemize}
+		\item[-] 	Check login via ssh as user created through web interface
+		\end{itemize}
+
+\item {\bf	 CernVM Test Case 1}
+		\begin{itemize}
+		\item[-] 	Check login via ssh as root
+		\end{itemize}
+
+\item {\bf	 CernVM Test Case 2}
+		\begin{itemize}
+		\item[-] 	No error messages at boot
+		\end{itemize}
+
+\item {\bf	 CernVM Test Case 3}
+		\begin{itemize}
+		\item[-] 	Check for correct time / running ntpd
+		\end{itemize}
+
+\item {\bf	 CernVM Test Case 4}
+		\begin{itemize}
+		\item[-] 	Create a new user using the CernVM web interface
+		\end{itemize}
+
+\item {\bf	 CernVM Test Case 5}
+		\begin{itemize}
+		\item[-] 	 Verify that the user is created and can be accessed from ssh login
+		\end{itemize}
+
+\item {\bf	 CernVM Test Case 6}
+		\begin{itemize}
+		\item[-] 	Restart through the web interface and check that there are no error
+						messages at boot
+		\end{itemize}
+
+\item {\bf	 CernVM Test Case 7}
+		\begin{itemize}
+		\item[-] 	Shutdown the system and disconnect the network, then start the image, 
+						it should take longer to boot but the system should not hang on startup
+		\end{itemize}
+
+\item {\bf	 CernVM Test Case 8}
+		\begin{itemize}
+		\item[-] 	Check that cernvmfs automount scripts works correctly and is able to 
+						mount any experiment group to /cvmfs/
+		\end{itemize}
+		
+\item {\bf	 CernVM Test Case 9}
+		\begin{itemize}
+		\item[-] 	Check the cvmfs cache list, verify that the cache list is  available after
+						restarting the cvmfs daemon
+		\end{itemize}
+
+\item {\bf	 CernVM Test Case 10}
+		\begin{itemize}
+		\item[-] 	Migrate to another experiment such as LHCB using the web interface 
+						and make sure the relative tests are loaded 
+		\end{itemize}
+
+\item {\bf	 CernVM Test Case 11}
+		\begin{itemize}
+		\item[-] 	Check that cernvmfs automount scripts works correctly and is able to
+						mount the new experiment group to /cvmfs/
+		\end{itemize}
+
+\item {\bf	 CernVM Test Case 12}
+		\begin{itemize}
+		\item[-] 	Check the cvmfs cache list for the new experiment group, verify that the
+						cache list is available after restarting the cvmfs daemon 
+		\end{itemize}
+
+\item {\bf	 CernVM Test Case 13}
+		\begin{itemize}
+		\item[-] 	Change the group of the primary user
+		\end{itemize}
+\end{description}
