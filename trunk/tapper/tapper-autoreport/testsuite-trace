@@ -300,6 +300,7 @@ create_trace_log()
     CURRENT_DATE=$(date)
 
     # Create the trace log file
+    mkdir -p $(dirname $1)
     echo -e "Trace Log File - ${CURRENT_DATE}" > $1
 }
 

@@ -762,7 +762,7 @@ if [ "$PRINTVERSION" ] ; then
 fi
 
 if [ ! "x1" = "x$NOSEND" ] ; then
-    NETCAT=`which netcat || which nc`
+    NETCAT=`which netcat 2>/dev/null  || which nc 2>/dev/null`
     # does it provide -q option
     if $NETCAT -h 2>&1 |grep -q -- '-q.*quit' ; then
         NETCAT="$NETCAT -q7"

@@ -18,7 +18,7 @@
   <on_reboot>restart</on_reboot>
   <on_crash>restart</on_crash>
   <devices>
-    <emulator>/usr/libexec/qemu-kvm</emulator>
+    <emulator>/usr/bin/qemu-kvm</emulator>
     <disk type='file' device='disk'>
       <driver name='qemu' type='raw'/>
       <source file=''/>
@@ -29,7 +29,7 @@
       <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x1'/>
     </controller>
     <interface type='network'>
-      <mac address='52:54:00:8f:ee:MAC_REPLACE'/>
+      <mac address='52:54:00:8f:30:20'/>
       <source network='default'/>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x04' function='0x0'/>
     </interface>

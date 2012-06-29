@@ -301,11 +301,9 @@ download_extract()
     if verify_exists ${FILE_LOCATION} ; test "$?" -eq 1
     then
         
-        # Create the directory if it does not already exist
-        if verify_exists $2 ; test "$?" -eq 1
-        then
-            mkdir -p $2
-        fi
+        # Create the directories 
+        mkdir -p $2
+        mkdir -p $(dirname $3)
 
         # Download the image
         wget --verbose $1 -P $2 > $3 2>&1
@@ -757,6 +755,10 @@ create_def()
             # Override the default MAC address
             sed -i -E "s|<mac[[:space:]]*address='.*'|<mac address='$MAC_ADDRESS'|" \
             $DEFINITION_FILE
+    	else
+	        # Generate a mac
+            RANDOM_MAC=$(printf '%02x' $(( $TEST_RUN_ID%253+2)))
+            sed -i -E "s|MAC_REPLACE|$RANDOM_MAC|" $DEFINITION_FILE
         fi
 
         if [ "$VIDEO_MEMORY" ]
@@ -907,20 +909,21 @@ configure_image_web()
 
     # Precondition - verify virtual machine has web interface support
     # Precondition - verify that it is possible to login on web interface
-    if web_check_interface $1 web_config_check.log ; test "$?" -eq 0 \
-    && web_check_login $1 $2 $3 web_config_login.log ; test "$?" -eq 0
+    if web_check_interface $1 ${LOG_FOLDER}/web_config_check.log ; test "$?" -eq 0 \
+    && web_check_login $1 $2 $3 ${LOG_FOLDER}/web_config_login.log ; test "$?" -eq 0
     then
 
         # Configure the proxy settings using the CernVM web interface
         # at the moment it doesn't specify any proxy settings
-        if web_config_proxy $1 web_config_proxy.log ; test "$?" -ne 0
+        if web_config_proxy $1 ${LOG_FOLDER}/web_config_proxy.log ; test "$?" -ne 0
         then
             # Configure proxy settings failed
             return $RESULT
         fi
 
         # Configure the web interface administrator password
-        if web_config_password $1 $ADMIN_PASS web_config_password.log ; test "$?" -ne 0
+
+        if web_config_password $1 $ADMIN_PASS ${LOG_FOLDER}/web_config_password.log ; test "$?" -ne 0
         then
             # Configure the web interface administrator password failed
             return $RESULT
@@ -928,7 +931,7 @@ configure_image_web()
     
         # Create a new user using the CernVM web interface
         if web_create_user $1 $USER_NAME $USER_PASS $USER_GROUP \
-        web_create_new_user.log ; test "$?" -ne 0
+        ${LOG_FOLDER}/web_create_new_user.log ; test "$?" -ne 0
         then
             # Create new user failed
             return $RESULT
@@ -936,14 +939,14 @@ configure_image_web()
 
         # Configure the CernVM image desktop settings using the CernVM web interface
         if web_config_desktop $1 $STARTXONBOOT $RESOLUTION $KEYBOARD_LOCALE \
-        web_config_desktop.log ; test "$?" -ne 0
+        ${LOG_FOLDER}/web_config_desktop.log ; test "$?" -ne 0
         then
             # Configure CernVM image desktop failed
             return $RESULT
         fi
 
         # Configure the CernVM image appliance group settings using web interface
-        if web_config_group $1 $EXPERIMENT_GROUP web_config_group.log ; test "$?" -ne 0
+        if web_config_group $1 $EXPERIMENT_GROUP ${LOG_FOLDER}/web_config_group.log ; test "$?" -ne 0
         then
             # Configure experiment group failed
             return $RESULT
@@ -951,7 +954,7 @@ configure_image_web()
 
         # Apply configuration changes made using the CernVM web interface, which
         # then reboots the CernVM image once completed
-        if web_apply_settings $1 web_apply_settings.log ; test "$?" -ne 0
+        if web_apply_settings $1 ${LOG_FOLDER}/web_apply_settings.log ; test "$?" -ne 0
         then
             # Apply settings failed
             return $RESULT

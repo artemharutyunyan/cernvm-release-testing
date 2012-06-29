@@ -23,7 +23,7 @@ TEMPLATE_HEADER=('')
 ADDITIONAL_HEADER=('')
 
 # List of web interface related log files
-WEBINTERFACE="web_interface.log"
+WEBINTERFACE=${LOG_FOLDER}/"web_interface.log"
 
 
 #****f* web-interface/generate_template_header
@@ -150,7 +150,7 @@ web_check_login()
     generate_template_header $1
     generate_header
  
-    curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" --data "user_name=$2" --data "password=$3" \
+    curl -i -v --cookie ${IMAGE_FOLDER}/cjar --cookie-jar ${IMAGE_FOLDER}/cjar "${HEADER[@]}" --data "user_name=$2" --data "password=$3" \
     --data "login=Login" --location-trusted http://$1:8004/login > $4 2>&1
     
     # Check that curl didn't have any error return codes, then verify that it was
@@ -200,7 +200,7 @@ web_config_proxy()
     generate_template_header $1
     generate_header   
  
-    curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" --data "httpProxy=" \
+    curl -i -v --cookie ${IMAGE_FOLDER}/cjar --cookie-jar ${IMAGE_FOLDER}/cjar "${HEADER[@]}" --data "httpProxy=" \
     --data "httpPort=" --data "httpUser=" --data "httpPass=" --data "httpsProxy=" \
     --data "httpsPort=" --data "httpsUser=" --data "httpsPass=" --location-trusted \
     http://$1:8004/configure/Proxy/saveProxy > $2 2>&1
@@ -248,8 +248,12 @@ web_config_password()
     generate_template_header $1
     generate_header
 
-    curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" --data "pwd1=$2" \
-    --data "pwd2=$2" --location-trusted \
+    # Retrieve the CSRF token
+    CSRF_TOKEN=$(grep CSRF_TOKEN $IMAGE_FOLDER/cjar|sed -r 's/.*CSRF_TOKEN\s+(\S+).*/\1/')
+    CSRF_TOKEN=${CSRF_TOKEN:-1}         
+
+    curl -i -v --cookie ${IMAGE_FOLDER}/cjar --cookie-jar ${IMAGE_FOLDER}/cjar "${HEADER[@]}" --data "pwd1=$2" \
+    --data "pwd2=$2" --data "csrf_token=$CSRF_TOKEN" --location-trusted \
     http://$1:8004/changepassword/ChangePassword/changePassword > $3 2>&1
     
     # Check that curl didn't have any error return codes, then verify that the
@@ -257,7 +261,7 @@ web_config_password()
     if [ "$?" -eq 0 ]
     then
         if grep -q -e "HTTP/1.1 403 Forbidden" $3 ; test "$?" -eq 1  && egrep \
-        -q '^\{\"message\"\:[[:space:]]*\"Password[[:space:]]*changed\"\,
+        -q '\"message\"\:[[:space:]]*\"Password[[:space:]]*changed\"\,
         [[:space:]]*\"page\"\:[[:space:]]*\"changePassword\"\}' $3 ; test "$?" -eq 0
         then
             RESULT=0
@@ -298,15 +302,29 @@ web_root_password()
     generate_template_header $1
     generate_header    
 
-    curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" --data "newpw=$2" --data \
-    "newpw2=$2" --data "currentpw=$3" --location-trusted \
-    http://$1:8004/configure/RootPw/changePass > $4 2>&1
+    # Login to the web interface
+    curl -i -v --cookie ${IMAGE_FOLDER}/cjar --cookie-jar ${IMAGE_FOLDER}/cjar "${HEADER[@]}" --data "user_name=admin" --data "password=$3" \
+    --data "login=Login" --location-trusted http://$1:8004/login > $4 2>&1
+ 
+    # Visit the web page to update the CSRF_TOKEN path in the cookie 
+    curl -i -v --cookie ${IMAGE_FOLDER}/cjar --cookie-jar ${IMAGE_FOLDER}/cjar "${HEADER[@]}" \
+    --location-trusted http://$1:8004/configure/RootPw > $4 2>&1
+
+
+    # Retrieve the CSRF token
+    CSRF_TOKEN=$(grep CSRF_TOKEN $IMAGE_FOLDER/cjar|grep RootPw|sed -r 's/.*CSRF_TOKEN\s+(\S+).*/\1/')
+    CSRF_TOKEN=${CSRF_TOKEN:-1}         
+
+    curl -i -v --cookie ${IMAGE_FOLDER}/cjar --cookie-jar ${IMAGE_FOLDER}/cjar "${HEADER[@]}" --data "newpw=$2" --data \
+    "newpw2=$2" --data "currentpw=$3" --data "csrf_token=$CSRF_TOKEN" --location-trusted \
+    http://$1:8004/configure/RootPw/changePass >> $4 2>&1
 
     # Check that curl didn't have any error return codes, then verify that the
     # root password set through the web interface succeeded 
     if [ "$?" -eq 0 ]
     then
-        if grep -q -e "HTTP/1.1 403 Forbidden" $4 ; test "$?" -eq 1
+        if grep -q -e "HTTP/1.1 403 Forbidden" $4 ; test "$?" -eq 1 && \
+        egrep -q '\"message\"\:[[:space:]]*\"Completed[[:space:]]*Successfully\"' $4 ; test "$?" -eq 0''
         then    
             RESULT=0
         fi
@@ -347,7 +365,7 @@ web_config_desktop()
     generate_template_header $1
     generate_header   
  
-    curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" --data "cernvmEdition=Desktop" \
+    curl -i -v --cookie ${IMAGE_FOLDER}/cjar --cookie-jar ${IMAGE_FOLDER}/cjar "${HEADER[@]}" --data "cernvmEdition=Desktop" \
     --data "cernvmScreenRes=$3" --data "cernvmKeyboard=$4" --data "cernvmStartXDM=$2" \
     --location-trusted http://$1:8004/cernvm/Config/editionUpdate > $5 2>&1
     
@@ -438,7 +456,7 @@ web_config_group()
     generate_template_header $1
     generate_header    
 
-    curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" \
+    curl -i -v --cookie ${IMAGE_FOLDER}/cjar --cookie-jar ${IMAGE_FOLDER}/cjar "${HEADER[@]}" \
     --data "cernvmOrganisation=$2" --data "cernvmRepositories=$GROUP_REPOSITORY" \
     --location-trusted http://$1:8004/cernvm/Config/repositoriesUpdate > $3 2>&1
     
@@ -493,7 +511,7 @@ web_create_user()
     generate_template_header $1
     generate_header
 
-    curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" --data "cernvmUser=$2" --data \
+    curl -i -v --cookie ${IMAGE_FOLDER}/cjar --cookie-jar ${IMAGE_FOLDER}/cjar "${HEADER[@]}" --data "cernvmUser=$2" --data \
     "cernvmUserGroup=$4" --data "cernvmUserShell=%2Fbin%2Fbash" --data "newpass1=$3" \
     --data "newpass2=$3" --location-trusted http://$1:8004/cernvm/User/userUpdate \
     > $5 2>&1
@@ -542,7 +560,7 @@ web_apply_settings()
     generate_template_header $1
     generate_header   
  
-    curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" --location-trusted \
+    curl -i -v --cookie ${IMAGE_FOLDER}/cjar --cookie-jar ${IMAGE_FOLDER}/cjar "${HEADER[@]}" --location-trusted \
     http://$1:8004/cernvm/Config/applyUpdate > $2 2>&1
 
     # Check that curl didn't have any error return codes, then verify that the
@@ -587,7 +605,7 @@ web_restart()
     generate_template_header $1
     generate_header
     
-    curl -i -v --cookie cjar --cookie-jar cjar "${HEADER[@]}" --location-trusted \
+    curl -i -v --cookie ${IMAGE_FOLDER}/cjar --cookie-jar ${IMAGE_FOLDER}/cjar "${HEADER[@]}" --location-trusted \
     http://$1:8004/reboot/Reboot/rebootNow > $2 2>&1
 
     # Check that curl didn't have any error return codes, then verify that the

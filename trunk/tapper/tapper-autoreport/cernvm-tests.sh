@@ -180,7 +180,6 @@ ARCH="${CVM_VM_ARCH}"                       # Mandatory, valid architectures are
 
 
 
-
 ######## INTERNAL OPTIONAL CONFIGURATIONS ###########
 ###
 ### ALL OF THESE ARE OPTIONAL CONFIGURATION SETTINGS
@@ -189,11 +188,10 @@ ARCH="${CVM_VM_ARCH}"                       # Mandatory, valid architectures are
 
 ######### Optional Trace and Debugging Settings ##########
 TRACE_VERBOSITY="${CVM_TS_TRACE_VERBOSITY:-2}"            # Optional, trace verbosity valid values are 0 - 3
-TRACE_LOGFILE="${CVM_TS_TRACE_LOGFILE:-cernvm-trace.log}" # Optional, name of trace logfile
-
 
 ######### Optional Host Settings ##########
 IMAGES_DIR="${CVM_TS_IMAGES_DIR:-/usr/share/images}"    # Optional, root directory for cernvm images
+TEST_RUN_ID_FILE="${CVM_VM_TEST_RUN_ID_FILE:-runid}" # Optional name of the test run ID file 
 OSTYPE="${CVM_TS_OSTYPE:-$(get_os_type)}"               # Optional, by default automatically determined by script 
 OSNAME="${CVM_TS_OSNAME:-$(get_os_name ${OSTYPE})}"     # Optional, by default automatically determined by script 
 HOSTNAME="${CVM_TS_HOSTNAME}"                           # Optional, set this to override the system hostname
@@ -209,7 +207,7 @@ MEMORY="${CVM_VM_MEMORY}"                   # Optional, default in template used
 VIDEO_MEMORY="${CVM_VM_VIDEO_MEMORY}"       # Optional, default in template used unless overriden
 NET_NAME="${CVM_VM_NET_NAME}"               # Optional, default in template used unless overriden
 MAC_ADDRESS="${CVM_VM_MAC_ADDRESS}"         # Optional, default in template used unless overriden
-
+TEST_RUN_ID="${CVM_VM_TEST_RUN_ID:-$(create_run_id $TEST_RUN_ID_FILE)}"         # Optional, by default automatically determined by script
 
 ######### Optional Web Interface Settings ##########
 ADMIN_USERNAME="${CVM_WEB_ADMIN_USERNAME:-admin}"
@@ -217,9 +215,9 @@ ADMIN_DEFAULT_PASS="${CVM_WEB_ADMIN_DEFAULT_PASS:-password}"
 ADMIN_PASS="${CVM_WEB_ADMIN_PASS:-VM4l1f3}"
 
 # CernVM image user settings, specify the settings for new account
-USER_NAME="${CVM_WEB_USER_NAME:-alice}"
+USER_NAME="${CVM_WEB_USER_NAME:-lhcb}"
 USER_PASS="${CVM_WEB_USER_PASS:-VM4l1f3}"
-USER_GROUP="${CVM_WEB_USER_GROUP:-alice}"
+USER_GROUP="${CVM_WEB_USER_GROUP:-lhcb}"
 
 # CernVM image root account settings, specify password for root account
 ROOT_PASS="${CVM_WEB_ROOT_PASS:-VM4l1f3}"
@@ -230,7 +228,7 @@ RESOLUTION="${CVM_WEB_RESOLUTION:-1024x768}"     # CernVM image desktop resoluti
 KEYBOARD_LOCALE="${CVM_WEB_KEYBOARD_LOCALE:-us}" # CernVM image keyboard locale
 
 # CernVM image primary group (experiment) settings
-EXPERIMENT_GROUP="${CVM_WEB_EXPERIMENT_GROUP:-ALICE}" # Group name, should be all capitals
+EXPERIMENT_GROUP="${CVM_WEB_EXPERIMENT_GROUP:-ATLAS}" # Group name, should be all capitals
 
 
 ######### Optional Test Case Settings ##########
@@ -249,8 +247,6 @@ USER_GROUP2="${CVM_TC_USER_GROUP:-lhcb}"
 ######## INTERNAL OPTIONAL CONFIGURATIONS ###########
 
 
-
-
 ######## DEFAULT INTERNAL CONFIGURATIONS ############
 ###
 ### ALL OF THESE ARE CONFIGURATION SETTINGS INTERNAL
@@ -259,7 +255,9 @@ USER_GROUP2="${CVM_TC_USER_GROUP:-lhcb}"
 
 ######### Path Settings ##########
 TEMPLATE_DIR="$(pwd)/templates"
-IMAGE_FOLDER="${IMAGES_DIR}/${HYPERVISOR}/$(($RANDOM % 999))" # Unique image download location
+IMAGE_FOLDER="${IMAGES_DIR}/${HYPERVISOR}/${TEST_RUN_ID}" # Unique image download location
+LOG_FOLDER="${IMAGE_FOLDER}/logs" # Unique image download location
+TRACE_LOGFILE="${CVM_TS_TRACE_LOGFILE:-$LOG_FOLDER/cernvm-trace.log}" # Optional, name of trace logfile
 
 
 ######### CernVM Image Settings ##########
@@ -306,7 +304,6 @@ append_tapdata "number_of_tap_reports: $(get_tap_counter)"
 ###
 ###
 ######## DEFAULT INTERNAL CONFIGURATIONS ############
-
 
 
 
@@ -383,7 +380,7 @@ user using keys instead of passwords, and verify that it is possible to login au
 
 ######### Precondition Test List ##########
 PRECONDITION_TEST[0]='IMAGE_URL=$(image_url $DOWNLOAD_PAGE $IMAGE_VERSION $HYPERVISOR $ARCH $IMAGE_TYPE)'
-PRECONDITION_TEST[1]='CERNVM_IMAGE=$(download_extract ${IMAGE_URL} ${IMAGE_FOLDER} cernvm_image_download.log)'
+PRECONDITION_TEST[1]='CERNVM_IMAGE=$(download_extract ${IMAGE_URL} ${IMAGE_FOLDER} ${LOG_FOLDER}/cernvm_image_download.log)'
 PRECONDITION_TEST[2]='VM_XML_DEFINITION=$(create_def $TEMPLATE $IMAGE_FOLDER)'
 PRECONDITION_TEST[3]='verify_exists ${VM_XML_DEFINITION}'
 PRECONDITION_TEST[4]='validate_def_xml ${VM_XML_DEFINITION}'
@@ -397,14 +394,14 @@ PRECONDITION_TEST[11]='create_net ${NET_XML_DEFINITION} ${NET_NAME}'
 PRECONDITION_TEST[12]='verify_vm_net ${NET_NAME}'
 PRECONDITION_TEST[13]='set_vmhdd_uuid ${CERNVM_IMAGE}'
 PRECONDITION_TEST[14]='create_vm ${VM_XML_DEFINITION} $NAME'
-PRECONDITION_TEST[15]='start_vm ${VM_XML_DEFINITION} $NAME'
+PRECONDITION_TEST[15]='start_vm ${VM_XML_DEFINITION} ${NET_XML_DEFINITION} $NAME'
 PRECONDITION_TEST[16]='stop_vm $NAME'
-PRECONDITION_TEST[17]='web_check_interface ${IP_ADDRESS} web_interface.log'
-PRECONDITION_TEST[18]='web_check_login ${IP_ADDRESS} $ADMIN_USERNAME $ADMIN_DEFAULT_PASS web_interface_login.log'
+PRECONDITION_TEST[17]='web_check_interface ${IP_ADDRESS} ${LOG_FOLDER}/web_interface.log'
+PRECONDITION_TEST[18]='web_check_login ${IP_ADDRESS} $ADMIN_USERNAME $ADMIN_DEFAULT_PASS ${LOG_FOLDER}/web_interface_login.log'
 PRECONDITION_TEST[19]='configure_image_web ${IP_ADDRESS} $ADMIN_USERNAME $ADMIN_DEFAULT_PASS'
-PRECONDITION_TEST[20]='web_check_login ${IP_ADDRESS} $ADMIN_USERNAME $ADMIN_PASS web_interface_login2.log'
+PRECONDITION_TEST[20]='web_check_login ${IP_ADDRESS} $ADMIN_USERNAME $ADMIN_PASS ${LOG_FOLDER}/web_interface_login2.log'
 PRECONDITION_TEST[21]='verify_autologin_ssh ${IP_ADDRESS} $USER_NAME $USER_PASS'
-PRECONDITION_TEST[22]='web_root_password ${IP_ADDRESS} $ROOT_PASS $ADMIN_PASS web_root_pass.log'
+PRECONDITION_TEST[22]='web_root_password ${IP_ADDRESS} $ROOT_PASS $ADMIN_PASS ${LOG_FOLDER}/web_root_pass.log'
 PRECONDITION_TEST[23]='verify_autologin_ssh ${IP_ADDRESS} root $ROOT_PASS'
 
 ###
@@ -463,18 +460,18 @@ TEST_CASE_DESC[13]="CernVM Test Case 13 - Change the group of the primary user"
 ######### CernVM Test Case List ##########
 TEST_CASE[0]='check_ssh ${IP_ADDRESS} $USER_NAME'
 TEST_CASE[1]='check_ssh ${IP_ADDRESS} root'
-TEST_CASE[2]='check_boot_error ${IP_ADDRESS} boot_error.log'
+TEST_CASE[2]='check_boot_error ${IP_ADDRESS} ${LOG_FOLDER}/boot_error.log'
 TEST_CASE[3]='check_time ${IP_ADDRESS}'
-TEST_CASE[4]='web_create_user ${IP_ADDRESS} $USER_NAME2 $USER_PASS2 $USER_GROUP web_interface_newuser.log'
+TEST_CASE[4]='web_create_user ${IP_ADDRESS} $USER_NAME2 $USER_PASS2 $USER_GROUP ${LOG_FOLDER}/web_interface_newuser.log'
 TEST_CASE[5]='check_ssh ${IP_ADDRESS} $USER_NAME2'
-TEST_CASE[6]='check_web_restart ${IP_ADDRESS} web_interface_reboot.log web_restart_boot.log'
+TEST_CASE[6]='check_web_restart ${IP_ADDRESS} ${LOG_FOLDER}/web_interface_reboot.log ${LOG_FOLDER}/web_restart_boot.log'
 TEST_CASE[7]='check_no_network ${IP_ADDRESS} $NAME ${NET_NAME} ${VM_XML_DEFINITION} ${NET_XML_DEFINITION}'
 TEST_CASE[8]='check_cvmfs_automount ${IP_ADDRESS} $EXPERIMENT_GROUP'
-TEST_CASE[9]='check_cvmfs_cache ${IP_ADDRESS} cvmfs_cache.log'
-TEST_CASE[10]='migrate_experiment ${IP_ADDRESS} $EXPERIMENT_GROUP2 migrate_experiment.log'
+TEST_CASE[9]='check_cvmfs_cache ${IP_ADDRESS} ${LOG_FOLDER}/cvmfs_cache.log'
+TEST_CASE[10]='migrate_experiment ${IP_ADDRESS} $EXPERIMENT_GROUP2 ${LOG_FOLDER}/migrate_experiment.log'
 TEST_CASE[11]='check_cvmfs_automount ${IP_ADDRESS} $EXPERIMENT_GROUP2'
-TEST_CASE[12]='check_cvmfs_cache ${IP_ADDRESS} cvmfs_cache_new_group.log'
-TEST_CASE[13]='change_user_group ${IP_ADDRESS} $USER_NAME $USER_PASS $USER_GROUP2 change_user_group.log'
+TEST_CASE[12]='check_cvmfs_cache ${IP_ADDRESS} ${LOG_FOLDER}/cvmfs_cache_new_group.log'
+TEST_CASE[13]='change_user_group ${IP_ADDRESS} $USER_NAME $USER_PASS $USER_GROUP2 ${LOG_FOLDER}/change_user_group.log'
 
 ###
 ###
@@ -500,11 +497,11 @@ create_trace_log $TRACE_LOGFILE
 # Execute the CernVM Precondition Tests specified in config file
 # Create/configure, start, and control virtual machines tests
 #
-for i in $(eval echo {0..$((${#PRECONDITION_TEST_LIST[@]} - 1))})
+for j in $(eval echo {0..$((${#PRECONDITION_TEST_LIST[@]} - 1))})
 do
     
     # For certain Precondition Tests, first meet the required dependencies
-    case "${PRECONDITION_TEST_LIST[${i}]}" in
+    case "${PRECONDITION_TEST_LIST[${j}]}" in
         "7")
           # Export the URI, required environment variable for virsh
           export URI
@@ -516,7 +513,7 @@ do
           ;;
         "17")
           # Start the virtual machine, which must be running for the proceeding tests
-          start_vm ${VM_XML_DEFINITION} $NAME
+          start_vm ${VM_XML_DEFINITION} ${NET_XML_DEFINITION} $NAME
 
           # Set the network MAC address and IP address
           MAC_ADDRESS="$(get_mac_address ${VM_XML_DEFINITION})"
@@ -527,14 +524,14 @@ do
     esac
     
     # Log a message to the trace file giving the name and description of the test
-    generic_msg "\nEXECUTING ${PRECONDITION_TEST_DESC[${PRECONDITION_TEST_LIST[${i}]}]}"
+    generic_msg "\nEXECUTING ${PRECONDITION_TEST_DESC[${PRECONDITION_TEST_LIST[${j}]}]}"
 
     # Execute the Precondition Test specified in PRECONDITION_TEST_LIST
-    eval "${PRECONDITION_TEST[${PRECONDITION_TEST_LIST[${i}]}]}"
+    eval "${PRECONDITION_TEST[${PRECONDITION_TEST_LIST[${j}]}]}"
 
     # Report the results of precondition test
     RESULT="$?"
-    ok $RESULT "${PRECONDITION_TEST_DESC[${PRECONDITION_TEST_LIST[${i}]}]}"
+    ok $RESULT "${PRECONDITION_TEST_DESC[${PRECONDITION_TEST_LIST[${j}]}]}"
 
     # If a precondition test failed stop testing and submit the report
     if [ "${RESULT}" -ne 0 ]
@@ -543,11 +540,11 @@ do
         ok 1 "FAILURE - A PRECONDITION TEST FAILED, TESTING CANNOT CONTINUE"
 
         # Add all the log files up to this point and submit report
-        add_file cernvm_image_download.log
-        add_file web_interface.log
-        add_file web_interface_login.log
-        add_file web_interface_login2.log
-        add_file web_root_pass.log
+        add_file ${LOG_FOLDER}/cernvm_image_download.log
+        add_file ${LOG_FOLDER}/web_interface.log
+        add_file ${LOG_FOLDER}/web_interface_login.log
+        add_file ${LOG_FOLDER}/web_interface_login2.log
+        add_file ${LOG_FOLDER}/web_root_pass.log
 
         # Submit report, return error
         . ./tapper-autoreport
@@ -561,11 +558,11 @@ done
 # CernVM Test Cases
 # Execute CernVM image specific Test Cases specified in config file
 #
-for i in $(eval echo {0..$((${#TEST_CASE_LIST[@]} - 1))})
+for j in $(eval echo {0..$((${#TEST_CASE_LIST[@]} - 1))})
 do
     
     # For certain Test Cases, first meet the required dependencies
-    case "${TEST_CASE_LIST[${i}]}" in
+    case "${TEST_CASE_LIST[${j}]}" in
         "5")
           # Before executing Test Case 5 execute a precondition test
           # which enables automatic SSH login to the machine for the user
@@ -576,43 +573,43 @@ do
     esac
 
     # Log a message to the trace file giving the name and description of the test
-    generic_msg "\nEXECUTING ${TEST_CASE_DESC[${TEST_CASE_LIST[${i}]}]}"
+    generic_msg "\nEXECUTING ${TEST_CASE_DESC[${TEST_CASE_LIST[${j}]}]}"
 
     # Execute the Test Case specified in TEST_CASE_LIST
-    eval "${TEST_CASE[${TEST_CASE_LIST[${i}]}]}"
+    eval "${TEST_CASE[${TEST_CASE_LIST[${j}]}]}"
 
     # Report the results of the Test Case
     RESULT="$?"
-    ok $RESULT "${TEST_CASE_DESC[${TEST_CASE_LIST[${i}]}]}"
+    ok $RESULT "${TEST_CASE_DESC[${TEST_CASE_LIST[${j}]}]}"
 done
 
 
 # Shutdown the virtual machine and cleanup the test environment for next set of tests
-stop_vm $NAME
+stopvm $NAME
 
 # Add all of the log files to the tapper report and submit the report
-add_file cernvm-trace.log
-add_file cernvm_image_download.log
-add_file web_root_pass.log
-add_file web_interface_login2.log
-add_file web_apply_settings.log
-add_file web_config_group.log
-add_file web_config_desktop.log
-add_file web_create_new_user.log
-add_file web_config_password.log
-add_file web_config_proxy.log
-add_file web_config_login.log
-add_file web_config_check.log
-add_file web_interface_login.log
-add_file web_interface.log
-add_file boot_error.log
-add_file web_interface_newuser.log
-add_file web_interface_reboot.log
-add_file web_restart_boot.log
-add_file cvmfs_cache.log
-add_file migrate_experiment.log
-add_file cvmfs_cache_new_group.log
-add_file change_user_group.log
+add_file ${LOG_FOLDER}/cernvm-trace.log
+add_file ${LOG_FOLDER}/cernvm_image_download.log
+add_file ${LOG_FOLDER}/web_root_pass.log
+add_file ${LOG_FOLDER}/web_interface_login2.log
+add_file ${LOG_FOLDER}/web_apply_settings.log
+add_file ${LOG_FOLDER}/web_config_group.log
+add_file ${LOG_FOLDER}/web_config_desktop.log
+add_file ${LOG_FOLDER}/web_create_new_user.log
+add_file ${LOG_FOLDER}/web_config_password.log
+add_file ${LOG_FOLDER}/web_config_proxy.log
+add_file ${LOG_FOLDER}/web_config_login.log
+add_file ${LOG_FOLDER}/web_config_check.log
+add_file ${LOG_FOLDER}/web_interface_login.log
+add_file ${LOG_FOLDER}/web_interface.log
+add_file ${LOG_FOLDER}/boot_error.log
+add_file ${LOG_FOLDER}/web_interface_newuser.log
+add_file ${LOG_FOLDER}/web_interface_reboot.log
+add_file ${LOG_FOLDER}/web_restart_boot.log
+add_file ${LOG_FOLDER}/cvmfs_cache.log
+add_file ${LOG_FOLDER}/migrate_experiment.log
+add_file ${LOG_FOLDER}/cvmfs_cache_new_group.log
+add_file ${LOG_FOLDER}/change_user_group.log
 
 . ./tapper-autoreport
 

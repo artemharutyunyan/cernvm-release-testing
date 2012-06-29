@@ -15,7 +15,7 @@ done
 ######### Mandatory Test Suite Settings ##########
 export CVM_TS_SUITENAME="CernVM-KVM-Tests"
 export CVM_TS_SUITEVERSION="1.00"
-export CVM_TS_REPORT_SERVER="cvmappi07.cern.ch"
+export CVM_TS_REPORT_SERVER=""
 export CVM_TS_DOWNLOAD_PAGE="http://cernvm.cern.ch/releases/releases.cgi"
 
 ######### Mandatory Precondition and Test Case List ##########
@@ -26,8 +26,8 @@ export CVM_TEST_CASE_LIST="0 1 2 3 4 5 6 8 9 10 11 12 13"
 export CVM_VM_HYPERVISOR="kvm"
 export CVM_VM_TEMPLATE="cernvm-kvm.xml"
 export CVM_VM_NET_TEMPLATE="kvm-network.xml"
-export CVM_VM_IMAGE_VERSION="2.5.1"
-export CVM_VM_IMAGE_TYPE="basic"
+export CVM_VM_IMAGE_VERSION=""
+export CVM_VM_IMAGE_TYPE="desktop"
 export CVM_VM_ARCH="x86_64"
 
 ###

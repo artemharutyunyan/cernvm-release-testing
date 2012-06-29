@@ -234,8 +234,7 @@ destroy_vm()
 #   Start the virtual machine and verify it started
 # ARGUMENTS
 #   $1 - The path to the virtual machine definition file
-#   $2 - The path to the virtual network definition file ('NONET' in case no network is available)
-#   $3 - The name of the virtual machine
+#   $2 - The name of the virtual machine
 # RESULT
 #   exitstatus - Sets $? as a zero for success, otherwise sets an error code
 # EXAMPLE
@@ -248,7 +247,7 @@ start_vm()
     then
         virsh --connect $URI create $1
     else
-        virsh --connect $URI start $3
+        virsh --connect $URI start $2
     fi
     
     # If virsh had an error starting do not sleep, return failure
@@ -256,50 +255,13 @@ start_vm()
     then
         return 1
     else
-        # Wait for five minutes (at most) for virtual machine to start
-        START_TIMEOUT=300
-        COUNTER=0
-
-        # Check if the VM needs to be started without network (in which case we sleep for 5 minutes)
-        if [ $2 == 'NONET' ]; then
-            sleep $START_TIMEOUT
-
-            virsh --connect $URI list --all | egrep -q \
-            "^[[:space:]]*[[:digit:]]*[[:space:]]*$3[[:space:]]*running"
-            
-            if [ $? -eq 0 ]; then
-                return 0
-            else
-                return 1
-            fi                      
-        fi
-
-        MAC_ADDRESS="$(get_mac_address $1)"
-        IP_ADDRESS="$(get_ip_address $HYPERVISOR ${MAC_ADDRESS} ${NET_XML_DEFINITION})"
-        RAA_PORT=8004
-
-        while [ $COUNTER -lt $START_TIMEOUT ]; do
-            virsh --connect $URI list --all | egrep -q \
-            "^[[:space:]]*[[:digit:]]*[[:space:]]*$3[[:space:]]*running"
-
-            IS_RUNNING=$? 
-            
-            if [ $? -eq 0 ]; then
-                nc -z $IP_ADDRESS $RAA_PORT
-                
-                if [ $? -eq 0 ]; then
-                    return 0;
-                fi    
-            fi  
-
-            sleep 2
-            COUNTER=$(($COUNTER+2))
-           
-        done
+        # Wait five minutes for virtual machine to start
+        sleep 300
+        virsh --connect $URI list --all | egrep -q \
+        "^[[:space:]]*[[:digit:]]*[[:space:]]*$2[[:space:]]*running"
     fi
     
-    # should never reach this point if VM starts
-    return 1
+    return $?
 }
 
 
@@ -319,7 +281,7 @@ stop_vm()
 {
     RESULT=1
 
-    virsh --connect $URI shutdown $1    
+    virsh --connect $URI shutdown $1
     RESULT=$?
    
     # If virsh had an error stopping virtual machine, do not sleep return failure
@@ -327,10 +289,8 @@ stop_vm()
     then
          return 1
     else
-        # Wait for 5 minutes (at most) for virtual machine to turn off
-        # sleep 120
-        STOP_TIMEOUT=300
-        COUNTER=0
+        # Wait 2 minutes for virtual machine to turn off
+        sleep 120
 
         # If URI is VMware do not check for virtual machine in list
         # as it does not appear in the list of virtual machines unless running
@@ -338,21 +298,13 @@ stop_vm()
         then
             return $RESULT
         else
-            while [ $COUNTER -lt $STOP_TIMEOUT ]; do          
-                virsh --connect $URI list --all | egrep -q "^[[:space:]]*-[[:space:]]*$1[[:space:]]*shut[[:space:]]off"
-
-                if [ $? -eq 0 ]; then
-                    return 0
-                else
-                    sleep 2
-                    COUNTER=$(($COUNTER+2))
-                fi          
-            done
+            virsh --connect $URI list --all | egrep -q "^[[:space:]]*-[[:space:]]*$1[[:space:]]*shut[[:space:]]off"
+            # If either returned a failure, set RESULT as error code
+            RESULT=$((${RESULT} | $?))
         fi
     fi
     
-    # should never reach this point if VM stops
-    return 1 
+    return $RESULT
 }
 
 

@@ -74,8 +74,8 @@ check_boot_error()
 {
     RESULT=0
     BOOT_TESTS=("ssh -q -o \"BatchMode=yes\" root@$1 dmesg | egrep \"error|warning|fail\" > $2" 
+"ssh -q -o \"BatchMode=yes\" root@$1 cat /var/log/messages | egrep -v \"Frequency format error|Address family not supported by protocol\" | egrep \"error|warning|fail\" >> $2" 
 "ssh -q -o \"BatchMode=yes\" root@$1 cat /var/log/boot.log | egrep \"error|warning|fail\" >> $2" 
-"ssh -q -o \"BatchMode=yes\" root@$1 cat /var/log/messages | egrep \"error|warning|fail\" >> $2" 
 "ssh -q -o \"BatchMode=yes\" root@$1 cat /var/log/cernvm-update.log | egrep \"error|warning|fail\" >> $2")
 
     # Precondition for ssh support as root for boot error tests
@@ -197,7 +197,7 @@ check_no_network()
         if [ "$?" -eq 0 ]
         then
             # Verify the virtual machine started
-            if start_vm $4 $2 ; test "$?" -eq 0
+            if start_vm $4 'NONET' $2 ; test "$?" -eq 0
             then
                 # Start the network
                 if [ "$HYPERVISOR" != "vmware" ]
